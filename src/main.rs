@@ -15,66 +15,53 @@
 // You should have received a copy of the Lesser GNU General Public License
 // along with poppenspeler.  If not, see <https://www.gnu.org/licenses/>.
 
-use serde::{Deserialize, Serialize};
+use paris::{error, info, success, warn};
+use pop_model::PopScenario;
+
+use core::convert::Into;
 use serde_yml;
-use std::collections::HashMap;
+use std::env;
 use std::fs;
+use std::process::exit;
 
-#[derive(Serialize, Deserialize, PartialEq, Debug)]
-#[serde(untagged)]
-enum PopServiceHealthCheck {
-    Http { path: String, patience_seconds: i32 },
-    Placebo,
-}
+mod pop_model;
 
-#[derive(Serialize, Deserialize, Debug)]
-struct PopService {
-    id: String,
-    name: String,
-    dir: String,
-    base_url: String,
-    start_cmd: String,
-    env_vars: HashMap<String, String>,
-    health_check: PopServiceHealthCheck,
-}
-
-#[derive(Serialize, Deserialize, PartialEq, Debug)]
-struct BodyPattern {
-    pattern: String,
-    condition: String,
-}
-
-#[derive(Serialize, Deserialize, PartialEq, Debug)]
-#[serde(untagged)]
-enum PopCheck {
-    Http {
-        expected_code: i32,
-        check_url: String,
-        service_id: String,
-        body_patterns: Vec<BodyPattern>,
-    },
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-struct PopScenario {
-    pop_services: Vec<PopService>,
-    pop_checks: Vec<PopCheck>,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-struct PopScenarioFile {
-    poppenspeler: PopScenario,
+fn play_scenario(scenario: PopScenario) -> () {
+    info!("{:?}", scenario)
 }
 
 fn main() -> Result<(), serde_yml::Error> {
-    let p = "./resources/scenarios/test-green-energy-mix.yaml";
-    let f = fs::read_to_string(p);
-    match f {
-        Err(e) => println!("error occurred reading file: {}", e),
+    println!("");
+    info!("`poppenspeler` starting up");
+    println!("");
+
+    info!("reading command-line arguments");
+
+    let args: Vec<String> = env::args().collect();
+    info!("{:?}", args);
+
+    if args.len() != 3 {
+        error!(
+            "did not pass the correct command-line arguments, expected <operation> <scenario-file>"
+        );
+        exit(1);
+    }
+
+    let user_cmd = &args[1];
+    let scenario_path = &args[2];
+
+    info!("reading scenario file");
+    let maybe_file = fs::read_to_string(scenario_path);
+
+    match maybe_file {
+        Err(e) => error!("error occurred reading file: {}", e),
         Ok(file_data) => {
-            let scenario_file: PopScenarioFile = serde_yml::from_str(&file_data)?;
-            println!("parsed PopScenarioFile:");
-            println!("{:?}", scenario_file);
+            info!("parsing YAML from file");
+            let scenario_file: pop_model::PopScenarioFile = serde_yml::from_str(&file_data)?;
+            success!("parsed pop scenario properly from YAML file");
+            if user_cmd == "play-scenario" {
+                play_scenario(scenario_file.poppenspeler)
+            }
         }
     }
 
