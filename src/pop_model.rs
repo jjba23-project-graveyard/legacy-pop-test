@@ -22,24 +22,25 @@ use std::collections::HashMap;
 #[serde(untagged)]
 pub enum PopServiceHealthCheck {
     Http { path: String, patience_seconds: i32 },
-    Placebo,
+    Dummy { always_healthy: bool },
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct PopService {
-    id: String,
-    name: String,
-    dir: String,
-    base_url: String,
-    start_cmd: String,
-    env_vars: HashMap<String, String>,
-    health_check: PopServiceHealthCheck,
+    pub id: String,
+    pub name: String,
+    pub dir: String,
+    pub base_url: String,
+    pub bash_path: String,
+    pub start_cmd_args: Vec<String>,
+    pub env_vars: HashMap<String, String>,
+    pub health_check: PopServiceHealthCheck,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct BodyPattern {
-    pattern: String,
-    condition: String,
+    pub pattern: String,
+    pub condition: String,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
@@ -55,8 +56,8 @@ pub enum PopCheck {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct PopScenario {
-    pop_services: Vec<PopService>,
-    pop_checks: Vec<PopCheck>,
+    pub pop_services: Vec<PopService>,
+    pub pop_checks: Vec<PopCheck>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

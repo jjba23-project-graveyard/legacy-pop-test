@@ -15,22 +15,17 @@
 // You should have received a copy of the Lesser GNU General Public License
 // along with poppenspeler.  If not, see <https://www.gnu.org/licenses/>.
 
-use paris::{error, info, success, warn};
-use pop_model::PopScenario;
+use paris::{error, info, success};
 
-use core::convert::Into;
 use serde_yml;
 use std::env;
 use std::fs;
 use std::process::exit;
 
 mod pop_model;
+mod poppenspeler;
 
-fn play_scenario(scenario: PopScenario) -> () {
-    info!("{:?}", scenario)
-}
-
-fn main() -> Result<(), serde_yml::Error> {
+fn main() {
     println!("");
     info!("`poppenspeler` starting up");
     println!("");
@@ -54,16 +49,27 @@ fn main() -> Result<(), serde_yml::Error> {
     let maybe_file = fs::read_to_string(scenario_path);
 
     match maybe_file {
-        Err(e) => error!("error occurred reading file: {}", e),
+        Err(e) => {
+            error!("error occurred reading file: {}", e);
+            exit(1);
+        }
         Ok(file_data) => {
             info!("parsing YAML from file");
-            let scenario_file: pop_model::PopScenarioFile = serde_yml::from_str(&file_data)?;
-            success!("parsed pop scenario properly from YAML file");
-            if user_cmd == "play-scenario" {
-                play_scenario(scenario_file.poppenspeler)
+            let scenario_file: Result<pop_model::PopScenarioFile, serde_yml::Error> =
+                serde_yml::from_str(&file_data);
+            match scenario_file {
+                Err(e) => {
+                    error!("error occured parsing YAML {}", e);
+                    exit(1);
+                }
+                Ok(s) => {
+                    success!("parsed pop scenario properly from YAML file");
+                    if user_cmd == "play-scenario" {
+                        poppenspeler::play_scenario(s.poppenspeler)
+                    }
+                }
             }
+            exit(0);
         }
     }
-
-    Ok(())
 }
