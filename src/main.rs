@@ -97,23 +97,25 @@ async fn main() -> Result<(), &'static str> {
                                     body_patterns,
                                 } => {
                                     let ss = service_id.clone();
-                                    info!("running check: {:?}", cccc);
-                                    let cc = do_with_http_check(
-                                        expected_code,
-                                        check_url,
-                                        service_id,
-                                        body_patterns,
-                                    );
-
-                                    match cc {
-                                        Err(e) => error!("error occurred {}", e),
-                                        _ => (),
-                                    }
-
                                     let maybe_service = servicios.iter().find(|x| x.id == ss);
 
                                     match maybe_service {
-                                        Some(s) => info!("found service to check : {:?}", s),
+                                        Some(s) => {
+                                            info!("found service to check : {:?}", s);
+                                            info!("running check: {:?}", cccc);
+                                            let uu = s.base_url.clone();
+                                            let cc = do_with_http_check(
+                                                expected_code,
+                                                check_url,
+                                                uu,
+                                                body_patterns,
+                                            );
+
+                                            match cc {
+                                                Err(e) => error!("error occurred {}", e),
+                                                _ => (),
+                                            }
+                                        }
                                         _ => error!("could not find service details for check"),
                                     }
                                 }

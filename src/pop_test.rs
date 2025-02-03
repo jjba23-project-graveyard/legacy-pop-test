@@ -20,16 +20,13 @@ use core::time::Duration;
 use jql_runner::runner::raw;
 use paris::{error, info, success};
 use serde_json::json;
-use std::{
-    env,
-    process::{Command, Stdio},
-};
-use tokio::time::sleep;
+use std::{env, process::Stdio};
+use tokio::{process::Command, time::sleep};
 
 pub fn do_with_http_check(
     expected_code: i32,
     check_url: String,
-    service_id: String,
+    service_url: String,
     body_patterns: Vec<BodyPattern>,
 ) -> Result<(), &'static str> {
     let a = raw(r#""a","b""#, &json!({ "a": 1, "b": 2 }));
@@ -106,8 +103,7 @@ pub fn run_process(pop_service: PopService) -> Result<(), &'static str> {
         .current_dir(dir)
         .envs(&pop_service.env_vars)
         .stdout(Stdio::inherit())
-        .output()
-        .expect("failed to execute process");
+        .output();
     Ok(())
 }
 
