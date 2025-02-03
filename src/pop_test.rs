@@ -23,7 +23,7 @@ use std::{
     env,
     process::{Command, Stdio},
 };
-use tokio::time::sleep;
+use tokio::{task::AbortHandle, time::sleep};
 
 pub async fn health_check(
     id: String,
@@ -36,16 +36,17 @@ pub async fn health_check(
             path,
             patience_seconds,
         } => {
+            let mut elapsed = 0;
             let url = format!("{}{}", base_url, path);
-            info!("calling health check URL: {}", url);
+            while elapsed < patience_seconds {
+                info!("calling health check URL ({}): {}", elapsed, url);
+                let resp = reqwest::get(url.clone()).await;
+                println!("{resp:#?}");
+                sleep(Duration::from_secs(2)).await;
+                elapsed += 2;
+                continue;
+            }
 
-            let resp = reqwest::get(url)
-                .await
-                .unwrap()
-                .json::<HashMap<String, String>>()
-                .await;
-            println!("{resp:#?}");
-            sleep(Duration::from_secs(patience_seconds.try_into().unwrap())).await;
             Ok(())
         }
         crate::pop_model::PopServiceHealthCheck::Dummy { always_healthy } => {
@@ -58,7 +59,7 @@ pub async fn health_check(
     }
 }
 
-pub async fn run_process(pop_service: PopService) -> Result<(), &'static str> {
+pub fn run_process(pop_service: PopService) -> Result<(), &'static str> {
     let user_home = env::var("HOME").unwrap();
 
     let dir = str::replace(&pop_service.dir, "$HOME", &user_home);
@@ -90,16 +91,12 @@ pub async fn run_process(pop_service: PopService) -> Result<(), &'static str> {
     Ok(())
 }
 
-pub async fn play_scenario(scenario: PopScenario) {
-    for pop_service in scenario.pop_services {
-        info!("registering service: {}", pop_service.id);
+pub fn start_p(pop_service: PopService) -> () {
+    let p = pop_service.clone();
+    run_process(p);
+}
 
-        let p = pop_service.clone();
-        let __task_abort = tokio::spawn(run_process(p)).abort_handle();
-
-        let pp = pop_service.clone();
-        let health_check_task =
-            tokio::spawn(async move { health_check(pp.id, pp.base_url, pp.health_check) });
-        health_check_task.await;
-    }
+pub async fn start_h(pop_service: PopService) -> () {
+    let pp = pop_service.clone();
+    health_check(pp.id, pp.base_url, pp.health_check).await;
 }

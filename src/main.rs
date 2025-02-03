@@ -17,11 +17,13 @@
 
 use paris::{error, info, success};
 
-use pop_test::play_scenario;
+use pop_test::start_h;
+use pop_test::start_p;
 use serde_yml;
 use std::env;
 use std::fs;
 use std::process::exit;
+use tokio::task::JoinSet;
 
 mod pop_model;
 mod pop_test;
@@ -65,7 +67,18 @@ async fn main() -> Result<(), &'static str> {
                 Ok(s) => {
                     success!("parsed pop scenario properly from YAML file");
                     if user_cmd == "play-scenario" {
-                        tokio::join!(play_scenario(s.pop_test));
+                        //tokio::join!(play_scenario(s.pop_test));
+                        for pop_service in s.pop_test.pop_services {
+                            info!("registering service: {}", pop_service.id);
+                            let mut set: JoinSet<_> = JoinSet::new();
+                            set.spawn(start_h(pop_service.clone()));
+
+                            let mut proc_set: JoinSet<_> = JoinSet::new();
+                            proc_set.spawn(async move { start_p(pop_service.clone()) });
+
+                            set.join_all().await;
+                            proc_set.join_all().await;
+                        }
                         success!("finished playing scenario");
                     }
                 }
