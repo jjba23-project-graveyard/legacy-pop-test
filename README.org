@@ -30,7 +30,7 @@ pop_test:
         NATIONAAL_ENERGIE_DASHBOARD_TOKEN: "7809ce9"
       health_check:
         path: "/health"
-        patience_seconds: 60
+        patience_seconds: 90
 
   pop_checks:
     - check_url: "/api/v1/forecast"

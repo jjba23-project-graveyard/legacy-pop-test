@@ -15,12 +15,13 @@
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
-use crate::pop_model::{BodyPattern, PopService, PopServiceHealthCheck};
+use crate::pop_model::{BodyPattern, PopCheck, PopScenarioFile, PopService, PopServiceHealthCheck};
 use core::time::Duration;
 use jql_runner::runner::raw;
 use paris::{error, info, success};
 use serde_json::json;
 use std::{env, process::Stdio};
+use tokio::task::JoinSet;
 use tokio::{
     process::{Child, Command},
     time::sleep,
@@ -144,4 +145,93 @@ pub async fn start_p(pop_service: PopService) -> Result<Child, std::io::Error> {
 pub async fn start_h(pop_service: PopService) -> () {
     let pp = pop_service.clone();
     health_check(pp.id, pp.base_url, pp.health_check).await;
+}
+
+pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), &'static str> {
+    let mut h_set = JoinSet::new();
+    let mut children = Vec::new();
+
+    register_services(&mut h_set, &mut children, &scenario_file).await?;
+
+    info!("awaiting for all services to be healthy");
+    h_set.join_all().await;
+
+    info!("performing tests and assertions");
+    perform_checks(&scenario_file).await;
+
+    terminate_processes(children).await;
+
+    success!("finished playing scenario");
+    Ok(())
+}
+
+pub async fn register_services(
+    h_set: &mut JoinSet<()>,
+    children: &mut Vec<Child>,
+    scenario_file: &PopScenarioFile,
+) -> Result<(), &'static str> {
+    for pop_service in scenario_file.pop_test.pop_services.clone() {
+        info!("registering service: {}", pop_service.id);
+        h_set.spawn(start_h(pop_service.clone()));
+        let p = start_p(pop_service)
+            .await
+            .map_err(|_| "Failed to start process")?;
+        children.push(p);
+    }
+    Ok(())
+}
+
+pub async fn perform_checks(scenario_file: &PopScenarioFile) {
+    let services = &scenario_file.pop_test.pop_services;
+
+    for check in &scenario_file.pop_test.pop_checks {
+        match check {
+            PopCheck::Http {
+                expected_code,
+                check_url,
+                service_id,
+                body_patterns,
+            } => {
+                if let Some(service) = services.iter().find(|s| s.id == *service_id) {
+                    info!("found service to check: {:?}", service);
+                    info!("running check: {:?}", check);
+                    if let Err(e) = do_with_http_check(
+                        *expected_code,
+                        check_url.clone(),
+                        service.base_url.clone(),
+                        body_patterns.clone(),
+                    )
+                    .await
+                    {
+                        error!("HTTP check failed: {:?}", e);
+                    }
+                } else {
+                    error!("could not find service details for check");
+                }
+            }
+            _ => (),
+        }
+    }
+}
+
+pub async fn terminate_processes(children: Vec<Child>) {
+    info!("terminating all processes");
+    for mut child in children {
+        info!("terminating pid: {:?}", child.id());
+        let _ = child.kill().await;
+    }
+}
+
+pub async fn do_with_file_data(user_cmd: String, file_data: String) -> Result<(), &'static str> {
+    info!("parsing YAML from file");
+    let scenario_file: PopScenarioFile = serde_yml::from_str(&file_data).unwrap();
+
+    success!("parsed pop scenario properly from YAML file");
+    if user_cmd == "play-scenario" {
+        play_scenario(scenario_file).await
+    } else {
+        let msg = "could not understand the wanted task to execute";
+        error!("{}", msg);
+        Err(&msg)
+    }
 }
