@@ -17,6 +17,7 @@
 
 use paris::{error, info, success};
 
+use pop_test::play_scenario;
 use serde_yml;
 use std::env;
 use std::fs;
@@ -64,7 +65,9 @@ async fn main() -> Result<(), &'static str> {
                 Ok(s) => {
                     success!("parsed pop scenario properly from YAML file");
                     if user_cmd == "play-scenario" {
-                        pop_test::play_scenario(s.pop_test).await.unwrap();
+                        let (processes, healths) = play_scenario(s.pop_test);
+                        tokio::join!();
+                        success!("finished playing scenario");
                     }
                 }
             }

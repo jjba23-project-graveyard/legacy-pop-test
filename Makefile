@@ -17,3 +17,6 @@
 
 run:
 	cargo run -- play-scenario ./resources/scenarios/test-green-energy-mix.yaml	
+fmt:
+	cargo fix --bin "pop-test"
+	find . -maxdepth 8 -name "*.rs" -type f -exec rustfmt {} \;
