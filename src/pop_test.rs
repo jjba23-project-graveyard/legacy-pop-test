@@ -15,28 +15,35 @@
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
-use core::fmt;
-use http_body_util::Empty;
+use core::{convert::TryInto, fmt, time::Duration};
 use paris::{error, info, success, warn};
 use std::{
+    collections::HashMap,
     env,
     process::{Command, Stdio},
+    thread::sleep,
 };
 use tokio::net::TcpStream;
 
-use crate::pop_model::{PopScenario, PopService};
+use crate::pop_model::{PopScenario, PopService, PopServiceHealthCheck};
 
-pub async fn health_check(pop_service: PopService) -> Result<(), &'static str> {
-    info!("starting healthcheck for service: {}", pop_service.id);
-    match service.health_check {
+pub async fn health_check(
+    id: String,
+    base_url: String,
+    health_check: PopServiceHealthCheck,
+) -> Result<(), &'static str> {
+    info!("starting healthcheck for service: {}", id);
+    match health_check {
         crate::pop_model::PopServiceHealthCheck::Http {
             path,
             patience_seconds,
         } => {
-            let resp = reqwest::get(format!("{}{}", pop_service.base_url, path))
-                .await?
+            sleep(Duration::from_secs(patience_seconds.try_into().unwrap()));
+            let resp = reqwest::get(format!("{}{}", base_url, path))
+                .await
+                .unwrap()
                 .json::<HashMap<String, String>>()
-                .await?;
+                .await;
             println!("{resp:#?}");
             Ok(())
         }
@@ -73,14 +80,29 @@ pub async fn play_scenario(scenario: PopScenario) -> Result<(), &'static str> {
             let _ = Command::new(bash_path)
                 .args(&arg)
                 .current_dir(dir)
-                .envs(&pop_service.env_vars)
+                .envs(pop_service.env_vars)
                 .stdin(Stdio::inherit())
                 .stdout(Stdio::inherit())
                 .output()
                 .expect("failed to execute process");
         });
 
-        let h: tokio::task::JoinHandle<_> = health_check(pop_service);
+        let h: tokio::task::JoinHandle<_> = tokio::spawn(async move {
+            health_check(
+                pop_service.id,
+                pop_service.base_url,
+                pop_service.health_check,
+            )
+        });
+
+        match h.await {
+            Err(e) => {
+                error!("error occurred while executing health check: {}", e)
+            }
+            Ok(_) => {
+                info!("success running health check")
+            }
+        }
 
         match proc.await {
             Err(e) => {
