@@ -25,6 +25,7 @@ use serde_yml;
 use std::env;
 use std::fs;
 use std::process::exit;
+use tokio::sync::watch;
 use tokio::task::JoinSet;
 
 mod pop_model;
@@ -73,11 +74,13 @@ async fn main() -> Result<(), &'static str> {
                     if user_cmd == "play-scenario" {
                         let mut h_set: JoinSet<_> = JoinSet::new();
                         let mut proc_set: JoinSet<_> = JoinSet::new();
+                        let (tx, rx) = watch::channel(false);
 
                         for pop_service in s.pop_test.pop_services.clone() {
                             info!("registering service: {}", pop_service.id);
                             h_set.spawn(start_h(pop_service.clone()));
-                            proc_set.spawn(async move { start_p(pop_service.clone()) });
+                            let p = start_p(pop_service.clone(), rx.clone());
+                            proc_set.spawn(p);
                         }
 
                         info!("awaiting for all services to be healthy");
@@ -109,7 +112,8 @@ async fn main() -> Result<(), &'static str> {
                                                 check_url,
                                                 uu,
                                                 body_patterns,
-                                            );
+                                            )
+                                            .await;
 
                                             match cc {
                                                 Err(e) => error!("error occurred {}", e),
@@ -123,7 +127,9 @@ async fn main() -> Result<(), &'static str> {
                         }
 
                         info!("terminating all processes");
+                        tx.send(true);
                         proc_set.shutdown().await;
+
                         success!("finished playing scenario");
                         Ok(())
                     } else {

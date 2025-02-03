@@ -21,15 +21,42 @@ use jql_runner::runner::raw;
 use paris::{error, info, success};
 use serde_json::json;
 use std::{env, process::Stdio};
-use tokio::{process::Command, time::sleep};
+use tokio::{process::Command, sync::watch::Receiver, time::sleep};
 
-pub fn do_with_http_check(
+pub async fn do_with_http_check(
     expected_code: i32,
     check_url: String,
     service_url: String,
     body_patterns: Vec<BodyPattern>,
 ) -> Result<(), &'static str> {
     let a = raw(r#""a","b""#, &json!({ "a": 1, "b": 2 }));
+    info!("{:?}", a);
+
+    let url = format!("{}{}", service_url, check_url);
+
+    let resp = reqwest::get(url.clone()).await;
+    println!("{resp:#?}");
+
+    match resp {
+        Err(e) => {
+            error!("{}", e);
+        }
+        Ok(v) => {
+            let j = &v.json().await;
+            match j {
+                Ok(vv) => {
+                    for pat in body_patterns {
+                        let jj = raw(&pat.pattern, vv);
+                        success!("{:?}", jj);
+                    }
+                    ()
+                }
+                _ => (),
+            }
+            ()
+        }
+    }
+
     Ok(())
 }
 
@@ -76,7 +103,8 @@ pub async fn health_check(
     }
 }
 
-pub fn run_process(pop_service: PopService) -> Result<(), &'static str> {
+pub async fn do_work(pop_service: PopService) {
+    info!("Task is running...");
     let user_home = env::var("HOME").unwrap();
 
     let dir = str::replace(&pop_service.dir, "$HOME", &user_home);
@@ -103,13 +131,24 @@ pub fn run_process(pop_service: PopService) -> Result<(), &'static str> {
         .current_dir(dir)
         .envs(&pop_service.env_vars)
         .stdout(Stdio::inherit())
-        .output();
-    Ok(())
+        .spawn();
 }
 
-pub fn start_p(pop_service: PopService) -> () {
-    let p = pop_service.clone();
-    run_process(p);
+pub async fn start_p(pop_service: PopService, mut rx: Receiver<bool>) -> () {
+    loop {
+        let p = pop_service.clone();
+        tokio::select! {
+            _ = do_work(p) => {
+                println!("Work completed, checking for cancellation...");
+            }
+            _ = rx.changed() => {
+                if *rx.borrow() {
+                    println!("Task is shutting down...");
+                    break;
+                }
+            }
+        }
+    }
 }
 
 pub async fn start_h(pop_service: PopService) -> () {
