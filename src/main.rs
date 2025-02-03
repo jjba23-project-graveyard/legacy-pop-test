@@ -26,7 +26,7 @@ mod pop_model;
 mod pop_test;
 
 #[tokio::main]
-async fn main() -> Result<(), String> {
+async fn main() -> Result<(), &'static str> {
     println!("");
     info!("`pop-test` starting up");
     println!("");
@@ -64,7 +64,7 @@ async fn main() -> Result<(), String> {
                 Ok(s) => {
                     success!("parsed pop scenario properly from YAML file");
                     if user_cmd == "play-scenario" {
-                        pop_test::play_scenario(s.pop_test);
+                        pop_test::play_scenario(s.pop_test).await.unwrap();
                     }
                 }
             }

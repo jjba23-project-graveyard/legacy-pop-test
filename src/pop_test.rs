@@ -24,10 +24,10 @@ use std::{
 
 use crate::pop_model::PopScenario;
 
-pub fn play_scenario(scenario: PopScenario) -> () {
+pub async fn play_scenario(scenario: PopScenario) -> Result<(), &'static str> {
     info!("{:?}", scenario);
 
-    for pop_service in &scenario.pop_services {
+    for pop_service in scenario.pop_services {
         let user_home = env::var("HOME").unwrap();
         let bash_path = str::replace(&pop_service.bash_path, "$HOME", &user_home);
 
@@ -36,21 +36,27 @@ pub fn play_scenario(scenario: PopScenario) -> () {
         info!("in dir {}", &dir);
         info!("with args {:?}", &pop_service.start_cmd_args);
 
-        let mut arg = Vec::new();
-        arg.push("-c");
-        for b in &pop_service.start_cmd_args {
+        let mut arg: Vec<String> = Vec::new();
+        arg.push("-c".to_string());
+        for b in pop_service.start_cmd_args {
             arg.push(b);
         }
 
         info!("bash with args {:?}", &arg);
 
-        let _ = Command::new(bash_path)
-            .args(&arg)
-            .current_dir(dir)
-            .envs(&pop_service.env_vars)
-            .stdin(Stdio::inherit())
-            .stdout(Stdio::inherit())
-            .output()
-            .expect("failed to execute process");
+        tokio::spawn(async move {
+            let _ = Command::new(bash_path)
+                .args(&arg)
+                .current_dir(dir)
+                .envs(&pop_service.env_vars)
+                .stdin(Stdio::inherit())
+                .stdout(Stdio::inherit())
+                .output()
+                .expect("failed to execute process");
+        })
+        .await
+        .unwrap();
     }
+
+    Ok(())
 }
