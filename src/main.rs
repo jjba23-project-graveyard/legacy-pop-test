@@ -1,19 +1,19 @@
-// poppenspeler - your test orchestration master of puppets
+// pop-test - your test orchestration master of puppets
 
 // Copyright (C) 2025 Josep Bigorra (jjba23) <jjbigorra@gmail.com>
 
-// poppenspeler is free software: you can redistribute it and/or modify
+// pop-test is free software: you can redistribute it and/or modify
 // it under the terms of the Lesser GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 
-// poppenspeler is distributed in the hope that it will be useful,
+// pop-test is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // Lesser GNU General Public License for more details.
 
 // You should have received a copy of the Lesser GNU General Public License
-// along with poppenspeler.  If not, see <https://www.gnu.org/licenses/>.
+// along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
 use paris::{error, info, success};
 
@@ -23,11 +23,11 @@ use std::fs;
 use std::process::exit;
 
 mod pop_model;
-mod poppenspeler;
+mod pop_test;
 
 fn main() {
     println!("");
-    info!("`poppenspeler` starting up");
+    info!("`pop-test` starting up");
     println!("");
 
     info!("reading command-line arguments");
@@ -65,7 +65,7 @@ fn main() {
                 Ok(s) => {
                     success!("parsed pop scenario properly from YAML file");
                     if user_cmd == "play-scenario" {
-                        poppenspeler::play_scenario(s.poppenspeler)
+                        pop_test::play_scenario(s.pop_test)
                     }
                 }
             }
