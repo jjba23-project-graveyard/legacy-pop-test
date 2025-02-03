@@ -65,8 +65,7 @@ async fn main() -> Result<(), &'static str> {
                 Ok(s) => {
                     success!("parsed pop scenario properly from YAML file");
                     if user_cmd == "play-scenario" {
-                        let (processes, healths) = play_scenario(s.pop_test);
-                        tokio::join!();
+                        let xs = play_scenario(s.pop_test);
                         success!("finished playing scenario");
                     }
                 }

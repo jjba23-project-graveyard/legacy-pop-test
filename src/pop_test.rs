@@ -16,12 +16,12 @@
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
 use crate::pop_model::{PopScenario, PopService, PopServiceHealthCheck};
-use core::{convert::TryInto, fmt, future::Future, time::Duration};
-use paris::{error, info, success, warn};
+use core::{convert::TryInto, future::Future, time::Duration};
+use paris::info;
 use std::{
     collections::HashMap,
     env,
-    process::{Command, Output, Stdio},
+    process::{Command, Stdio},
 };
 use tokio::{task::JoinHandle, time::sleep};
 
@@ -90,14 +90,14 @@ pub async fn run_process(pop_service: PopService) -> Result<(), &'static str> {
     Ok(())
 }
 
-pub async fn play_scenario(
+pub fn play_scenario(
     scenario: PopScenario,
 ) -> (
     HashMap<String, JoinHandle<impl Future<Output = Result<(), &'static str>>>>,
     HashMap<String, JoinHandle<impl Future<Output = Result<(), &'static str>>>>,
 ) {
-    let process_tasks: HashMap<_, _> = HashMap::new();
-    let health_tasks: HashMap<_, _> = HashMap::new();
+    let mut process_tasks: HashMap<_, _> = HashMap::new();
+    let mut health_tasks: HashMap<_, _> = HashMap::new();
 
     for pop_service in scenario.pop_services {
         info!("registering service: {}", pop_service.id);
@@ -105,13 +105,13 @@ pub async fn play_scenario(
         let p = pop_service.clone();
         let pk = format!("{}-process", &p.id);
         let process_task = tokio::spawn(async move { run_process(p) });
-        process_tasks[&pk] = process_task;
+        process_tasks.insert(pk, process_task);
 
         let pp = pop_service.clone();
-        let hk = format!("{}-health", &p.id);
+        let hk = format!("{}-health", &pp.id);
         let health_check_task =
             tokio::spawn(async move { health_check(pp.id, pp.base_url, pp.health_check) });
-        health_tasks[&hk] = health_check_task;
+        health_tasks.insert(hk, health_check_task);
     }
 
     (process_tasks, health_tasks)
