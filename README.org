@@ -25,7 +25,7 @@ pop_test:
       dir: "$HOME/Ontwikkeling/Werk"
       base_url: "http://localhost:50000"
       start_cmd_args:
-        - "sbt \"greenEnergyMix/run\""
+        - 'sbt "greenEnergyMix/run"'
       env_vars:
         NATIONAAL_ENERGIE_DASHBOARD_TOKEN: "7809ce9"
       health_check:
@@ -37,11 +37,11 @@ pop_test:
       service_id: "green-energy-mix"
       expected_code: 200
       body_patterns:
-        - pattern: ".meta.forecastDate"
+        - pattern: '"meta""forecastDate"'
           condition: "!= \"\""
-        - pattern: ".data[0].load"
+        - pattern: '"data"[0]"load"'
           condition: "> 0"
-        - pattern: ".data[0].solar"
+        - pattern: '"data"[0]"solar"'
           condition: ">= 0"
 
 #+end_src

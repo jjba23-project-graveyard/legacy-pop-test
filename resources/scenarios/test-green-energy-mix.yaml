@@ -36,7 +36,7 @@ pop_test:
       body_patterns:
         - pattern: '"meta""forecastDate"'
           condition: '!= ""'
-        # - pattern: ".data[0].load"
-        #   condition: "> 0"
-        # - pattern: ".data[0].solar"
-        #   condition: ">= 0"
+        - pattern: '"data"[0]"load"'
+          condition: "> 0"
+        - pattern: '"data"[0]"solar"'
+          condition: ">= 0"
