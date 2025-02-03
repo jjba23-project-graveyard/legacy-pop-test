@@ -17,16 +17,15 @@
 
 use paris::{error, info, success};
 
+use pop_test::do_with_http_check;
 use pop_test::start_h;
 use pop_test::start_p;
-use serde_json::json;
+
 use serde_yml;
 use std::env;
 use std::fs;
 use std::process::exit;
 use tokio::task::JoinSet;
-
-use jql_runner::runner::raw;
 
 mod pop_model;
 mod pop_test;
@@ -75,7 +74,7 @@ async fn main() -> Result<(), &'static str> {
                         let mut h_set: JoinSet<_> = JoinSet::new();
                         let mut proc_set: JoinSet<_> = JoinSet::new();
 
-                        for pop_service in s.pop_test.pop_services {
+                        for pop_service in s.pop_test.pop_services.clone() {
                             info!("registering service: {}", pop_service.id);
                             h_set.spawn(start_h(pop_service.clone()));
                             proc_set.spawn(async move { start_p(pop_service.clone()) });
@@ -87,10 +86,38 @@ async fn main() -> Result<(), &'static str> {
 
                         // here add checks
 
+                        let servicios = s.pop_test.pop_services.clone();
                         for c in s.pop_test.pop_checks {
-                            info!("running check: {:?}", c);
-                            let jqljql = raw(r#""a","b""#, &json!({ "a": 1, "b": 2 }));
-                            info!("jqljql: {:?}", jqljql);
+                            let cccc = c.clone();
+                            match c {
+                                pop_model::PopCheck::Http {
+                                    expected_code,
+                                    check_url,
+                                    service_id,
+                                    body_patterns,
+                                } => {
+                                    let ss = service_id.clone();
+                                    info!("running check: {:?}", cccc);
+                                    let cc = do_with_http_check(
+                                        expected_code,
+                                        check_url,
+                                        service_id,
+                                        body_patterns,
+                                    );
+
+                                    match cc {
+                                        Err(e) => error!("error occurred {}", e),
+                                        _ => (),
+                                    }
+
+                                    let maybe_service = servicios.iter().find(|x| x.id == ss);
+
+                                    match maybe_service {
+                                        Some(s) => info!("found service to check : {:?}", s),
+                                        _ => error!("could not find service details for check"),
+                                    }
+                                }
+                            }
                         }
 
                         info!("terminating all processes");

@@ -15,14 +15,26 @@
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
-use crate::pop_model::{PopService, PopServiceHealthCheck};
+use crate::pop_model::{BodyPattern, PopService, PopServiceHealthCheck};
 use core::time::Duration;
+use jql_runner::runner::raw;
 use paris::{error, info, success};
+use serde_json::json;
 use std::{
     env,
     process::{Command, Stdio},
 };
 use tokio::time::sleep;
+
+pub fn do_with_http_check(
+    expected_code: i32,
+    check_url: String,
+    service_id: String,
+    body_patterns: Vec<BodyPattern>,
+) -> Result<(), &'static str> {
+    let a = raw(r#""a","b""#, &json!({ "a": 1, "b": 2 }));
+    Ok(())
+}
 
 pub async fn health_check(
     id: String,

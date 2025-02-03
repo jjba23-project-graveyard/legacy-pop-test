@@ -37,13 +37,13 @@ pub struct PopService {
     pub health_check: PopServiceHealthCheck,
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct BodyPattern {
     pub pattern: String,
     pub condition: String,
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 #[serde(untagged)]
 pub enum PopCheck {
     Http {
@@ -54,13 +54,13 @@ pub enum PopCheck {
     },
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct PopScenario {
     pub pop_services: Vec<PopService>,
     pub pop_checks: Vec<PopCheck>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct PopScenarioFile {
     pub pop_test: PopScenario,
 }
