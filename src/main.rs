@@ -52,9 +52,10 @@ async fn main() -> Result<(), &'static str> {
     info!("reading scenario file");
     let maybe_file = fs::read_to_string(scenario_path);
 
-    let _ = match maybe_file {
+    let xpr: Result<(), &'static str> = match maybe_file {
         Err(e) => {
             error!("error occurred reading file: {}", e);
+            Err("err reading file")
         }
         Ok(file_data) => {
             info!("parsing YAML from file");
@@ -63,6 +64,7 @@ async fn main() -> Result<(), &'static str> {
             match scenario_file {
                 Err(e) => {
                     error!("error occured parsing YAML {}", e);
+                    Err("error parsing YAML")
                 }
                 Ok(s) => {
                     success!("parsed pop scenario properly from YAML file");
@@ -81,13 +83,16 @@ async fn main() -> Result<(), &'static str> {
                         info!("performing tests and assertions");
                         // here add checks
                         info!("terminating all processes");
-                        proc_set.abort_all();
+                        proc_set.shutdown().await;
                         success!("finished playing scenario");
+                        Ok(())
+                    } else {
+                        let s = "could not understand the wanted task to execute";
+                        Err(&s)
                     }
                 }
             }
         }
     };
-
-    Ok(())
+    xpr
 }

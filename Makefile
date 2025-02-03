@@ -15,7 +15,7 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
-run:
+run-green-energy-mix: fmt
 	cargo run -- play-scenario ./resources/scenarios/test-green-energy-mix.yaml	
 fmt:
 	cargo fix --allow-dirty --bin "pop-test"

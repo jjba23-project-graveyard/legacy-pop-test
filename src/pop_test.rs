@@ -15,15 +15,14 @@
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
-use crate::pop_model::{PopScenario, PopService, PopServiceHealthCheck};
-use core::{convert::TryInto, time::Duration};
+use crate::pop_model::{PopService, PopServiceHealthCheck};
+use core::time::Duration;
 use paris::{error, info, success};
 use std::{
-    collections::HashMap,
     env,
     process::{Command, Stdio},
 };
-use tokio::{task::AbortHandle, time::sleep};
+use tokio::time::sleep;
 
 pub async fn health_check(
     id: String,
