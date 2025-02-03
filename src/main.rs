@@ -123,7 +123,8 @@ async fn do_with_file_data(user_cmd: String, file_data: String) -> Result<(), &'
         info!("terminating all processes");
 
         for mut child in children {
-            child.kill().await;
+            info!("terminating pid: {:?}", child.id());
+            let _ = child.kill().await;
         }
 
         success!("finished playing scenario");
