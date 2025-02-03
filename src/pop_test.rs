@@ -17,7 +17,7 @@
 
 use crate::pop_model::{PopScenario, PopService, PopServiceHealthCheck};
 use core::{convert::TryInto, time::Duration};
-use paris::info;
+use paris::{error, info, success};
 use std::{
     collections::HashMap,
     env,
@@ -38,13 +38,22 @@ pub async fn health_check(
         } => {
             let mut elapsed = 0;
             let url = format!("{}{}", base_url, path);
-            while elapsed < patience_seconds {
+            while elapsed <= patience_seconds {
                 info!("calling health check URL ({}): {}", elapsed, url);
                 let resp = reqwest::get(url.clone()).await;
                 println!("{resp:#?}");
-                sleep(Duration::from_secs(2)).await;
-                elapsed += 2;
-                continue;
+                match resp {
+                    Err(e) => {
+                        error!("{}", e);
+                        sleep(Duration::from_secs(2)).await;
+                        elapsed += 5;
+                        continue;
+                    }
+                    Ok(v) => {
+                        success!("{:?}", v);
+                        break;
+                    }
+                }
             }
 
             Ok(())

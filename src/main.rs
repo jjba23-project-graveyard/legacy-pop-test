@@ -67,18 +67,21 @@ async fn main() -> Result<(), &'static str> {
                 Ok(s) => {
                     success!("parsed pop scenario properly from YAML file");
                     if user_cmd == "play-scenario" {
-                        //tokio::join!(play_scenario(s.pop_test));
+                        let mut h_set: JoinSet<_> = JoinSet::new();
+                        let mut proc_set: JoinSet<_> = JoinSet::new();
+
                         for pop_service in s.pop_test.pop_services {
                             info!("registering service: {}", pop_service.id);
-                            let mut set: JoinSet<_> = JoinSet::new();
-                            set.spawn(start_h(pop_service.clone()));
-
-                            let mut proc_set: JoinSet<_> = JoinSet::new();
+                            h_set.spawn(start_h(pop_service.clone()));
                             proc_set.spawn(async move { start_p(pop_service.clone()) });
-
-                            set.join_all().await;
-                            proc_set.join_all().await;
                         }
+
+                        info!("awaiting for all services to be healthy");
+                        h_set.join_all().await;
+                        info!("performing tests and assertions");
+                        // here add checks
+                        info!("terminating all processes");
+                        proc_set.abort_all();
                         success!("finished playing scenario");
                     }
                 }
