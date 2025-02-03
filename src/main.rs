@@ -25,7 +25,7 @@ use serde_yml;
 use std::env;
 use std::fs;
 use std::process::exit;
-use tokio::sync::watch;
+use tokio::process::Child;
 use tokio::task::JoinSet;
 
 mod pop_model;
@@ -60,85 +60,76 @@ async fn main() -> Result<(), &'static str> {
             error!("error occurred reading file: {}", e);
             Err("err reading file")
         }
-        Ok(file_data) => {
-            info!("parsing YAML from file");
-            let scenario_file: Result<pop_model::PopScenarioFile, serde_yml::Error> =
-                serde_yml::from_str(&file_data);
-            match scenario_file {
-                Err(e) => {
-                    error!("error occured parsing YAML {}", e);
-                    Err("error parsing YAML")
-                }
-                Ok(s) => {
-                    success!("parsed pop scenario properly from YAML file");
-                    if user_cmd == "play-scenario" {
-                        let mut h_set: JoinSet<_> = JoinSet::new();
-                        let mut proc_set: JoinSet<_> = JoinSet::new();
-                        let (tx, rx) = watch::channel(false);
+        Ok(file_data) => do_with_file_data(user_cmd.to_string(), file_data).await,
+    };
+    xpr
+}
 
-                        for pop_service in s.pop_test.pop_services.clone() {
-                            info!("registering service: {}", pop_service.id);
-                            h_set.spawn(start_h(pop_service.clone()));
-                            let p = start_p(pop_service.clone(), rx.clone());
-                            proc_set.spawn(p);
-                        }
+async fn do_with_file_data(user_cmd: String, file_data: String) -> Result<(), &'static str> {
+    info!("parsing YAML from file");
+    let scenario_file: pop_model::PopScenarioFile = serde_yml::from_str(&file_data).unwrap();
 
-                        info!("awaiting for all services to be healthy");
-                        h_set.join_all().await;
-                        info!("performing tests and assertions");
+    success!("parsed pop scenario properly from YAML file");
+    if user_cmd == "play-scenario" {
+        let mut h_set: JoinSet<_> = JoinSet::new();
+        let mut children: Vec<Child> = Vec::new();
 
-                        // here add checks
+        for pop_service in scenario_file.pop_test.pop_services.clone() {
+            info!("registering service: {}", pop_service.id);
+            h_set.spawn(start_h(pop_service.clone()));
+            let p = start_p(pop_service.clone()).await.unwrap();
+            children.push(p);
+        }
 
-                        let servicios = s.pop_test.pop_services.clone();
-                        for c in s.pop_test.pop_checks {
-                            let cccc = c.clone();
-                            match c {
-                                pop_model::PopCheck::Http {
-                                    expected_code,
-                                    check_url,
-                                    service_id,
-                                    body_patterns,
-                                } => {
-                                    let ss = service_id.clone();
-                                    let maybe_service = servicios.iter().find(|x| x.id == ss);
+        info!("awaiting for all services to be healthy");
+        h_set.join_all().await;
+        info!("performing tests and assertions");
 
-                                    match maybe_service {
-                                        Some(s) => {
-                                            info!("found service to check : {:?}", s);
-                                            info!("running check: {:?}", cccc);
-                                            let uu = s.base_url.clone();
-                                            let cc = do_with_http_check(
-                                                expected_code,
-                                                check_url,
-                                                uu,
-                                                body_patterns,
-                                            )
-                                            .await;
+        // here add checks
 
-                                            match cc {
-                                                Err(e) => error!("error occurred {}", e),
-                                                _ => (),
-                                            }
-                                        }
-                                        _ => error!("could not find service details for check"),
-                                    }
-                                }
+        let servicios = scenario_file.pop_test.pop_services.clone();
+        for c in scenario_file.pop_test.pop_checks {
+            let cccc = c.clone();
+            match c {
+                pop_model::PopCheck::Http {
+                    expected_code,
+                    check_url,
+                    service_id,
+                    body_patterns,
+                } => {
+                    let ss = service_id.clone();
+                    let maybe_service = servicios.iter().find(|x| x.id == ss);
+
+                    match maybe_service {
+                        Some(s) => {
+                            info!("found service to check : {:?}", s);
+                            info!("running check: {:?}", cccc);
+                            let uu = s.base_url.clone();
+                            let cc =
+                                do_with_http_check(expected_code, check_url, uu, body_patterns)
+                                    .await;
+
+                            match cc {
+                                Err(e) => error!("error occurred {}", e),
+                                _ => (),
                             }
                         }
-
-                        info!("terminating all processes");
-                        tx.send(true);
-                        proc_set.shutdown().await;
-
-                        success!("finished playing scenario");
-                        Ok(())
-                    } else {
-                        let s = "could not understand the wanted task to execute";
-                        Err(&s)
+                        _ => error!("could not find service details for check"),
                     }
                 }
             }
         }
-    };
-    xpr
+
+        info!("terminating all processes");
+
+        for mut child in children {
+            child.kill().await;
+        }
+
+        success!("finished playing scenario");
+        Ok(())
+    } else {
+        let s = "could not understand the wanted task to execute";
+        Err(&s)
+    }
 }

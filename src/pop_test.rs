@@ -21,7 +21,10 @@ use jql_runner::runner::raw;
 use paris::{error, info, success};
 use serde_json::json;
 use std::{env, process::Stdio};
-use tokio::{process::Command, sync::watch::Receiver, time::sleep};
+use tokio::{
+    process::{Child, Command},
+    time::sleep,
+};
 
 pub async fn do_with_http_check(
     expected_code: i32,
@@ -103,7 +106,7 @@ pub async fn health_check(
     }
 }
 
-pub async fn do_work(pop_service: PopService) {
+pub async fn do_work(pop_service: PopService) -> Result<Child, std::io::Error> {
     info!("Task is running...");
     let user_home = env::var("HOME").unwrap();
 
@@ -126,29 +129,16 @@ pub async fn do_work(pop_service: PopService) {
         .unwrap_or_else(|| "bash".to_string());
 
     let bash_path = str::replace(b, "$HOME", &user_home);
-    let _ = Command::new(bash_path)
+    Command::new(bash_path)
         .args(&arg)
         .current_dir(dir)
         .envs(&pop_service.env_vars)
         .stdout(Stdio::inherit())
-        .spawn();
+        .spawn()
 }
 
-pub async fn start_p(pop_service: PopService, mut rx: Receiver<bool>) -> () {
-    loop {
-        let p = pop_service.clone();
-        tokio::select! {
-            _ = do_work(p) => {
-                println!("Work completed, checking for cancellation...");
-            }
-            _ = rx.changed() => {
-                if *rx.borrow() {
-                    println!("Task is shutting down...");
-                    break;
-                }
-            }
-        }
-    }
+pub async fn start_p(pop_service: PopService) -> Result<Child, std::io::Error> {
+    do_work(pop_service).await
 }
 
 pub async fn start_h(pop_service: PopService) -> () {
