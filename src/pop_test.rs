@@ -38,15 +38,22 @@ pub async fn do_with_http_check(
 
     let url = format!("{}{}", service_url, check_url);
 
-    let resp = reqwest::get(url.clone()).await;
-    println!("{resp:#?}");
+    let maybe_response = reqwest::get(url.clone()).await;
+    println!("{maybe_response:#?}");
 
-    match resp {
-        Err(e) => {
-            error!("{}", e);
-        }
-        Ok(v) => {
-            let j = &v.json().await;
+    match maybe_response {
+        Err(e) => error!("{}", e),
+        Ok(resp) => {
+            if (resp.status().as_u16() as i32) != expected_code {
+                return Err("the HTTP status did not match the expectation");
+            } else {
+                success!(
+                    "the HTTP response contained the expected status: {}",
+                    expected_code
+                )
+            }
+
+            let j = &resp.json().await;
             match j {
                 Ok(vv) => {
                     for pat in body_patterns {
@@ -144,7 +151,7 @@ pub async fn start_p(pop_service: PopService) -> Result<Child, std::io::Error> {
 
 pub async fn start_h(pop_service: PopService) -> () {
     let pp = pop_service.clone();
-    health_check(pp.id, pp.base_url, pp.health_check).await;
+    let _ = health_check(pp.id, pp.base_url, pp.health_check).await;
 }
 
 pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), &'static str> {
@@ -209,7 +216,6 @@ pub async fn perform_checks(scenario_file: &PopScenarioFile) {
                     error!("could not find service details for check");
                 }
             }
-            _ => (),
         }
     }
 }
