@@ -38,7 +38,7 @@ pop_test:
       expected_code: 200
       body_patterns:
         - pattern: '"meta""forecastDate"'
-          condition: "!= \"\""
+          condition: '!= ""'
         - pattern: '"data"[0]"load"'
           condition: "> 0"
         - pattern: '"data"[0]"solar"'
