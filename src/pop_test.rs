@@ -19,7 +19,7 @@ use crate::pop_model::{BodyPattern, PopCheck, PopScenarioFile, PopService, PopSe
 use core::time::Duration;
 use jql_runner::runner::raw;
 use paris::{error, info, success};
-use serde_json::json;
+use serde_json::{json, Value};
 use std::{env, process::Stdio};
 use tokio::task::JoinSet;
 use tokio::{
@@ -55,13 +55,7 @@ pub async fn do_with_http_check(
 
             let j = &resp.json().await;
             match j {
-                Ok(vv) => {
-                    for pat in body_patterns {
-                        let jj = raw(&pat.pattern, vv);
-                        success!("{:?}", jj);
-                    }
-                    ()
-                }
+                Ok(body) => check_pat(body, body_patterns).unwrap(),
                 _ => (),
             }
             ()
@@ -240,4 +234,32 @@ pub async fn do_with_file_data(user_cmd: String, file_data: String) -> Result<()
         error!("{}", msg);
         Err(&msg)
     }
+}
+
+pub fn check_pat(body: &Value, patterns: Vec<BodyPattern>) -> Result<(), &'static str> {
+    for pat in patterns {
+        let jj = raw(&pat.pattern, body).unwrap();
+        success!("{:?}", jj);
+
+        if &pat.condition == "!= \"\"" {
+            if jj == "" {
+                return Err("expectation not met of match to be non empty");
+            } else {
+                success!("{} {}", jj, &pat.condition);
+                continue;
+            }
+        }
+
+        if str::starts_with(&pat.condition, "> ") {
+            let exp: f64 = str::replace(&pat.condition, "> ", "").parse().unwrap();
+            let jj_num: f64 = 0.0; // jj.as_str().unwrap().parse().unwrap();
+            if jj_num <= exp {
+                return Err("expectation not met of numeric value");
+            } else {
+                success!("{} {}", jj, &pat.condition);
+                continue;
+            }
+        }
+    }
+    Ok(())
 }
