@@ -18,20 +18,20 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-#[derive(Serialize, Deserialize, PartialEq, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 #[serde(untagged)]
 pub enum PopServiceHealthCheck {
     Http { path: String, patience_seconds: i32 },
     Dummy { always_healthy: bool },
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct PopService {
     pub id: String,
     pub name: String,
     pub dir: String,
     pub base_url: String,
-    pub bash_path: String,
+    pub bash_path: Option<String>,
     pub start_cmd_args: Vec<String>,
     pub env_vars: HashMap<String, String>,
     pub health_check: PopServiceHealthCheck,

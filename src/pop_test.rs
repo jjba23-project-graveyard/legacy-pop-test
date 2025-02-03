@@ -15,17 +15,15 @@
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
+use crate::pop_model::{PopScenario, PopService, PopServiceHealthCheck};
 use core::{convert::TryInto, fmt, time::Duration};
 use paris::{error, info, success, warn};
 use std::{
     collections::HashMap,
     env,
     process::{Command, Stdio},
-    thread::sleep,
 };
-use tokio::net::TcpStream;
-
-use crate::pop_model::{PopScenario, PopService, PopServiceHealthCheck};
+use tokio::time::sleep;
 
 pub async fn health_check(
     id: String,
@@ -38,13 +36,16 @@ pub async fn health_check(
             path,
             patience_seconds,
         } => {
-            sleep(Duration::from_secs(patience_seconds.try_into().unwrap()));
-            let resp = reqwest::get(format!("{}{}", base_url, path))
+            let url = format!("{}{}", base_url, path);
+            info!("calling health check URL: {}", url);
+
+            let resp = reqwest::get(url)
                 .await
                 .unwrap()
                 .json::<HashMap<String, String>>()
                 .await;
             println!("{resp:#?}");
+            sleep(Duration::from_secs(patience_seconds.try_into().unwrap())).await;
             Ok(())
         }
         crate::pop_model::PopServiceHealthCheck::Dummy { always_healthy } => {
@@ -57,61 +58,57 @@ pub async fn health_check(
     }
 }
 
+pub async fn run_process(pop_service: PopService) -> Result<(), &'static str> {
+    let user_home = env::var("HOME").unwrap();
+
+    let dir = str::replace(&pop_service.dir, "$HOME", &user_home);
+
+    info!("in dir {}", &dir);
+    info!("with args {:?}", &pop_service.start_cmd_args);
+
+    let mut arg: Vec<String> = Vec::new();
+    arg.push("-c".to_string());
+    for b in &pop_service.start_cmd_args {
+        arg.push(b.to_string());
+    }
+
+    info!("bash with args {:?}", &arg);
+
+    let b = &pop_service
+        .bash_path
+        .clone()
+        .unwrap_or_else(|| "bash".to_string());
+
+    let bash_path = str::replace(b, "$HOME", &user_home);
+    let _ = Command::new(bash_path)
+        .args(&arg)
+        .current_dir(dir)
+        .envs(&pop_service.env_vars)
+        .stdout(Stdio::inherit())
+        .output()
+        .expect("failed to execute process");
+    Ok(())
+}
+
 pub async fn play_scenario(scenario: PopScenario) -> Result<(), &'static str> {
     for pop_service in scenario.pop_services {
         info!("registering service: {}", pop_service.id);
-        let user_home = env::var("HOME").unwrap();
-        let bash_path = str::replace(&pop_service.bash_path, "$HOME", &user_home);
 
-        let dir = str::replace(&pop_service.dir, "$HOME", &user_home);
+        let p = pop_service.clone();
 
-        info!("in dir {}", &dir);
-        info!("with args {:?}", &pop_service.start_cmd_args);
+        let process_task: tokio::task::JoinHandle<_> = tokio::spawn(async move { run_process(p) });
+        let process_cancel = process_task.abort_handle();
 
-        let mut arg: Vec<String> = Vec::new();
-        arg.push("-c".to_string());
-        for b in pop_service.start_cmd_args {
-            arg.push(b);
-        }
+        let pp = pop_service.clone();
+        let health_check_task =
+            tokio::spawn(async move { health_check(pp.id, pp.base_url, pp.health_check) });
 
-        info!("bash with args {:?}", &arg);
+        let health_check_cancel = health_check_task.abort_handle();
 
-        let proc: tokio::task::JoinHandle<_> = tokio::spawn(async move {
-            let _ = Command::new(bash_path)
-                .args(&arg)
-                .current_dir(dir)
-                .envs(pop_service.env_vars)
-                .stdin(Stdio::inherit())
-                .stdout(Stdio::inherit())
-                .output()
-                .expect("failed to execute process");
-        });
+        health_check_task.await;
 
-        let h: tokio::task::JoinHandle<_> = tokio::spawn(async move {
-            health_check(
-                pop_service.id,
-                pop_service.base_url,
-                pop_service.health_check,
-            )
-        });
-
-        match h.await {
-            Err(e) => {
-                error!("error occurred while executing health check: {}", e)
-            }
-            Ok(_) => {
-                info!("success running health check")
-            }
-        }
-
-        match proc.await {
-            Err(e) => {
-                error!("error occurred while executing proc: {}", e)
-            }
-            Ok(_) => {
-                info!("success running proc")
-            }
-        }
+        health_check_cancel.abort();
+        process_cancel.abort();
     }
 
     Ok(())

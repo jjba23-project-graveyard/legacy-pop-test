@@ -21,9 +21,9 @@ pop_test:
       name: "Green Energy Mix"
       dir: "$HOME/Ontwikkeling/Werk/Vandebron"
       base_url: "http://localhost:50000"
-      bash_path: "bash"
       start_cmd_args:
-        - "sbt \"greenEnergyMix/run\""
+        - "sbt"
+        - "\"greenEnergyMix/run\""
       env_vars:
         NATIONAAL_ENERGIE_DASHBOARD_TOKEN: "002b9a99a4d98cdee8aabf3abb0778cb649126ffbffc1bcde516884797809ce9"
       health_check:
