@@ -24,7 +24,7 @@ authors = ["Josep Bigorra <jjbigorra@gmail.com>"]
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
 paris = { version = "1.0", features = ["timestamps", "macros"]}
-
 serde_json = "1.0"
 serde_yml = "0.0.12"
 toml = "0.8.19"
+tokio = { version = "1", features = ["full"] }

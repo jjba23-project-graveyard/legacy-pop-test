@@ -25,7 +25,8 @@ use std::process::exit;
 mod pop_model;
 mod pop_test;
 
-fn main() {
+#[tokio::main]
+async fn main() -> Result<(), String> {
     println!("");
     info!("`pop-test` starting up");
     println!("");
@@ -48,10 +49,9 @@ fn main() {
     info!("reading scenario file");
     let maybe_file = fs::read_to_string(scenario_path);
 
-    match maybe_file {
+    let _ = match maybe_file {
         Err(e) => {
             error!("error occurred reading file: {}", e);
-            exit(1);
         }
         Ok(file_data) => {
             info!("parsing YAML from file");
@@ -60,16 +60,16 @@ fn main() {
             match scenario_file {
                 Err(e) => {
                     error!("error occured parsing YAML {}", e);
-                    exit(1);
                 }
                 Ok(s) => {
                     success!("parsed pop scenario properly from YAML file");
                     if user_cmd == "play-scenario" {
-                        pop_test::play_scenario(s.pop_test)
+                        pop_test::play_scenario(s.pop_test);
                     }
                 }
             }
-            exit(0);
         }
-    }
+    };
+
+    Ok(())
 }
