@@ -30,3 +30,5 @@ toml = "0.8.19"
 tokio = { version = "1", features = ["full"] }
 reqwest = { version = "0.12", features = ["json"] }
 openssl = { version = "0.10", features = ["vendored"] }
+jql-parser = { version = "8.0" }
+jql-runner = { version = "8.0" }

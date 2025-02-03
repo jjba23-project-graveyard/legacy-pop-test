@@ -19,11 +19,14 @@ use paris::{error, info, success};
 
 use pop_test::start_h;
 use pop_test::start_p;
+use serde_json::json;
 use serde_yml;
 use std::env;
 use std::fs;
 use std::process::exit;
 use tokio::task::JoinSet;
+
+use jql_runner::runner::raw;
 
 mod pop_model;
 mod pop_test;
@@ -81,7 +84,15 @@ async fn main() -> Result<(), &'static str> {
                         info!("awaiting for all services to be healthy");
                         h_set.join_all().await;
                         info!("performing tests and assertions");
+
                         // here add checks
+
+                        for c in s.pop_test.pop_checks {
+                            info!("running check: {:?}", c);
+                            let jqljql = raw(r#""a","b""#, &json!({ "a": 1, "b": 2 }));
+                            info!("jqljql: {:?}", jqljql);
+                        }
+
                         info!("terminating all processes");
                         proc_set.shutdown().await;
                         success!("finished playing scenario");
