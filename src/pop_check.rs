@@ -27,9 +27,13 @@ pub fn check_pat(body: &Value, patterns: Vec<BodyPattern>) -> Result<(), String>
         success!("{:?}", good_match);
 
         match pat.condition.as_str() {
-            "!= \"\"" if good_match.as_str().unwrap_or("").is_empty() => {
-                return Err("expectation not met of match to be non-empty".to_string());
+            // match should not be empty
+            "!= \"\"" => {
+                if good_match.as_str().unwrap_or("").is_empty() {
+                    return Err("expectation not met of match to be non-empty".to_string());
+                }
             }
+            // match should be greater than x
             cond if cond.starts_with("> ") => {
                 let exp: f64 = pat
                     .condition
@@ -45,7 +49,29 @@ pub fn check_pat(body: &Value, patterns: Vec<BodyPattern>) -> Result<(), String>
                     ));
                 }
             }
-            _ => {}
+            // match should be smaller than x
+            cond if cond.starts_with("< ") => {
+                let exp: f64 = pat
+                    .condition
+                    .replace("< ", "")
+                    .parse()
+                    .map_err(|e| format!("{}", e))?;
+
+                let the_num: f64 = good_match.as_number().unwrap().as_f64().unwrap();
+                if the_num >= exp {
+                    return Err(format!(
+                        "expectation not met of numeric value: {} {}",
+                        the_num, &pat.condition
+                    ));
+                }
+            }
+            // unknown conditions should result in error
+            cond => {
+                return Err(format!(
+                    "found a condition that was unable to process: {}",
+                    cond
+                ))
+            }
         }
 
         success!("{} {}", good_match, pat.condition);
@@ -62,6 +88,19 @@ mod tests {
     use super::*;
     use paris::error;
     use serde_json::json;
+
+    #[test]
+    fn check_smaller_than_pat_handles_happy_string() {
+        let mut patterns = Vec::new();
+        patterns.push(BodyPattern {
+            pattern: "\"sut\"".to_string(),
+            condition: "< 0".to_string(),
+        });
+        let body = json!({"sut": -1});
+        let result = check_pat(&body, patterns);
+
+        assert_eq!(result, Ok(()));
+    }
 
     #[test]
     fn check_greater_than_pat_handles_happy_string() {
