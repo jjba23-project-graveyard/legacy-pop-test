@@ -33,7 +33,7 @@ pub fn check_pat(body: &Value, patterns: Vec<BodyPattern>) -> Result<(), String>
                 success!("{:?}", good_match);
 
                 if &pat.condition == "!= \"\"" {
-                    if good_match == "" {
+                    if good_match.as_str() == Some("") || good_match.as_str() == None {
                         return Err("expectation not met of match to be non empty".to_string());
                     } else {
                         success!("{} {}", good_match, &pat.condition);
@@ -42,10 +42,16 @@ pub fn check_pat(body: &Value, patterns: Vec<BodyPattern>) -> Result<(), String>
                 }
 
                 if str::starts_with(&pat.condition, "> ") {
-                    let exp: f64 = str::replace(&pat.condition, "> ", "").parse().unwrap();
-                    let jj_num: f64 = 0.0; // jj.as_str().unwrap().parse().unwrap();
-                    if jj_num <= exp {
-                        return Err("expectation not met of numeric value".to_string());
+                    let exp: f64 = str::replace(&pat.condition, "> ", "")
+                        .parse()
+                        .map_err(|e| format!("{}", e))?;
+
+                    let the_num: f64 = good_match.as_number().unwrap().as_f64().unwrap();
+                    if the_num <= exp {
+                        return Err(format!(
+                            "expectation not met of numeric value: {} {}",
+                            the_num, &pat.condition
+                        ));
                     } else {
                         success!("{} {}", good_match, &pat.condition);
                         continue;
@@ -64,6 +70,19 @@ mod tests {
     use super::*;
     use paris::error;
     use serde_json::json;
+
+    #[test]
+    fn check_greater_than_pat_handles_happy_string() {
+        let mut patterns = Vec::new();
+        patterns.push(BodyPattern {
+            pattern: "\"sut\"".to_string(),
+            condition: "> 0".to_string(),
+        });
+        let body = json!({"sut": 1});
+        let result = check_pat(&body, patterns);
+
+        assert_eq!(result, Ok(()));
+    }
 
     #[test]
     fn check_non_empty_string_pat_handles_happy_string() {
