@@ -23,45 +23,38 @@ use serde_json::Value;
 
 pub fn check_pat(body: &Value, patterns: Vec<BodyPattern>) -> Result<(), String> {
     for pat in patterns {
-        let maybe_match = raw(&pat.pattern, body);
+        let good_match = raw(&pat.pattern, body).map_err(|e| e.to_string())?;
+        success!("{:?}", good_match);
 
-        match maybe_match {
-            Err(e) => {
-                return Err(format!("{}", e));
+        match pat.condition.as_str() {
+            "!= \"\"" if good_match.as_str().unwrap_or("").is_empty() => {
+                return Err("expectation not met of match to be non-empty".to_string());
             }
-            Ok(good_match) => {
-                success!("{:?}", good_match);
+            cond if cond.starts_with("> ") => {
+                let exp: f64 = str::replace(&pat.condition, "> ", "")
+                    .parse()
+                    .map_err(|e| format!("{}", e))?;
 
-                if &pat.condition == "!= \"\"" {
-                    if good_match.as_str() == Some("") || good_match.as_str() == None {
-                        return Err("expectation not met of match to be non empty".to_string());
-                    } else {
-                        success!("{} {}", good_match, &pat.condition);
-                        continue;
-                    }
-                }
-
-                if str::starts_with(&pat.condition, "> ") {
-                    let exp: f64 = str::replace(&pat.condition, "> ", "")
-                        .parse()
-                        .map_err(|e| format!("{}", e))?;
-
-                    let the_num: f64 = good_match.as_number().unwrap().as_f64().unwrap();
-                    if the_num <= exp {
-                        return Err(format!(
-                            "expectation not met of numeric value: {} {}",
-                            the_num, &pat.condition
-                        ));
-                    } else {
-                        success!("{} {}", good_match, &pat.condition);
-                        continue;
-                    }
+                let the_num: f64 = good_match.as_number().unwrap().as_f64().unwrap();
+                if the_num <= exp {
+                    return Err(format!(
+                        "expectation not met of numeric value: {} {}",
+                        the_num, &pat.condition
+                    ));
+                } else {
+                    success!("{} {}", good_match, &pat.condition);
+                    continue;
                 }
             }
+            _ => {}
         }
+
+        success!("{} {}", good_match, pat.condition);
     }
     Ok(())
 }
+
+// module tests
 
 #[cfg(test)]
 mod tests {
