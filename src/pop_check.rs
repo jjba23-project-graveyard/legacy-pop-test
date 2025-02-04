@@ -33,35 +33,35 @@ pub fn check_pat(body: &Value, patterns: Vec<BodyPattern>) -> Result<(), String>
                     return Err("expectation not met of match to be non-empty".to_string());
                 }
             }
-            // match should be greater than x
-            cond if cond.starts_with("> ") => {
-                let exp: f64 = pat
-                    .condition
-                    .replace("> ", "")
-                    .parse()
-                    .map_err(|e| format!("{}", e))?;
+            // match should be greater or smaller than x
+            cond if cond.starts_with("> ") || cond.starts_with("< ") => {
+                let exp: f64 = cond[2..].parse().map_err(|e| format!("{}", e))?;
+                let the_num = good_match
+                    .as_number()
+                    .and_then(|n| n.as_f64())
+                    .ok_or_else(|| format!("expected numeric value, got: {:?}", good_match))?;
 
-                let the_num: f64 = good_match.as_number().unwrap().as_f64().unwrap();
-                if the_num <= exp {
+                let is_greater = pat.condition.starts_with("> ");
+                if (is_greater && the_num <= exp) || (!is_greater && the_num >= exp) {
                     return Err(format!(
                         "expectation not met of numeric value: {} {}",
-                        the_num, &pat.condition
+                        the_num, pat.condition
                     ));
                 }
             }
-            // match should be smaller than x
-            cond if cond.starts_with("< ") => {
-                let exp: f64 = pat
-                    .condition
-                    .replace("< ", "")
-                    .parse()
-                    .map_err(|e| format!("{}", e))?;
+            // match should be greater or equal or smaller or equal than x
+            cond if cond.starts_with(">= ") || cond.starts_with("<= ") => {
+                let exp: f64 = cond[3..].parse().map_err(|e| format!("{}", e))?;
+                let the_num = good_match
+                    .as_number()
+                    .and_then(|n| n.as_f64())
+                    .ok_or_else(|| format!("expected numeric value, got: {:?}", good_match))?;
 
-                let the_num: f64 = good_match.as_number().unwrap().as_f64().unwrap();
-                if the_num >= exp {
+                let is_greater = pat.condition.starts_with(">= ");
+                if (is_greater && the_num < exp) || (!is_greater && the_num > exp) {
                     return Err(format!(
                         "expectation not met of numeric value: {} {}",
-                        the_num, &pat.condition
+                        the_num, pat.condition
                     ));
                 }
             }
@@ -90,7 +90,33 @@ mod tests {
     use serde_json::json;
 
     #[test]
-    fn check_smaller_than_pat_handles_happy_string() {
+    fn check_greater_or_equal_than_pat_handles_happy_case() {
+        let mut patterns = Vec::new();
+        patterns.push(BodyPattern {
+            pattern: "\"sut\"".to_string(),
+            condition: ">= 0".to_string(),
+        });
+        let body = json!({"sut": 0});
+        let result = check_pat(&body, patterns);
+
+        assert_eq!(result, Ok(()));
+    }
+
+    #[test]
+    fn check_smaller_or_equal_than_pat_handles_happy_case() {
+        let mut patterns = Vec::new();
+        patterns.push(BodyPattern {
+            pattern: "\"sut\"".to_string(),
+            condition: "<= 0".to_string(),
+        });
+        let body = json!({"sut": 0});
+        let result = check_pat(&body, patterns);
+
+        assert_eq!(result, Ok(()));
+    }
+
+    #[test]
+    fn check_smaller_than_pat_handles_happy_case() {
         let mut patterns = Vec::new();
         patterns.push(BodyPattern {
             pattern: "\"sut\"".to_string(),
@@ -103,7 +129,7 @@ mod tests {
     }
 
     #[test]
-    fn check_greater_than_pat_handles_happy_string() {
+    fn check_greater_than_pat_handles_happy_case() {
         let mut patterns = Vec::new();
         patterns.push(BodyPattern {
             pattern: "\"sut\"".to_string(),
@@ -116,7 +142,7 @@ mod tests {
     }
 
     #[test]
-    fn check_non_empty_string_pat_handles_happy_string() {
+    fn check_non_empty_string_pat_handles_happy_case() {
         let mut patterns = Vec::new();
         patterns.push(BodyPattern {
             pattern: "\"sut\"".to_string(),
