@@ -25,29 +25,25 @@ mod pop_test;
 #[tokio::main]
 async fn main() -> Result<(), &'static str> {
     info!("\n`pop-test` starting up\n");
-    info!("start reading command-line arguments");
 
     let args: Vec<String> = env::args().collect();
-    info!("read command-line arguments: {:?}", args);
+    info!("command-line arguments: {:?}", args);
 
     if args.len() != 3 {
-        return Err(
-            "did not pass the correct command-line arguments, expected <operation> <scenario-file>",
-        );
+        return Err("usage: <operation> <scenario-file>");
     }
 
-    let user_cmd = &args[1];
-    let scenario_path = &args[2];
+    let (user_cmd, scenario_path) = (&args[1], &args[2]);
+    info!("reading scenario file: {}", scenario_path);
 
-    info!("reading scenario file");
-    let maybe_file = fs::read_to_string(scenario_path);
-    success!("read scenario file successfully");
-
-    match maybe_file {
-        Err(e) => {
-            error!("error occurred reading file: {}", e);
-            Err("err reading file")
+    match fs::read_to_string(scenario_path) {
+        Ok(file_data) => {
+            success!("scenario file read successfully");
+            pop_test::do_with_file_data(user_cmd.clone(), file_data).await
         }
-        Ok(file_data) => pop_test::do_with_file_data(user_cmd.to_string(), file_data).await,
+        Err(e) => {
+            error!("failed to read scenario file: {}", e);
+            Err("error reading file")
+        }
     }
 }
