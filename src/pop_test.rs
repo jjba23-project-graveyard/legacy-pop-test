@@ -127,15 +127,15 @@ pub async fn do_work(pop_service: PopService) -> Result<Child, std::io::Error> {
         arg.push(b.to_string());
     }
 
-    info!("bash with args {:?}", &arg);
+    info!("run shell with args {:?}", &arg);
 
     let b = &pop_service
-        .bash_path
+        .shell_path
         .clone()
         .unwrap_or_else(|| "bash".to_string());
 
-    let bash_path = str::replace(b, "$HOME", &user_home);
-    Command::new(bash_path)
+    let shell_path = str::replace(b, "$HOME", &user_home);
+    Command::new(shell_path)
         .args(&arg)
         .current_dir(dir)
         .envs(&pop_service.env_vars)

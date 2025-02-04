@@ -31,7 +31,7 @@ pub struct PopService {
     pub name: Option<String>,
     pub dir: String,
     pub base_url: String,
-    pub bash_path: Option<String>,
+    pub shell_path: Option<String>,
     pub start_cmd_args: Vec<String>,
     pub env_vars: HashMap<String, String>,
     pub health_check: PopServiceHealthCheck,
