@@ -15,11 +15,12 @@
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
+use crate::pop_check::check_pat;
 use crate::pop_model::{BodyPattern, PopCheck, PopScenarioFile, PopService, PopServiceHealthCheck};
 use core::time::Duration;
 use jql_runner::runner::raw;
 use paris::{error, info, success};
-use serde_json::{json, Value};
+use serde_json::json;
 use std::{env, process::Stdio};
 use tokio::task::JoinSet;
 use tokio::{
@@ -32,7 +33,7 @@ pub async fn do_with_http_check(
     check_url: String,
     service_url: String,
     body_patterns: Vec<BodyPattern>,
-) -> Result<(), &'static str> {
+) -> Result<(), String> {
     let a = raw(r#""a","b""#, &json!({ "a": 1, "b": 2 }));
     info!("{:?}", a);
 
@@ -45,7 +46,7 @@ pub async fn do_with_http_check(
         Err(e) => error!("{}", e),
         Ok(resp) => {
             if (resp.status().as_u16() as i32) != expected_code {
-                return Err("the HTTP status did not match the expectation");
+                return Err("the HTTP status did not match the expectation".to_string());
             } else {
                 success!(
                     "the HTTP response contained the expected status: {}",
@@ -69,7 +70,7 @@ pub async fn health_check(
     id: String,
     base_url: String,
     health_check: PopServiceHealthCheck,
-) -> Result<(), &'static str> {
+) -> Result<(), String> {
     info!("starting healthcheck for service: {}", id);
     match health_check {
         crate::pop_model::PopServiceHealthCheck::Http {
@@ -102,7 +103,7 @@ pub async fn health_check(
             if always_healthy {
                 Ok(())
             } else {
-                Err("")
+                Err("".to_string())
             }
         }
     }
@@ -148,7 +149,7 @@ pub async fn start_h(pop_service: PopService) -> () {
     let _ = health_check(pp.id, pp.base_url, pp.health_check).await;
 }
 
-pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), &'static str> {
+pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String> {
     let mut h_set = JoinSet::new();
     let mut children = Vec::new();
 
@@ -170,7 +171,7 @@ pub async fn register_services(
     h_set: &mut JoinSet<()>,
     children: &mut Vec<Child>,
     scenario_file: &PopScenarioFile,
-) -> Result<(), &'static str> {
+) -> Result<(), String> {
     for pop_service in scenario_file.pop_test.pop_services.clone() {
         info!("registering service: {}", pop_service.id);
         h_set.spawn(start_h(pop_service.clone()));
@@ -222,7 +223,7 @@ pub async fn terminate_processes(children: Vec<Child>) {
     }
 }
 
-pub async fn do_with_file_data(user_cmd: String, file_data: String) -> Result<(), &'static str> {
+pub async fn do_with_file_data(user_cmd: String, file_data: String) -> Result<(), String> {
     info!("parsing YAML from file");
     let scenario_file: PopScenarioFile = serde_yml::from_str(&file_data).unwrap();
 
@@ -232,34 +233,6 @@ pub async fn do_with_file_data(user_cmd: String, file_data: String) -> Result<()
     } else {
         let msg = "could not understand the wanted task to execute";
         error!("{}", msg);
-        Err(&msg)
+        Err(msg.to_string())
     }
-}
-
-pub fn check_pat(body: &Value, patterns: Vec<BodyPattern>) -> Result<(), &'static str> {
-    for pat in patterns {
-        let jj = raw(&pat.pattern, body).unwrap();
-        success!("{:?}", jj);
-
-        if &pat.condition == "!= \"\"" {
-            if jj == "" {
-                return Err("expectation not met of match to be non empty");
-            } else {
-                success!("{} {}", jj, &pat.condition);
-                continue;
-            }
-        }
-
-        if str::starts_with(&pat.condition, "> ") {
-            let exp: f64 = str::replace(&pat.condition, "> ", "").parse().unwrap();
-            let jj_num: f64 = 0.0; // jj.as_str().unwrap().parse().unwrap();
-            if jj_num <= exp {
-                return Err("expectation not met of numeric value");
-            } else {
-                success!("{} {}", jj, &pat.condition);
-                continue;
-            }
-        }
-    }
-    Ok(())
 }

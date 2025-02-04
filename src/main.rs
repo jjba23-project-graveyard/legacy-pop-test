@@ -19,6 +19,7 @@ use paris::{error, info, success};
 use std::env;
 use std::fs;
 
+mod pop_check;
 mod pop_model;
 mod pop_test;
 
@@ -36,14 +37,27 @@ async fn main() -> Result<(), &'static str> {
     let (user_cmd, scenario_path) = (&args[1], &args[2]);
     info!("reading scenario file: {}", scenario_path);
 
-    match fs::read_to_string(scenario_path) {
+    let result: Result<(), &'static str> = match fs::read_to_string(scenario_path) {
         Ok(file_data) => {
             success!("scenario file read successfully");
-            pop_test::do_with_file_data(user_cmd.clone(), file_data).await
+            let run_result: Result<(), String> =
+                pop_test::do_with_file_data(user_cmd.clone(), file_data).await;
+            match run_result {
+                Err(e) => {
+                    error!("{}", e);
+                    Err("scenario failed to run successfully")
+                }
+                Ok(_) => {
+                    success!("ran scenario successfully");
+                    Ok(())
+                }
+            }
         }
         Err(e) => {
             error!("failed to read scenario file: {}", e);
             Err("error reading file")
         }
-    }
+    };
+
+    result
 }

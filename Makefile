@@ -22,3 +22,5 @@ run-byggsteg: fmt
 fmt:
 	cargo fix --allow-dirty --bin "pop-test"
 	find . -maxdepth 8 -name "*.rs" -type f -exec rustfmt --edition 2021 {} \;
+test: fmt
+	cargo test
