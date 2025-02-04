@@ -33,6 +33,11 @@ pub fn check_pat(body: &Value, patterns: Vec<BodyPattern>) -> Result<(), String>
                     return Err("expectation not met of match to be non-empty".to_string());
                 }
             }
+            "== \"\"" => {
+                if !good_match.as_str().unwrap_or("").is_empty() {
+                    return Err("expectation not met of match to be empty".to_string());
+                }
+            }
             // match should be greater or smaller than x
             cond if cond.starts_with("> ") || cond.starts_with("< ") => {
                 let exp: f64 = cond[2..].parse().map_err(|e| format!("{}", e))?;
@@ -136,6 +141,11 @@ mod tests {
     #[test]
     fn check_non_empty_string_pat_handles_happy_case() {
         run_check_pat_test("\"sut\"", "!= \"\"", json!({"sut": "something"}), Ok(()));
+    }
+
+    #[test]
+    fn check_empty_string_pat_handles_happy_case() {
+        run_check_pat_test("\"sut\"", "== \"\"", json!({"sut": ""}), Ok(()));
     }
 
     #[test]
