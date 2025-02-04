@@ -27,8 +27,7 @@ pub fn check_pat(body: &Value, patterns: Vec<BodyPattern>) -> Result<(), String>
 
         match maybe_match {
             Err(e) => {
-                let m = format!("{}", e);
-                return Err(m.clone());
+                return Err(format!("{}", e));
             }
             Ok(good_match) => {
                 success!("{:?}", good_match);
@@ -63,13 +62,14 @@ mod tests {
     use core::assert_ne;
 
     use super::*;
+    use paris::error;
     use serde_json::json;
 
     #[test]
     fn check_non_empty_string_pat_handles_happy_string() {
         let mut patterns = Vec::new();
         patterns.push(BodyPattern {
-            pattern: "\"suta\"".to_string(),
+            pattern: "\"sut\"".to_string(),
             condition: "!= \"\"".to_string(),
         });
         let body = json!({"sut": "something"});
@@ -87,7 +87,7 @@ mod tests {
         });
         let body = json!({"sut": "something"});
         let result = check_pat(&body, patterns);
-
+        error!("{:?}", result);
         assert_ne!(result, Ok(()));
     }
 }

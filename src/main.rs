@@ -37,27 +37,25 @@ async fn main() -> Result<(), &'static str> {
     let (user_cmd, scenario_path) = (&args[1], &args[2]);
     info!("reading scenario file: {}", scenario_path);
 
-    let result: Result<(), &'static str> = match fs::read_to_string(scenario_path) {
-        Ok(file_data) => {
-            success!("scenario file read successfully");
-            let run_result: Result<(), String> =
-                pop_test::do_with_file_data(user_cmd.clone(), file_data).await;
-            match run_result {
-                Err(e) => {
-                    error!("{}", e);
-                    Err("scenario failed to run successfully")
-                }
-                Ok(_) => {
-                    success!("ran scenario successfully");
-                    Ok(())
-                }
-            }
-        }
-        Err(e) => {
-            error!("failed to read scenario file: {}", e);
-            Err("error reading file")
-        }
-    };
+    let file_data: String = fs::read_to_string(scenario_path).map_err(|e| {
+        error!("failed to read scenario file: {}", e);
+        "error reading file"
+    })?;
+
+    let result = async {
+        success!("scenario file read successfully to string");
+
+        pop_test::do_with_file_data(user_cmd.clone(), file_data)
+            .await
+            .map_err(|e| {
+                error!("{}", e);
+                "scenario failed to run successfully"
+            })?;
+
+        success!("ran scenario successfully");
+        Ok(())
+    }
+    .await;
 
     result
 }
