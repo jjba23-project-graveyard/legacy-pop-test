@@ -18,7 +18,6 @@
 pop_test:
   pop_services:
     - id: "byggsteg"
-      name: "Byggsteg"
       dir: "$HOME/Ontwikkeling/Persoonlijk/byggsteg"
       base_url: "http://localhost:50002"
       start_cmd_args:
@@ -31,5 +30,3 @@ pop_test:
   pop_checks:
     - check_url: "/"
       service_id: "byggsteg"
-      expected_code: 200
-      body_patterns: []

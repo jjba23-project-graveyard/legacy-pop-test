@@ -28,7 +28,7 @@ pub enum PopServiceHealthCheck {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct PopService {
     pub id: String,
-    pub name: String,
+    pub name: Option<String>,
     pub dir: String,
     pub base_url: String,
     pub bash_path: Option<String>,
@@ -47,10 +47,10 @@ pub struct BodyPattern {
 #[serde(untagged)]
 pub enum PopCheck {
     Http {
-        expected_code: i32,
+        expected_code: Option<i32>,
         check_url: String,
         service_id: String,
-        body_patterns: Vec<BodyPattern>,
+        json_body_patterns: Option<Vec<BodyPattern>>,
     },
 }
 

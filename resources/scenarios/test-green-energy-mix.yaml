@@ -18,7 +18,6 @@
 pop_test:
   pop_services:
     - id: "green-energy-mix"
-      name: "Green Energy Mix"
       dir: "$HOME/Ontwikkeling/Werk/Vandebron"
       base_url: "http://localhost:50000"
       start_cmd_args:
@@ -32,8 +31,7 @@ pop_test:
   pop_checks:
     - check_url: "/api/v1/forecast"
       service_id: "green-energy-mix"
-      expected_code: 200
-      body_patterns:
+      json_body_patterns:
         - pattern: '"meta""forecastDate"'
           condition: '!= ""'
         - pattern: '"data"[0]"load"'

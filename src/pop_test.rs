@@ -29,10 +29,10 @@ use tokio::{
 };
 
 pub async fn do_with_http_check(
-    expected_code: i32,
+    expected_code: Option<i32>,
     check_url: String,
     service_url: String,
-    body_patterns: Vec<BodyPattern>,
+    json_body_patterns: Option<Vec<BodyPattern>>,
 ) -> Result<(), String> {
     let a = raw(r#""a","b""#, &json!({ "a": 1, "b": 2 }));
     info!("{:?}", a);
@@ -41,22 +41,25 @@ pub async fn do_with_http_check(
 
     let maybe_response = reqwest::get(url.clone()).await;
     println!("{maybe_response:#?}");
+    let wanted_status_code = expected_code.unwrap_or_else(|| 200);
 
     match maybe_response {
         Err(e) => error!("{}", e),
         Ok(resp) => {
-            if (resp.status().as_u16() as i32) != expected_code {
+            if (resp.status().as_u16() as i32) != wanted_status_code {
                 return Err("the HTTP status did not match the expectation".to_string());
             } else {
                 success!(
-                    "the HTTP response contained the expected status: {}",
-                    expected_code
+                    "the HTTP response contained the expected status: {:?}",
+                    wanted_status_code
                 )
             }
 
             let j = &resp.json().await;
             match j {
-                Ok(body) => check_pat(body, body_patterns).unwrap(),
+                Ok(body) => {
+                    check_pat(body, json_body_patterns.unwrap_or_else(|| Vec::new())).unwrap()
+                }
                 _ => (),
             }
             ()
@@ -192,7 +195,7 @@ pub async fn perform_checks(scenario_file: &PopScenarioFile) {
                 expected_code,
                 check_url,
                 service_id,
-                body_patterns,
+                json_body_patterns,
             } => {
                 if let Some(service) = services.iter().find(|s| s.id == *service_id) {
                     info!("found service to check: {:?}", service);
@@ -201,7 +204,7 @@ pub async fn perform_checks(scenario_file: &PopScenarioFile) {
                         *expected_code,
                         check_url.clone(),
                         service.base_url.clone(),
-                        body_patterns.clone(),
+                        json_body_patterns.clone(),
                     )
                     .await
                     {
