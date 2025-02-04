@@ -89,69 +89,53 @@ mod tests {
     use paris::error;
     use serde_json::json;
 
+    fn run_check_pat_test(
+        pattern: &str,
+        condition: &str,
+        body: serde_json::Value,
+        expected: Result<(), String>,
+    ) {
+        let patterns = vec![BodyPattern {
+            pattern: pattern.to_string(),
+            condition: condition.to_string(),
+        }];
+        let result = check_pat(&body, patterns);
+        assert_eq!(result, expected);
+    }
+
     #[test]
     fn check_greater_or_equal_than_pat_handles_happy_case() {
-        let mut patterns = Vec::new();
-        patterns.push(BodyPattern {
-            pattern: "\"sut\"".to_string(),
-            condition: ">= 0".to_string(),
-        });
-        let body = json!({"sut": 0});
-        let result = check_pat(&body, patterns);
+        run_check_pat_test("\"sut\"", ">= 0", json!({"sut": 0}), Ok(()));
+    }
 
-        assert_eq!(result, Ok(()));
+    #[test]
+    fn check_greater_or_equal_than_pat_handles_happy_case2() {
+        run_check_pat_test("\"sut\"", ">= 0", json!({"sut": 22}), Ok(()));
     }
 
     #[test]
     fn check_smaller_or_equal_than_pat_handles_happy_case() {
-        let mut patterns = Vec::new();
-        patterns.push(BodyPattern {
-            pattern: "\"sut\"".to_string(),
-            condition: "<= 0".to_string(),
-        });
-        let body = json!({"sut": 0});
-        let result = check_pat(&body, patterns);
+        run_check_pat_test("\"sut\"", "<= 0", json!({"sut": 0}), Ok(()));
+    }
 
-        assert_eq!(result, Ok(()));
+    #[test]
+    fn check_smaller_or_equal_than_pat_handles_happy_case2() {
+        run_check_pat_test("\"sut\"", "<= 0", json!({"sut": -22}), Ok(()));
     }
 
     #[test]
     fn check_smaller_than_pat_handles_happy_case() {
-        let mut patterns = Vec::new();
-        patterns.push(BodyPattern {
-            pattern: "\"sut\"".to_string(),
-            condition: "< 0".to_string(),
-        });
-        let body = json!({"sut": -1});
-        let result = check_pat(&body, patterns);
-
-        assert_eq!(result, Ok(()));
+        run_check_pat_test("\"sut\"", "< 0", json!({"sut": -1}), Ok(()));
     }
 
     #[test]
     fn check_greater_than_pat_handles_happy_case() {
-        let mut patterns = Vec::new();
-        patterns.push(BodyPattern {
-            pattern: "\"sut\"".to_string(),
-            condition: "> 0".to_string(),
-        });
-        let body = json!({"sut": 1});
-        let result = check_pat(&body, patterns);
-
-        assert_eq!(result, Ok(()));
+        run_check_pat_test("\"sut\"", "> 0", json!({"sut": 1}), Ok(()));
     }
 
     #[test]
     fn check_non_empty_string_pat_handles_happy_case() {
-        let mut patterns = Vec::new();
-        patterns.push(BodyPattern {
-            pattern: "\"sut\"".to_string(),
-            condition: "!= \"\"".to_string(),
-        });
-        let body = json!({"sut": "something"});
-        let result = check_pat(&body, patterns);
-
-        assert_eq!(result, Ok(()));
+        run_check_pat_test("\"sut\"", "!= \"\"", json!({"sut": "something"}), Ok(()));
     }
 
     #[test]
