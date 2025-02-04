@@ -31,7 +31,9 @@ pub fn check_pat(body: &Value, patterns: Vec<BodyPattern>) -> Result<(), String>
                 return Err("expectation not met of match to be non-empty".to_string());
             }
             cond if cond.starts_with("> ") => {
-                let exp: f64 = str::replace(&pat.condition, "> ", "")
+                let exp: f64 = pat
+                    .condition
+                    .replace("> ", "")
                     .parse()
                     .map_err(|e| format!("{}", e))?;
 
@@ -41,9 +43,6 @@ pub fn check_pat(body: &Value, patterns: Vec<BodyPattern>) -> Result<(), String>
                         "expectation not met of numeric value: {} {}",
                         the_num, &pat.condition
                     ));
-                } else {
-                    success!("{} {}", good_match, &pat.condition);
-                    continue;
                 }
             }
             _ => {}
