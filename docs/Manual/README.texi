@@ -32,8 +32,18 @@ pop-tests as we affectionately call them, can range from small scope integration
 @menu
 * Why pop-test?::
 * Motivation::
-* The DSL (Domain Specific Language)::
+* The Scenario DSL (Domain Specific Language)::
 * Example tests, using the DSL: Example tests using the DSL. 
+
+@detailmenu
+--- The Detailed Node Listing ---
+
+The Scenario DSL (Domain Specific Language)
+
+* pop@math{_services}::
+* pop@math{_checks}::
+
+@end detailmenu
 @end menu
 
 @node Why pop-test?
@@ -77,12 +87,93 @@ As your system grows, you don’t need to rewrite tests every time. You just kee
 
 In short, pop-tests make engineers happier, business people more certain of what they sell and overall, it makes refactoring and maintaining things easier.
 
-@node The DSL (Domain Specific Language)
-@chapter The DSL (Domain Specific Language)
+@node The Scenario DSL (Domain Specific Language)
+@chapter The Scenario DSL (Domain Specific Language)
 
 In order to provide an expressive and powerful way to describe test scenarios, a lot of care has gone into creating a good domain-specific language, which remains flexible but concise.
 
-Here follows an explanation of every individual field and parameter possible, including default or optional ones, as well as some recommendations.
+Here follows an explanation of every individual field and parameter possible, including default or optional ones, as well as some recommendations. Unless otherwise stated, the YAML representation of the Scenario DSL will be used.
+
+@code{pop_test} represents the top node under which all other nodes live.
+
+@menu
+* pop@math{_services}::
+* pop@math{_checks}::
+@end menu
+
+@node pop@math{_services}
+@section pop@math{_services}
+
+@code{pop_services} is a list of services to be started for the scenario.
+
+A service is defined by:  
+
+@itemize
+@item
+@code{id} (required, string) – A unique identifier for the service within the scenario. A common practice is to use a kebab-case version of the service name.  
+
+@item
+@code{dir} (required, string) – The working directory (pwd) from which the service process should be started. This can be an absolute path or a path starting with `$HOME`, which will be expanded to an absolute path.  
+
+@item
+@code{base_url} (required, string) – The URL where the service’s HTTP endpoint is reachable.  
+
+@item
+@code{start_cmd_args} (required, list of strings) – The command(s) needed to start the service. These will be executed via a shell interpreter (default: `bash -c`). For example, if `make run` is specified, the system will actually execute `bash -c make run`.
+
+@item
+@code{shell_path} (optional, string) - the path to the shell interpreter to use to run the service. This defaults to @code{bash}.  
+
+@item
+@code{env_vars} (optional, map of string to string) – A set of environment variables to be defined for the service.  
+
+@item
+@code{health_check} (required, object) – Defines how the system determines whether the service is healthy.  
+@end itemize
+
+Health checks can take different forms:
+
+Dummy/Placebo health check:
+@itemize
+@item
+@code{always_healthy} (boolean) – If set, forces the service to always be considered healthy (or never healthy).
+@end itemize
+
+HTTP health check:
+@itemize
+@item
+@code{path} (required, string) – The HTTP route used to check the service’s health (e.g., "/health").  
+@item
+@code{patience_seconds} (required, integer) – The maximum time allowed for the service to become healthy. If the service is healthy before this deadline, the scenario setup continues without waiting.  
+@end itemize
+
+@node pop@math{_checks}
+@section pop@math{_checks}
+
+@code{pop_checks} is a list of checks that validate expected responses and behaviours from the services in the scenario. These checks help verify that the services return valid and expected data before proceeding with the scenario execution.
+
+A check is defined by:
+
+@code{check_url} (required, string) – The endpoint path to be tested within the service. This should be a relative path, such as "/api/v1/forecast", which will be appended to the base@math{_url} of the service.
+
+@code{service_id} (required, string) – A reference to the id of the service being checked. This links the check to a specific service defined in pop@math{_services}.
+
+@code{json_body_patterns} (optional, list of objects) – A list of conditions that must be met within the JSON response body. Each pattern defines a JSON field to inspect and a condition that must be satisfied.
+
+Each json@math{_body}@math{_patterns} entry includes:
+
+@code{pattern} (required, string) – A JSON path-like expression that identifies the field in the response body. This uses the Rust @code{jql} library.
+
+@code{condition} (required, string) – A logical condition to be checked.
+
+Supported conditions include:
+
+@code{!= ""} (ensures the field is not empty)
+@code{== ""} (ensures the field is empty)
+@code{> 0} (ensures the field is greater than zero)
+@code{>= 0} (ensures the field is non-negative)
+@code{< 0} (ensures the field is smaller than zero)
+@code{<= 0} (ensures the field is non-positive)
 
 @node Example tests using the DSL
 @chapter Example tests, using the DSL

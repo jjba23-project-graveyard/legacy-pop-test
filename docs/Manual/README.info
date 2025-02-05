@@ -29,8 +29,16 @@ integration tests to all encompassing end-to-end or black box tests.
 
 * Why pop-test?::
 * Motivation::
-* The DSL (Domain Specific Language)::
+* The Scenario DSL (Domain Specific Language)::
 * Example tests, using the DSL: Example tests using the DSL.
+
+— The Detailed Node Listing —
+
+The Scenario DSL (Domain Specific Language)
+
+* pop_services::
+* pop_checks::
+
 
 
 File: README.info,  Node: Why pop-test?,  Next: Motivation,  Prev: Top,  Up: Top
@@ -51,7 +59,7 @@ File: README.info,  Node: Why pop-test?,  Next: Motivation,  Prev: Top,  Up: Top
      for speed and safety.
 
 
-File: README.info,  Node: Motivation,  Next: The DSL (Domain Specific Language),  Prev: Why pop-test?,  Up: Top
+File: README.info,  Node: Motivation,  Next: The Scenario DSL (Domain Specific Language),  Prev: Why pop-test?,  Up: Top
 
 2 Motivation
 ************
@@ -95,10 +103,10 @@ certain of what they sell and overall, it makes refactoring and
 maintaining things easier.
 
 
-File: README.info,  Node: The DSL (Domain Specific Language),  Next: Example tests using the DSL,  Prev: Motivation,  Up: Top
+File: README.info,  Node: The Scenario DSL (Domain Specific Language),  Next: Example tests using the DSL,  Prev: Motivation,  Up: Top
 
-3 The DSL (Domain Specific Language)
-************************************
+3 The Scenario DSL (Domain Specific Language)
+*********************************************
 
 In order to provide an expressive and powerful way to describe test
 scenarios, a lot of care has gone into creating a good domain-specific
@@ -106,10 +114,108 @@ language, which remains flexible but concise.
 
    Here follows an explanation of every individual field and parameter
 possible, including default or optional ones, as well as some
-recommendations.
+recommendations.  Unless otherwise stated, the YAML representation of
+the Scenario DSL will be used.
+
+   ‘pop_test’ represents the top node under which all other nodes live.
+
+* Menu:
+
+* pop_services::
+* pop_checks::
 
 
-File: README.info,  Node: Example tests using the DSL,  Prev: The DSL (Domain Specific Language),  Up: Top
+File: README.info,  Node: pop_services,  Next: pop_checks,  Up: The Scenario DSL (Domain Specific Language)
+
+3.1 pop_services
+================
+
+‘pop_services’ is a list of services to be started for the scenario.
+
+   A service is defined by:
+
+   • ‘id’ (required, string) – A unique identifier for the service
+     within the scenario.  A common practice is to use a kebab-case
+     version of the service name.
+
+   • ‘dir’ (required, string) – The working directory (pwd) from which
+     the service process should be started.  This can be an absolute
+     path or a path starting with ‘$HOME‘, which will be expanded to an
+     absolute path.
+
+   • ‘base_url’ (required, string) – The URL where the service’s HTTP
+     endpoint is reachable.
+
+   • ‘start_cmd_args’ (required, list of strings) – The command(s)
+     needed to start the service.  These will be executed via a shell
+     interpreter (default: ‘bash -c‘).  For example, if ‘make run‘ is
+     specified, the system will actually execute ‘bash -c make run‘.
+
+   • ‘shell_path’ (optional, string) - the path to the shell interpreter
+     to use to run the service.  This defaults to ‘bash’.
+
+   • ‘env_vars’ (optional, map of string to string) – A set of
+     environment variables to be defined for the service.
+
+   • ‘health_check’ (required, object) – Defines how the system
+     determines whether the service is healthy.
+
+   Health checks can take different forms:
+
+   Dummy/Placebo health check:
+   • ‘always_healthy’ (boolean) – If set, forces the service to always
+     be considered healthy (or never healthy).
+
+   HTTP health check:
+   • ‘path’ (required, string) – The HTTP route used to check the
+     service’s health (e.g., "/health").
+   • ‘patience_seconds’ (required, integer) – The maximum time allowed
+     for the service to become healthy.  If the service is healthy
+     before this deadline, the scenario setup continues without waiting.
+
+
+File: README.info,  Node: pop_checks,  Prev: pop_services,  Up: The Scenario DSL (Domain Specific Language)
+
+3.2 pop_checks
+==============
+
+‘pop_checks’ is a list of checks that validate expected responses and
+behaviours from the services in the scenario.  These checks help verify
+that the services return valid and expected data before proceeding with
+the scenario execution.
+
+   A check is defined by:
+
+   ‘check_url’ (required, string) – The endpoint path to be tested
+within the service.  This should be a relative path, such as
+"/api/v1/forecast", which will be appended to the base_url of the
+service.
+
+   ‘service_id’ (required, string) – A reference to the id of the
+service being checked.  This links the check to a specific service
+defined in pop_services.
+
+   ‘json_body_patterns’ (optional, list of objects) – A list of
+conditions that must be met within the JSON response body.  Each pattern
+defines a JSON field to inspect and a condition that must be satisfied.
+
+   Each json_body_patterns entry includes:
+
+   ‘pattern’ (required, string) – A JSON path-like expression that
+identifies the field in the response body.  This uses the Rust ‘jql’
+library.
+
+   ‘condition’ (required, string) – A logical condition to be checked.
+
+   Supported conditions include:
+
+   ‘!= ""’ (ensures the field is not empty) ‘== ""’ (ensures the field
+is empty) ‘> 0’ (ensures the field is greater than zero) ‘>= 0’ (ensures
+the field is non-negative) ‘< 0’ (ensures the field is smaller than
+zero) ‘<= 0’ (ensures the field is non-positive)
+
+
+File: README.info,  Node: Example tests using the DSL,  Prev: The Scenario DSL (Domain Specific Language),  Up: Top
 
 4 Example tests, using the DSL
 ******************************
@@ -151,10 +257,12 @@ nested attributes of the JSON response.
 
 Tag Table:
 Node: Top73
-Node: Why pop-test?1190
-Node: Motivation1847
-Node: The DSL (Domain Specific Language)3609
-Node: Example tests using the DSL4150
+Node: Why pop-test?1313
+Node: Motivation1970
+Node: The Scenario DSL (Domain Specific Language)3741
+Node: pop_services4512
+Node: pop_checks6544
+Node: Example tests using the DSL8145
 
 End Tag Table
 

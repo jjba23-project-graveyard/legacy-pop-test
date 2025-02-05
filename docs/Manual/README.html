@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2025-02-05 wo 09:23 -->
+<!-- 2025-02-05 wo 10:07 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>pop-test manual</title>
@@ -201,10 +201,15 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org8ee5109">1. Why pop-test?</a></li>
-<li><a href="#org453bef7">2. Motivation</a></li>
-<li><a href="#org2b20233">3. The DSL (Domain Specific Language)</a></li>
-<li><a href="#orgf7e7fbf">4. Example tests, using the DSL</a></li>
+<li><a href="#org405ee04">1. Why pop-test?</a></li>
+<li><a href="#orgbfcd966">2. Motivation</a></li>
+<li><a href="#orga076c27">3. The Scenario DSL (Domain Specific Language)</a>
+<ul>
+<li><a href="#org12f9c94">3.1. pop<sub>services</sub></a></li>
+<li><a href="#org3207190">3.2. pop<sub>checks</sub></a></li>
+</ul>
+</li>
+<li><a href="#org919b046">4. Example tests, using the DSL</a></li>
 </ul>
 </div>
 </div>
@@ -229,8 +234,8 @@ pop-tests as we affectionately call them, can range from small scope integration
 </p>
 
 
-<div id="outline-container-org8ee5109" class="outline-2">
-<h2 id="org8ee5109"><span class="section-number-2">1.</span> Why pop-test?</h2>
+<div id="outline-container-org405ee04" class="outline-2">
+<h2 id="org405ee04"><span class="section-number-2">1.</span> Why pop-test?</h2>
 <div class="outline-text-2" id="text-1">
 <ul class="org-ul">
 <li>Catches mistakes early – Helps find problems before real users do.</li>
@@ -243,8 +248,8 @@ pop-tests as we affectionately call them, can range from small scope integration
 </div>
 </div>
 
-<div id="outline-container-org453bef7" class="outline-2">
-<h2 id="org453bef7"><span class="section-number-2">2.</span> Motivation</h2>
+<div id="outline-container-orgbfcd966" class="outline-2">
+<h2 id="orgbfcd966"><span class="section-number-2">2.</span> Motivation</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 Imagine you're building a toy robot, but you don't need to understand all the small parts inside the robot to know if it works. You just need to press a button and see if it performs the task correctly.
@@ -288,21 +293,125 @@ In short, pop-tests make engineers happier, business people more certain of what
 </div>
 </div>
 
-<div id="outline-container-org2b20233" class="outline-2">
-<h2 id="org2b20233"><span class="section-number-2">3.</span> The DSL (Domain Specific Language)</h2>
+<div id="outline-container-orga076c27" class="outline-2">
+<h2 id="orga076c27"><span class="section-number-2">3.</span> The Scenario DSL (Domain Specific Language)</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 In order to provide an expressive and powerful way to describe test scenarios, a lot of care has gone into creating a good domain-specific language, which remains flexible but concise.
 </p>
 
 <p>
-Here follows an explanation of every individual field and parameter possible, including default or optional ones, as well as some recommendations.
+Here follows an explanation of every individual field and parameter possible, including default or optional ones, as well as some recommendations. Unless otherwise stated, the YAML representation of the Scenario DSL will be used.
 </p>
+
+<p>
+<code>pop_test</code> represents the top node under which all other nodes live.
+</p>
+</div>
+
+<div id="outline-container-org12f9c94" class="outline-3">
+<h3 id="org12f9c94"><span class="section-number-3">3.1.</span> pop<sub>services</sub></h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+<code>pop_services</code> is a list of services to be started for the scenario.
+</p>
+
+<p>
+A service is defined by:  
+</p>
+
+<ul class="org-ul">
+<li><code>id</code> (required, string) – A unique identifier for the service within the scenario. A common practice is to use a kebab-case version of the service name.</li>
+
+<li><code>dir</code> (required, string) – The working directory (pwd) from which the service process should be started. This can be an absolute path or a path starting with `$HOME`, which will be expanded to an absolute path.</li>
+
+<li><code>base_url</code> (required, string) – The URL where the service’s HTTP endpoint is reachable.</li>
+
+<li><code>start_cmd_args</code> (required, list of strings) – The command(s) needed to start the service. These will be executed via a shell interpreter (default: `bash -c`). For example, if `make run` is specified, the system will actually execute `bash -c make run`.</li>
+
+<li><code>shell_path</code> (optional, string) - the path to the shell interpreter to use to run the service. This defaults to <code>bash</code>.</li>
+
+<li><code>env_vars</code> (optional, map of string to string) – A set of environment variables to be defined for the service.</li>
+
+<li><code>health_check</code> (required, object) – Defines how the system determines whether the service is healthy.</li>
+</ul>
+
+<p>
+Health checks can take different forms:
+</p>
+
+<p>
+Dummy/Placebo health check:
+</p>
+<ul class="org-ul">
+<li><code>always_healthy</code> (boolean) – If set, forces the service to always be considered healthy (or never healthy).</li>
+</ul>
+
+<p>
+HTTP health check:
+</p>
+<ul class="org-ul">
+<li><code>path</code> (required, string) – The HTTP route used to check the service’s health (e.g., "/health").</li>
+<li><code>patience_seconds</code> (required, integer) – The maximum time allowed for the service to become healthy. If the service is healthy before this deadline, the scenario setup continues without waiting.</li>
+</ul>
 </div>
 </div>
 
-<div id="outline-container-orgf7e7fbf" class="outline-2">
-<h2 id="orgf7e7fbf"><span class="section-number-2">4.</span> Example tests, using the DSL</h2>
+
+<div id="outline-container-org3207190" class="outline-3">
+<h3 id="org3207190"><span class="section-number-3">3.2.</span> pop<sub>checks</sub></h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+<code>pop_checks</code> is a list of checks that validate expected responses and behaviours from the services in the scenario. These checks help verify that the services return valid and expected data before proceeding with the scenario execution.
+</p>
+
+<p>
+A check is defined by:
+</p>
+
+<p>
+<code>check_url</code> (required, string) – The endpoint path to be tested within the service. This should be a relative path, such as "/api/v1/forecast", which will be appended to the base<sub>url</sub> of the service.
+</p>
+
+<p>
+<code>service_id</code> (required, string) – A reference to the id of the service being checked. This links the check to a specific service defined in pop<sub>services</sub>.
+</p>
+
+<p>
+<code>json_body_patterns</code> (optional, list of objects) – A list of conditions that must be met within the JSON response body. Each pattern defines a JSON field to inspect and a condition that must be satisfied.
+</p>
+
+<p>
+Each json<sub>body</sub><sub>patterns</sub> entry includes:
+</p>
+
+<p>
+<code>pattern</code> (required, string) – A JSON path-like expression that identifies the field in the response body. This uses the Rust <code>jql</code> library.
+</p>
+
+<p>
+<code>condition</code> (required, string) – A logical condition to be checked.
+</p>
+
+<p>
+Supported conditions include:
+</p>
+
+<p>
+<code>!= ""</code> (ensures the field is not empty)
+<code>== ""</code> (ensures the field is empty)
+<code>&gt; 0</code> (ensures the field is greater than zero)
+<code>&gt;= 0</code> (ensures the field is non-negative)
+<code>&lt; 0</code> (ensures the field is smaller than zero)
+<code>&lt;= 0</code> (ensures the field is non-positive)
+</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org919b046" class="outline-2">
+<h2 id="org919b046"><span class="section-number-2">4.</span> Example tests, using the DSL</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 Here follow some examples of pop-tests.
@@ -344,7 +453,7 @@ In this example we spin up a REST API written in Scala, with SBT, and poll its <
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Music Player Daemon (MPD) user</p>
-<p class="date">Created: 2025-02-05 wo 09:23</p>
+<p class="date">Created: 2025-02-05 wo 10:07</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
