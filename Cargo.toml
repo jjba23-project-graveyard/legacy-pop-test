@@ -32,3 +32,6 @@ reqwest = { version = "0.12", features = ["json"] }
 openssl = { version = "0.10", features = ["vendored"] }
 jql-parser = { version = "8.0" }
 jql-runner = { version = "8.0" }
+testcontainers = "0.23.1"
+testcontainers-modules = { version = "0.11.6", features = ["postgres", "kafka"] }
+tokio-postgres = "0.7.13"

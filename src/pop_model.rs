@@ -55,9 +55,29 @@ pub enum PopCheck {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct PopPostgres {
+    pub image_name: String,
+    pub image_tag: String,
+    pub host_var: Option<String>,
+    pub port_var: Option<String>,
+    pub db_var: Option<String>,
+    pub user_var: Option<String>,
+    pub pass_var: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct PopKafka {
+    pub image_name: String,
+    pub image_tag: String,
+    pub bootstrap_server_var: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct PopScenario {
     pub pop_services: Vec<PopService>,
     pub pop_checks: Vec<PopCheck>,
+    pub pop_postgres: Option<PopPostgres>,
+    pub pop_kafka: Option<PopKafka>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
