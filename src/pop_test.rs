@@ -192,6 +192,11 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
         _ => None,
     };
 
+    match postgres_container {
+        Some(p) => info!("postgres host: {:?}", p.get_host().await),
+        _ => (),
+    }
+
     let kafka_container = match &scenario_file.pop_test.pop_kafka {
         Some(kafka) => {
             info!("start setting up kafka");
@@ -199,11 +204,6 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
         }
         _ => None,
     };
-
-    match postgres_container {
-        Some(p) => info!("postgres host: {:?}", p.get_host().await),
-        _ => (),
-    }
 
     match kafka_container {
         Some(k) => info!("kafka host: {:?}", k.get_host().await),
