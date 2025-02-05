@@ -159,4 +159,16 @@ mod tests {
         error!("{:?}", result);
         assert_ne!(result, Ok(()));
     }
+
+    #[test]
+    fn check_fails_gracefully_when_no_condition_matches_found() {
+        let patterns = vec![BodyPattern {
+            pattern: "\"sut\"".to_string(),
+            condition: "weird-condition".to_string(),
+        }];
+        let body = json!({"sut": "something"});
+        let result = check_pat(&body, patterns);
+        error!("{:?}", result);
+        assert_ne!(result, Ok(()));
+    }
 }
