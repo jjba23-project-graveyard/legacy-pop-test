@@ -27,6 +27,8 @@ Define your test scenarios in a DSL (YAML, in the future also TOML or JSON) and 
 pop-test is built with Rust, enhancing safety, performance and reliability, with a modern and accessible code-base.
 
 pop-tests as we affectionately call them, can range from small scope integration tests to all encompassing end-to-end or black box tests.
+
+@image{../../resources/img/wp10992149,,,,jpg}
 @end ifnottex
 
 @menu

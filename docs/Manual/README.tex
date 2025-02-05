@@ -1,4 +1,4 @@
-% Created 2025-02-05 wo 23:20
+% Created 2025-02-05 wo 23:26
 % Intended LaTeX compiler: pdflatex
 \documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
@@ -37,9 +37,13 @@ pop-test is built with Rust, enhancing safety, performance and reliability, with
 
 pop-tests as we affectionately call them, can range from small scope integration tests to all encompassing end-to-end or black box tests.
 
+\begin{center}
+\includegraphics[width=.9\linewidth]{../../resources/img/wp10992149.jpg}
+\end{center}
+
 
 \section{Why pop-test?}
-\label{sec:orga9fe915}
+\label{sec:org6a673b3}
 
 \begin{itemize}
 \item Catches mistakes early – Helps find problems before real users do.
@@ -51,7 +55,7 @@ pop-tests as we affectionately call them, can range from small scope integration
 \end{itemize}
 
 \section{Motivation}
-\label{sec:org2c6134a}
+\label{sec:org72f8b7c}
 
 Imagine you're building a toy robot, but you don't need to understand all the small parts inside the robot to know if it works. You just need to press a button and see if it performs the task correctly.
 
@@ -74,7 +78,7 @@ As your system grows, you don’t need to rewrite tests every time. You just kee
 In short, pop-tests make engineers happier, business people more certain of what they sell and overall, it makes refactoring and maintaining things easier.
 
 \section{The Scenario DSL (Domain Specific Language)}
-\label{sec:org8ea3084}
+\label{sec:org05072ed}
 
 In order to provide an expressive and powerful way to describe test scenarios, a lot of care has gone into creating a good domain-specific language, which remains flexible but concise.
 
@@ -83,7 +87,7 @@ Here follows an explanation of every individual field and parameter possible, in
 \texttt{pop\_test} represents the top node under which all other nodes live.
 
 \subsection{pop services}
-\label{sec:orga2ae68d}
+\label{sec:org741f304}
 
 \texttt{pop\_services} is a list of services to be started for the scenario.
 
@@ -117,7 +121,7 @@ HTTP health check:
 
 
 \subsection{pop checks}
-\label{sec:orge08b862}
+\label{sec:orge65c6dc}
 
 \texttt{pop\_checks} is a list of checks that validate expected responses and behaviours from the services in the scenario. These checks help verify that the services return valid and expected data before proceeding with the scenario execution.
 
@@ -136,7 +140,7 @@ Each JSON body pattern entry includes:
 \texttt{condition} (required, string) – A logical condition to be checked.
 
 \subsubsection{Condition DSL}
-\label{sec:org7a887e3}
+\label{sec:org32a9af0}
 
 Supported conditions include:
 
@@ -148,7 +152,7 @@ Supported conditions include:
 \texttt{<= 0} (ensures the field is non-positive)
 
 \subsection{pop postgres}
-\label{sec:org737159c}
+\label{sec:orga25fe8b}
 
 You can use PostgreSQL in pop-tests easily.
 
@@ -169,7 +173,7 @@ You can use PostgreSQL in pop-tests easily.
 \texttt{pass\_var} (optional, string) - Container DB password will be injected on services, via environment variable, by default \texttt{POSTGRESQL\_PASSWORD}
 
 \subsection{pop kafka}
-\label{sec:orgcc3b09c}
+\label{sec:org0792e9e}
 
 You can use Kafka in pop-tests easily.
 
@@ -182,7 +186,7 @@ You can use Kafka in pop-tests easily.
 \texttt{bootstrap\_server\_var} (optional, string) - Container HTTP connection string for Kafka will be injected on services, via environment variable, by default \texttt{KAFKA\_BOOTSTRAP\_SERVER}
 
 \section{Example tests, using the DSL}
-\label{sec:org451d30d}
+\label{sec:orgfa09729}
 
 For example tests and learning demos, refer to the scenarios directory: \url{../../resources/scenarios}
 
