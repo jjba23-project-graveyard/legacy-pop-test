@@ -202,104 +202,125 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
             _ => None,
         };
 
-    let postgres_host: String = if let Some(p) = &postgres_container {
-        p.get_host().await.unwrap().to_string()
-    } else {
-        "localhost".to_string()
-    };
-
-    let postgres_port: i32 = if let Some(p) = &postgres_container {
-        p.ports()
-            .await
-            .unwrap()
-            .map_to_host_port_ipv4(5432)
-            .unwrap_or(5432)
-            .into()
-    } else {
-        5432
-    };
-
     let kafka_container: Option<ContainerAsync<Kafka>> = match &scenario_file.pop_test.pop_kafka {
         Some(kafka) => {
-            info!("start setting up kafka");
-            Some(start_kafka(kafka.clone()).await.unwrap())
+            if kafka.enabled == Some(true) {
+                info!("start setting up kafka");
+                Some(start_kafka(kafka.clone()).await.unwrap())
+            } else {
+                None
+            }
         }
         _ => None,
     };
 
-    let kafka_host: String = if let Some(k) = &kafka_container {
-        k.get_host().await.unwrap().to_string()
-    } else {
-        "localhost".to_string()
-    };
+    let mut with_env = HashMap::from([]);
 
-    let kafka_port: i32 = if let Some(k) = &kafka_container {
-        k.ports()
-            .await
-            .unwrap()
-            .map_to_host_port_ipv4(9092)
-            .unwrap_or(9092)
-            .into()
-    } else {
-        9092
-    };
+    if scenario_file
+        .clone()
+        .pop_test
+        .pop_postgres
+        .map(|p| p.enabled)
+        == Some(Some(true))
+    {
+        let postgres_host = if let Some(p) = &postgres_container {
+            Some(p.get_host().await.unwrap().to_string())
+        } else {
+            None
+        };
 
-    let with_env = HashMap::from([
-        (
-            scenario_file
-                .pop_test
-                .pop_postgres
-                .as_ref()
-                .and_then(|pp| pp.db_var.clone())
-                .unwrap_or("POSTGRES_DB".to_string()),
-            "postgres".to_string(),
-        ),
-        (
-            scenario_file
-                .pop_test
-                .pop_postgres
-                .as_ref()
-                .and_then(|pp| pp.user_var.clone())
-                .unwrap_or("POSTGRES_USER".to_string()),
-            "postgres".to_string(),
-        ),
-        (
-            scenario_file
-                .pop_test
-                .pop_postgres
-                .as_ref()
-                .and_then(|pp| pp.pass_var.clone())
-                .unwrap_or("POSTGRES_PASSWORD".to_string()),
-            "postgres".to_string(),
-        ),
-        (
-            scenario_file
-                .pop_test
-                .pop_postgres
-                .as_ref()
-                .and_then(|pp| pp.port_var.clone())
-                .unwrap_or("POSTGRES_PORT".to_string()),
-            postgres_port.to_string(),
-        ),
-        (
-            scenario_file
-                .pop_test
-                .pop_postgres
-                .as_ref()
-                .and_then(|pp| pp.host_var.clone())
-                .unwrap_or("POSTGRES_HOST".to_string()),
-            postgres_host.clone(),
-        ),
-        (
-            scenario_file
-                .pop_test
-                .pop_kafka
-                .as_ref()
-                .and_then(|pp| pp.bootstrap_server_var.clone())
-                .unwrap_or("KAFKA_BOOTSTRAP_SERVER".to_string()),
-            format!("{}:{}", kafka_host, kafka_port),
-        ),
-    ]);
+        let postgres_port: i32 = if let Some(p) = &postgres_container {
+            p.ports()
+                .await
+                .unwrap()
+                .map_to_host_port_ipv4(5432)
+                .unwrap_or(5432)
+                .into()
+        } else {
+            5432
+        };
+
+        if let Some(h) = postgres_host {
+            with_env.insert(
+                scenario_file
+                    .pop_test
+                    .pop_postgres
+                    .as_ref()
+                    .and_then(|pp| pp.db_var.clone())
+                    .unwrap_or("POSTGRES_DB".to_string()),
+                "postgres".to_string(),
+            );
+            with_env.insert(
+                scenario_file
+                    .pop_test
+                    .pop_postgres
+                    .as_ref()
+                    .and_then(|pp| pp.user_var.clone())
+                    .unwrap_or("POSTGRES_USER".to_string()),
+                "postgres".to_string(),
+            );
+            with_env.insert(
+                scenario_file
+                    .pop_test
+                    .pop_postgres
+                    .as_ref()
+                    .and_then(|pp| pp.pass_var.clone())
+                    .unwrap_or("POSTGRES_PASSWORD".to_string()),
+                "postgres".to_string(),
+            );
+            with_env.insert(
+                scenario_file
+                    .pop_test
+                    .pop_postgres
+                    .as_ref()
+                    .and_then(|pp| pp.port_var.clone())
+                    .unwrap_or("POSTGRES_PORT".to_string()),
+                postgres_port.to_string(),
+            );
+            with_env.insert(
+                scenario_file
+                    .pop_test
+                    .pop_postgres
+                    .as_ref()
+                    .and_then(|pp| pp.host_var.clone())
+                    .unwrap_or("POSTGRES_HOST".to_string()),
+                h.clone(),
+            );
+        }
+    }
+
+    if scenario_file.clone().pop_test.pop_kafka.map(|k| k.enabled) == Some(Some(true)) {
+        let kafka_host = if let Some(k) = &kafka_container {
+            Some(k.get_host().await.unwrap().to_string())
+        } else {
+            None
+        };
+
+        let kafka_port: i32 = if let Some(k) = &kafka_container {
+            k.ports()
+                .await
+                .unwrap()
+                .map_to_host_port_ipv4(9092)
+                .unwrap_or(9092)
+                .into()
+        } else {
+            9092
+        };
+
+        match kafka_host {
+            Some(h) => with_env.insert(
+                scenario_file
+                    .pop_test
+                    .pop_kafka
+                    .clone()
+                    .as_ref()
+                    .and_then(|pp| pp.bootstrap_server_var.clone())
+                    .unwrap_or("KAFKA_BOOTSTRAP_SERVER".to_string()),
+                format!("{}:{}", h, kafka_port),
+            ),
+            _ => None,
+        };
+    }
 
     register_services(&mut h_set, &mut children, &scenario_file, with_env).await?;
 
