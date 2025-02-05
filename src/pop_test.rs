@@ -182,15 +182,33 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
     let mut h_set = JoinSet::new();
     let mut children = Vec::new();
 
-    let _postgres_container = match &scenario_file.pop_test.pop_postgres {
-        Some(postgres) => Some(start_postgres(postgres.clone()).await.unwrap()),
+    info!("start setting up dependencies");
+
+    let postgres_container = match &scenario_file.pop_test.pop_postgres {
+        Some(postgres) => {
+            info!("start setting up postgres");
+            Some(start_postgres(postgres.clone()).await.unwrap())
+        }
         _ => None,
     };
 
-    let _kafka_container = match &scenario_file.pop_test.pop_kafka {
-        Some(kafka) => Some(start_kafka(kafka.clone()).await.unwrap()),
+    let kafka_container = match &scenario_file.pop_test.pop_kafka {
+        Some(kafka) => {
+            info!("start setting up kafka");
+            Some(start_kafka(kafka.clone()).await.unwrap())
+        }
         _ => None,
     };
+
+    match postgres_container {
+        Some(p) => info!("postgres host: {:?}", p.get_host().await),
+        _ => (),
+    }
+
+    match kafka_container {
+        Some(k) => info!("kafka host: {:?}", k.get_host().await),
+        _ => (),
+    }
 
     register_services(&mut h_set, &mut children, &scenario_file).await?;
 
