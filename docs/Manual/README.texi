@@ -35,18 +35,18 @@ pop-tests as we affectionately call them, can range from small scope integration
 * Why pop-test?::
 * Motivation::
 * The Scenario DSL (Domain Specific Language)::
-* pop services::
-* pop checks::
-* pop postgres::
-* pop kafka::
 * Example tests, using the DSL: Example tests using the DSL. 
 
 @detailmenu
 --- The Detailed Node Listing ---
 
-pop checks
+The Scenario DSL (Domain Specific Language)
 
+* pop services::
+* pop checks::
 * Condition DSL::
+* pop postgres::
+* pop kafka::
 
 @end detailmenu
 @end menu
@@ -101,8 +101,16 @@ Here follows an explanation of every individual field and parameter possible, in
 
 @code{pop_test} represents the top node under which all other nodes live.
 
+@menu
+* pop services::
+* pop checks::
+* Condition DSL::
+* pop postgres::
+* pop kafka::
+@end menu
+
 @node pop services
-@chapter pop services
+@section pop services
 
 @code{pop_services} is a list of services to be started for the scenario.
 
@@ -135,7 +143,7 @@ HTTP health check:
 @code{patience_seconds} (required, integer) – The maximum time allowed for the service to become healthy. If the service is healthy before this deadline, the scenario setup continues without waiting.
 
 @node pop checks
-@chapter pop checks
+@section pop checks
 
 @code{pop_checks} is a list of checks that validate expected responses and behaviours from the services in the scenario. These checks help verify that the services return valid and expected data before proceeding with the scenario execution.
 
@@ -152,10 +160,6 @@ Each JSON body pattern entry includes:
 @code{pattern} (required, string) – A JSON path-like expression that identifies the field in the response body. This uses the Rust @code{jql} library.
 
 @code{condition} (required, string) – A logical condition to be checked.
-
-@menu
-* Condition DSL::
-@end menu
 
 @node Condition DSL
 @section Condition DSL
@@ -175,7 +179,7 @@ Supported conditions include:
 @code{<= 0} (ensures the field is non-positive)
 
 @node pop postgres
-@chapter pop postgres
+@section pop postgres
 
 You can use PostgreSQL in pop-tests easily.
 
@@ -196,7 +200,7 @@ You can use PostgreSQL in pop-tests easily.
 @code{pass_var} (optional, string) - Container DB password will be injected on services, via environment variable, by default @code{POSTGRESQL_PASSWORD}
 
 @node pop kafka
-@chapter pop kafka
+@section pop kafka
 
 You can use Kafka in pop-tests easily.
 

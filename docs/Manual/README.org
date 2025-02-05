@@ -58,7 +58,7 @@ Here follows an explanation of every individual field and parameter possible, in
 
 -----
 
-* pop services
+** pop services
 
 ~pop_services~ is a list of services to be started for the scenario.
 
@@ -92,7 +92,7 @@ HTTP health check:
 
 -----
 
-* pop checks
+** pop checks
 
 ~pop_checks~ is a list of checks that validate expected responses and behaviours from the services in the scenario. These checks help verify that the services return valid and expected data before proceeding with the scenario execution.
 
@@ -128,7 +128,7 @@ Supported conditions include:
 
 -----
 
-* pop postgres
+** pop postgres
 
 You can use PostgreSQL in pop-tests easily.
 
@@ -150,7 +150,7 @@ You can use PostgreSQL in pop-tests easily.
 
 -----
 
-* pop kafka
+** pop kafka
 
 You can use Kafka in pop-tests easily.
 

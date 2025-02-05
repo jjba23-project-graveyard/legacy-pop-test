@@ -1,15 +1,15 @@
 
 # Table of Contents
 
-1.  [Why pop-test?](#org63f684e)
-2.  [Motivation](#org45609a6)
-3.  [The Scenario DSL (Domain Specific Language)](#org44c18d6)
-4.  [pop services](#org4094be1)
-5.  [pop checks](#orga36308c)
-    1.  [Condition DSL](#org2daa50f)
-6.  [pop postgres](#org4919349)
-7.  [pop kafka](#orge396162)
-8.  [Example tests, using the DSL](#org075cd3c)
+1.  [Why pop-test?](#org7939fc2)
+2.  [Motivation](#orgd468e53)
+3.  [The Scenario DSL (Domain Specific Language)](#org0647882)
+    1.  [pop services](#org556e4b6)
+    2.  [pop checks](#org604c216)
+    3.  [Condition DSL](#orgd1eede8)
+    4.  [pop postgres](#org4e60825)
+    5.  [pop kafka](#org7dd49db)
+4.  [Example tests, using the DSL](#orgb975632)
 
 In Dutch 🇳🇱, *pop* means puppet or doll. But pop-test is not about dolls! It’s a tool that helps test computer programs in an easy and future-proof manner that improves reliability and engineering freedom.
 
@@ -24,7 +24,7 @@ pop-tests as we affectionately call them, can range from small scope integration
 ![img](../../resources/img/wp10992149.jpg)
 
 
-<a id="org63f684e"></a>
+<a id="org7939fc2"></a>
 
 # Why pop-test?
 
@@ -36,7 +36,7 @@ pop-tests as we affectionately call them, can range from small scope integration
 -   Fast and reliable – Built with Rust, a programming language known for speed and safety.
 
 
-<a id="org45609a6"></a>
+<a id="orgd468e53"></a>
 
 # Motivation
 
@@ -63,7 +63,7 @@ In short, pop-tests make engineers happier, business people more certain of what
 ---
 
 
-<a id="org44c18d6"></a>
+<a id="org0647882"></a>
 
 # The Scenario DSL (Domain Specific Language)
 
@@ -76,9 +76,9 @@ Here follows an explanation of every individual field and parameter possible, in
 ---
 
 
-<a id="org4094be1"></a>
+<a id="org556e4b6"></a>
 
-# pop services
+## pop services
 
 `pop_services` is a list of services to be started for the scenario.
 
@@ -113,9 +113,9 @@ HTTP health check:
 ---
 
 
-<a id="orga36308c"></a>
+<a id="org604c216"></a>
 
-# pop checks
+## pop checks
 
 `pop_checks` is a list of checks that validate expected responses and behaviours from the services in the scenario. These checks help verify that the services return valid and expected data before proceeding with the scenario execution.
 
@@ -134,7 +134,7 @@ Each JSON body pattern entry includes:
 `condition` (required, string) – A logical condition to be checked.
 
 
-<a id="org2daa50f"></a>
+<a id="orgd1eede8"></a>
 
 ## Condition DSL
 
@@ -155,9 +155,9 @@ Supported conditions include:
 ---
 
 
-<a id="org4919349"></a>
+<a id="org4e60825"></a>
 
-# pop postgres
+## pop postgres
 
 You can use PostgreSQL in pop-tests easily.
 
@@ -180,9 +180,9 @@ You can use PostgreSQL in pop-tests easily.
 ---
 
 
-<a id="orge396162"></a>
+<a id="org7dd49db"></a>
 
-# pop kafka
+## pop kafka
 
 You can use Kafka in pop-tests easily.
 
@@ -197,7 +197,7 @@ You can use Kafka in pop-tests easily.
 ---
 
 
-<a id="org075cd3c"></a>
+<a id="orgb975632"></a>
 
 # Example tests, using the DSL
 
