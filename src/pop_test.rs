@@ -24,6 +24,7 @@ use core::time::Duration;
 use jql_runner::runner::raw;
 use paris::{error, info, success};
 use serde_json::json;
+use std::collections::HashMap;
 use std::{env, process::Stdio};
 use testcontainers::ContainerAsync;
 use testcontainers::{runners::AsyncRunner, ImageExt};
@@ -120,7 +121,10 @@ pub async fn health_check(
     }
 }
 
-pub async fn do_work(pop_service: PopService) -> Result<Child, std::io::Error> {
+pub async fn do_work(
+    pop_service: PopService,
+    with_env: HashMap<String, String>,
+) -> Result<Child, std::io::Error> {
     info!("Task is running...");
     let user_home = env::var("HOME").unwrap();
 
@@ -128,6 +132,7 @@ pub async fn do_work(pop_service: PopService) -> Result<Child, std::io::Error> {
 
     info!("in dir {}", &dir);
     info!("with args {:?}", &pop_service.start_cmd_args);
+    info!("with env {:?}", &with_env);
 
     let mut arg: Vec<String> = Vec::new();
     arg.push("-c".to_string());
@@ -143,16 +148,20 @@ pub async fn do_work(pop_service: PopService) -> Result<Child, std::io::Error> {
         .unwrap_or_else(|| "bash".to_string());
 
     let shell_path = str::replace(b, "$HOME", &user_home);
+    let env: HashMap<String, String> = pop_service.env_vars.into_iter().chain(with_env).collect();
     Command::new(shell_path)
         .args(&arg)
         .current_dir(dir)
-        .envs(&pop_service.env_vars)
+        .envs(env)
         .stdout(Stdio::inherit())
         .spawn()
 }
 
-pub async fn start_p(pop_service: PopService) -> Result<Child, std::io::Error> {
-    do_work(pop_service).await
+pub async fn start_p(
+    pop_service: PopService,
+    with_env: HashMap<String, String>,
+) -> Result<Child, std::io::Error> {
+    do_work(pop_service, with_env).await
 }
 
 pub async fn start_h(pop_service: PopService) -> () {
@@ -184,20 +193,33 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
 
     info!("start setting up dependencies");
 
-    let postgres_container = match &scenario_file.pop_test.pop_postgres {
-        Some(postgres) => {
-            info!("start setting up postgres");
-            Some(start_postgres(postgres.clone()).await.unwrap())
-        }
-        _ => None,
+    let postgres_container: Option<ContainerAsync<Postgres>> =
+        match &scenario_file.pop_test.pop_postgres {
+            Some(postgres) => {
+                info!("start setting up postgres");
+                Some(start_postgres(postgres.clone()).await.unwrap())
+            }
+            _ => None,
+        };
+
+    let postgres_host: String = if let Some(p) = &postgres_container {
+        p.get_host().await.unwrap().to_string()
+    } else {
+        "localhost".to_string()
     };
 
-    match postgres_container {
-        Some(p) => info!("postgres host: {:?}", p.get_host().await),
-        _ => (),
-    }
+    let postgres_port: i32 = if let Some(p) = &postgres_container {
+        p.ports()
+            .await
+            .unwrap()
+            .map_to_host_port_ipv4(5432)
+            .unwrap_or(5432)
+            .into()
+    } else {
+        5432
+    };
 
-    let kafka_container = match &scenario_file.pop_test.pop_kafka {
+    let kafka_container: Option<ContainerAsync<Kafka>> = match &scenario_file.pop_test.pop_kafka {
         Some(kafka) => {
             info!("start setting up kafka");
             Some(start_kafka(kafka.clone()).await.unwrap())
@@ -205,12 +227,81 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
         _ => None,
     };
 
-    match kafka_container {
-        Some(k) => info!("kafka host: {:?}", k.get_host().await),
-        _ => (),
-    }
+    let kafka_host: String = if let Some(k) = &kafka_container {
+        k.get_host().await.unwrap().to_string()
+    } else {
+        "localhost".to_string()
+    };
 
-    register_services(&mut h_set, &mut children, &scenario_file).await?;
+    let kafka_port: i32 = if let Some(k) = &kafka_container {
+        k.ports()
+            .await
+            .unwrap()
+            .map_to_host_port_ipv4(9092)
+            .unwrap_or(9092)
+            .into()
+    } else {
+        9092
+    };
+
+    let with_env: HashMap<String, String> = HashMap::from([
+        (
+            scenario_file
+                .clone()
+                .pop_test
+                .pop_postgres
+                .and_then(|pp| pp.db_var)
+                .unwrap_or("POSTGRES_DB".to_string()),
+            "postgres".to_string(),
+        ),
+        (
+            scenario_file
+                .clone()
+                .pop_test
+                .pop_postgres
+                .and_then(|pp| pp.user_var)
+                .unwrap_or("POSTGRES_USER".to_string()),
+            "postgres".to_string(),
+        ),
+        (
+            scenario_file
+                .clone()
+                .pop_test
+                .pop_postgres
+                .and_then(|pp| pp.pass_var)
+                .unwrap_or("POSTGRES_PASSWORD".to_string()),
+            "postgres".to_string(),
+        ),
+        (
+            scenario_file
+                .clone()
+                .pop_test
+                .pop_postgres
+                .and_then(|pp| pp.port_var)
+                .unwrap_or("POSTGRES_PORT".to_string()),
+            postgres_port.to_string(),
+        ),
+        (
+            scenario_file
+                .clone()
+                .pop_test
+                .pop_postgres
+                .and_then(|pp| pp.host_var)
+                .unwrap_or("POSTGRES_HOST".to_string()),
+            postgres_host.to_string(),
+        ),
+        (
+            scenario_file
+                .clone()
+                .pop_test
+                .pop_kafka
+                .and_then(|pp| pp.bootstrap_server_var)
+                .unwrap_or("KAFKA_BOOTSTRAP_SERVER".to_string()),
+            format!("{}:{}", kafka_host, kafka_port),
+        ),
+    ]);
+
+    register_services(&mut h_set, &mut children, &scenario_file, with_env).await?;
 
     info!("awaiting for all services to be healthy");
     h_set.join_all().await;
@@ -228,11 +319,12 @@ pub async fn register_services(
     h_set: &mut JoinSet<()>,
     children: &mut Vec<Child>,
     scenario_file: &PopScenarioFile,
+    with_env: HashMap<String, String>,
 ) -> Result<(), String> {
     for pop_service in scenario_file.pop_test.pop_services.clone() {
         info!("registering service: {}", pop_service.id);
         h_set.spawn(start_h(pop_service.clone()));
-        let p = start_p(pop_service)
+        let p = start_p(pop_service, with_env.clone())
             .await
             .map_err(|_| "Failed to start process")?;
         children.push(p);
