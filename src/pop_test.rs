@@ -244,58 +244,58 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
         9092
     };
 
-    let with_env: HashMap<String, String> = HashMap::from([
+    let with_env = HashMap::from([
         (
             scenario_file
-                .clone()
                 .pop_test
                 .pop_postgres
-                .and_then(|pp| pp.db_var)
+                .as_ref()
+                .and_then(|pp| pp.db_var.clone())
                 .unwrap_or("POSTGRES_DB".to_string()),
             "postgres".to_string(),
         ),
         (
             scenario_file
-                .clone()
                 .pop_test
                 .pop_postgres
-                .and_then(|pp| pp.user_var)
+                .as_ref()
+                .and_then(|pp| pp.user_var.clone())
                 .unwrap_or("POSTGRES_USER".to_string()),
             "postgres".to_string(),
         ),
         (
             scenario_file
-                .clone()
                 .pop_test
                 .pop_postgres
-                .and_then(|pp| pp.pass_var)
+                .as_ref()
+                .and_then(|pp| pp.pass_var.clone())
                 .unwrap_or("POSTGRES_PASSWORD".to_string()),
             "postgres".to_string(),
         ),
         (
             scenario_file
-                .clone()
                 .pop_test
                 .pop_postgres
-                .and_then(|pp| pp.port_var)
+                .as_ref()
+                .and_then(|pp| pp.port_var.clone())
                 .unwrap_or("POSTGRES_PORT".to_string()),
             postgres_port.to_string(),
         ),
         (
             scenario_file
-                .clone()
                 .pop_test
                 .pop_postgres
-                .and_then(|pp| pp.host_var)
+                .as_ref()
+                .and_then(|pp| pp.host_var.clone())
                 .unwrap_or("POSTGRES_HOST".to_string()),
-            postgres_host.to_string(),
+            postgres_host.clone(),
         ),
         (
             scenario_file
-                .clone()
                 .pop_test
                 .pop_kafka
-                .and_then(|pp| pp.bootstrap_server_var)
+                .as_ref()
+                .and_then(|pp| pp.bootstrap_server_var.clone())
                 .unwrap_or("KAFKA_BOOTSTRAP_SERVER".to_string()),
             format!("{}:{}", kafka_host, kafka_port),
         ),
