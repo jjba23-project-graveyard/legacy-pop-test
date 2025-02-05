@@ -23,6 +23,7 @@ run-dynamic-tariff-charging: fmt
 	cargo run -- play-scenario ./resources/scenarios/test-dynamic-tariff-charging.yaml	
 fmt:
 	cargo fix --allow-dirty --bin "pop-test"
+	cargo clippy --fix --allow-dirty
 	find . -maxdepth 8 -name "*.rs" -type f -exec rustfmt --edition 2021 {} \;
 test: fmt
 	cargo test

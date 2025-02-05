@@ -50,7 +50,7 @@ pub async fn do_with_http_check(
 
     let maybe_response = reqwest::get(url.clone()).await;
     println!("{maybe_response:#?}");
-    let wanted_status_code = expected_code.unwrap_or_else(|| 200);
+    let wanted_status_code = expected_code.unwrap_or(200);
 
     match maybe_response {
         Err(e) => error!("{}", e),
@@ -65,13 +65,9 @@ pub async fn do_with_http_check(
             }
 
             let j = &resp.json().await;
-            match j {
-                Ok(body) => {
-                    check_pat(body, json_body_patterns.unwrap_or_else(|| Vec::new())).unwrap()
-                }
-                _ => (),
+            if let Ok(body) = j {
+                check_pat(body, json_body_patterns.unwrap_or_default()).unwrap()
             }
-            ()
         }
     }
 
@@ -164,7 +160,7 @@ pub async fn start_p(
     do_work(pop_service, with_env).await
 }
 
-pub async fn start_h(pop_service: PopService) -> () {
+pub async fn start_h(pop_service: PopService) {
     let pp = pop_service.clone();
     let _ = health_check(pp.id, pp.base_url, pp.health_check).await;
 }

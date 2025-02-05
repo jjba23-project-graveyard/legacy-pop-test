@@ -150,11 +150,10 @@ mod tests {
 
     #[test]
     fn check_fails_gracefully_when_no_matches_found() {
-        let mut patterns = Vec::new();
-        patterns.push(BodyPattern {
+        let patterns = vec![BodyPattern {
             pattern: "\"suta\"".to_string(),
             condition: "!= \"\"".to_string(),
-        });
+        }];
         let body = json!({"sut": "something"});
         let result = check_pat(&body, patterns);
         error!("{:?}", result);
