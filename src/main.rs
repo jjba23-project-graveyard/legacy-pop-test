@@ -24,22 +24,23 @@ mod pop_model;
 mod pop_test;
 
 #[tokio::main]
-async fn main() -> Result<(), &'static str> {
+async fn main() -> Result<(), String> {
     info!("\n`pop-test` starting up\n");
 
     let args: Vec<String> = env::args().collect();
     info!("command-line arguments: {:?}", args);
 
     if args.len() != 3 {
-        return Err("usage: <operation> <scenario-file>");
+        return Err("usage: <operation> <scenario-file>".to_string());
     }
 
     let (user_cmd, scenario_path) = (&args[1], &args[2]);
     info!("reading scenario file: {}", scenario_path);
 
     let file_data: String = fs::read_to_string(scenario_path).map_err(|e| {
-        error!("failed to read scenario file: {}", e);
-        "error reading file"
+        let err_msg = format!("failed to read scenario file: {}", e);
+        error!("{}", err_msg);
+        err_msg
     })?;
 
     async {

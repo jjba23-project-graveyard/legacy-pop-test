@@ -112,6 +112,9 @@ Supported conditions include:
 ~< 0~ (ensures the field is smaller than zero)
 ~<= 0~ (ensures the field is non-positive)
 
+** pop postgres
+
+** pop kafka
 
 * Example tests, using the DSL
 

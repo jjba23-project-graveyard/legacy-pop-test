@@ -42,9 +42,9 @@ pop_test:
   #         condition: ">= 0"
 
   pop_postgres:
-    image_name: "postgres"
-    image_tag: "17.2"
+    enabled: true
     
   pop_kafka:
+    enabled: true
     image_name: "confluentinc/cp-kafka"
     image_tag: "6.1.1"

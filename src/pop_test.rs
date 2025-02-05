@@ -167,8 +167,8 @@ pub async fn start_h(pop_service: PopService) {
 
 pub async fn start_postgres(pop_postgres: PopPostgres) -> Result<ContainerAsync<Postgres>, String> {
     Postgres::default()
-        .with_name(pop_postgres.image_name)
-        .with_tag(pop_postgres.image_tag)
+        .with_name(pop_postgres.image_name.unwrap_or("postgres".to_string()))
+        .with_tag(pop_postgres.image_tag.unwrap_or("17.2".to_string()))
         .start()
         .await
         .map_err(|e| format!("{}", e))
@@ -176,8 +176,12 @@ pub async fn start_postgres(pop_postgres: PopPostgres) -> Result<ContainerAsync<
 
 pub async fn start_kafka(pop_kafka: PopKafka) -> Result<ContainerAsync<Kafka>, String> {
     Kafka::default()
-        .with_name(pop_kafka.image_name)
-        .with_tag(pop_kafka.image_tag)
+        .with_name(
+            pop_kafka
+                .image_name
+                .unwrap_or("confluentinc/cp-kafka".to_string()),
+        )
+        .with_tag(pop_kafka.image_tag.unwrap_or("6.1.1".to_string()))
         .start()
         .await
         .map_err(|e| format!("{}", e))
@@ -331,7 +335,12 @@ pub async fn register_services(
 pub async fn perform_checks(scenario_file: &PopScenarioFile) {
     let services = &scenario_file.pop_test.pop_services;
 
-    for check in &scenario_file.pop_test.pop_checks {
+    for check in &scenario_file
+        .pop_test
+        .pop_checks
+        .clone()
+        .unwrap_or_default()
+    {
         match check {
             PopCheck::Http {
                 expected_code,
