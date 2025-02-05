@@ -42,7 +42,7 @@ async fn main() -> Result<(), &'static str> {
         "error reading file"
     })?;
 
-    let result = async {
+    async {
         success!("scenario file read successfully to string");
 
         pop_test::do_with_file_data(user_cmd.clone(), file_data)
@@ -55,7 +55,5 @@ async fn main() -> Result<(), &'static str> {
         success!("ran scenario successfully");
         Ok(())
     }
-    .await;
-
-    result
+    .await
 }
