@@ -162,6 +162,8 @@ You can use Kafka in pop-tests easily.
 
 ~bootstrap_server_var~ (optional, string) - Container HTTP connection string for Kafka will be injected on services, via environment variable, by default ~KAFKA_BOOTSTRAP_SERVER~
 
+-----
+
 * Example tests, using the DSL
 
 For example tests and learning demos, refer to the scenarios directory: [[file:../../resources/scenarios]]
