@@ -1,4 +1,4 @@
-% Created 2025-02-05 wo 10:07
+% Created 2025-02-05 wo 10:08
 % Intended LaTeX compiler: pdflatex
 \documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
@@ -39,7 +39,7 @@ pop-tests as we affectionately call them, can range from small scope integration
 
 
 \section{Why pop-test?}
-\label{sec:orgbcdd64d}
+\label{sec:org1a107ce}
 
 \begin{itemize}
 \item Catches mistakes early – Helps find problems before real users do.
@@ -51,7 +51,7 @@ pop-tests as we affectionately call them, can range from small scope integration
 \end{itemize}
 
 \section{Motivation}
-\label{sec:orgc9281cb}
+\label{sec:org50e7560}
 
 Imagine you're building a toy robot, but you don't need to understand all the small parts inside the robot to know if it works. You just need to press a button and see if it performs the task correctly.
 
@@ -74,7 +74,7 @@ As your system grows, you don’t need to rewrite tests every time. You just kee
 In short, pop-tests make engineers happier, business people more certain of what they sell and overall, it makes refactoring and maintaining things easier.
 
 \section{The Scenario DSL (Domain Specific Language)}
-\label{sec:org7f10625}
+\label{sec:org500f3e2}
 
 In order to provide an expressive and powerful way to describe test scenarios, a lot of care has gone into creating a good domain-specific language, which remains flexible but concise.
 
@@ -83,44 +83,41 @@ Here follows an explanation of every individual field and parameter possible, in
 \texttt{pop\_test} represents the top node under which all other nodes live.
 
 \subsection{pop\textsubscript{services}}
-\label{sec:orgd856c2c}
+\label{sec:org55187cd}
 
 \texttt{pop\_services} is a list of services to be started for the scenario.
 
 A service is defined by:  
 
-\begin{itemize}
-\item \texttt{id} (required, string) – A unique identifier for the service within the scenario. A common practice is to use a kebab-case version of the service name.
+\texttt{id} (required, string) – A unique identifier for the service within the scenario. A common practice is to use a kebab-case version of the service name.  
 
-\item \texttt{dir} (required, string) – The working directory (pwd) from which the service process should be started. This can be an absolute path or a path starting with `\$HOME`, which will be expanded to an absolute path.
+\texttt{dir} (required, string) – The working directory (pwd) from which the service process should be started. This can be an absolute path or a path starting with `\$HOME`, which will be expanded to an absolute path.  
 
-\item \texttt{base\_url} (required, string) – The URL where the service’s HTTP endpoint is reachable.
+\texttt{base\_url} (required, string) – The URL where the service’s HTTP endpoint is reachable.  
 
-\item \texttt{start\_cmd\_args} (required, list of strings) – The command(s) needed to start the service. These will be executed via a shell interpreter (default: `bash -c`). For example, if `make run` is specified, the system will actually execute `bash -c make run`.
+\texttt{start\_cmd\_args} (required, list of strings) – The command(s) needed to start the service. These will be executed via a shell interpreter (default: `bash -c`). For example, if `make run` is specified, the system will actually execute `bash -c make run`.
 
-\item \texttt{shell\_path} (optional, string) - the path to the shell interpreter to use to run the service. This defaults to \texttt{bash}.
+\texttt{shell\_path} (optional, string) - the path to the shell interpreter to use to run the service. This defaults to \texttt{bash}.  
 
-\item \texttt{env\_vars} (optional, map of string to string) – A set of environment variables to be defined for the service.
+\texttt{env\_vars} (optional, map of string to string) – A set of environment variables to be defined for the service.  
 
-\item \texttt{health\_check} (required, object) – Defines how the system determines whether the service is healthy.
-\end{itemize}
+\texttt{health\_check} (required, object) – Defines how the system determines whether the service is healthy.  
 
 Health checks can take different forms:
 
 Dummy/Placebo health check:
-\begin{itemize}
-\item \texttt{always\_healthy} (boolean) – If set, forces the service to always be considered healthy (or never healthy).
-\end{itemize}
+
+\texttt{always\_healthy} (boolean) – If set, forces the service to always be considered healthy (or never healthy).
 
 HTTP health check:
-\begin{itemize}
-\item \texttt{path} (required, string) – The HTTP route used to check the service’s health (e.g., "/health").
-\item \texttt{patience\_seconds} (required, integer) – The maximum time allowed for the service to become healthy. If the service is healthy before this deadline, the scenario setup continues without waiting.
-\end{itemize}
+
+\texttt{path} (required, string) – The HTTP route used to check the service’s health (e.g., "/health").  
+
+\texttt{patience\_seconds} (required, integer) – The maximum time allowed for the service to become healthy. If the service is healthy before this deadline, the scenario setup continues without waiting.  
 
 
 \subsection{pop\textsubscript{checks}}
-\label{sec:org69b896f}
+\label{sec:orgaf744b3}
 
 \texttt{pop\_checks} is a list of checks that validate expected responses and behaviours from the services in the scenario. These checks help verify that the services return valid and expected data before proceeding with the scenario execution.
 
@@ -149,7 +146,7 @@ Supported conditions include:
 
 
 \section{Example tests, using the DSL}
-\label{sec:orga02db2c}
+\label{sec:org7b1cd48}
 
 Here follow some examples of pop-tests.
 

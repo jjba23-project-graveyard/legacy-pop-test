@@ -58,28 +58,31 @@ Here follows an explanation of every individual field and parameter possible, in
 
 A service is defined by:  
 
-- ~id~ (required, string) – A unique identifier for the service within the scenario. A common practice is to use a kebab-case version of the service name.  
+~id~ (required, string) – A unique identifier for the service within the scenario. A common practice is to use a kebab-case version of the service name.  
 
-- ~dir~ (required, string) – The working directory (pwd) from which the service process should be started. This can be an absolute path or a path starting with `$HOME`, which will be expanded to an absolute path.  
+~dir~ (required, string) – The working directory (pwd) from which the service process should be started. This can be an absolute path or a path starting with `$HOME`, which will be expanded to an absolute path.  
 
-- ~base_url~ (required, string) – The URL where the service’s HTTP endpoint is reachable.  
+~base_url~ (required, string) – The URL where the service’s HTTP endpoint is reachable.  
 
-- ~start_cmd_args~ (required, list of strings) – The command(s) needed to start the service. These will be executed via a shell interpreter (default: `bash -c`). For example, if `make run` is specified, the system will actually execute `bash -c make run`.
+~start_cmd_args~ (required, list of strings) – The command(s) needed to start the service. These will be executed via a shell interpreter (default: `bash -c`). For example, if `make run` is specified, the system will actually execute `bash -c make run`.
 
-- ~shell_path~ (optional, string) - the path to the shell interpreter to use to run the service. This defaults to ~bash~.  
+~shell_path~ (optional, string) - the path to the shell interpreter to use to run the service. This defaults to ~bash~.  
 
-- ~env_vars~ (optional, map of string to string) – A set of environment variables to be defined for the service.  
+~env_vars~ (optional, map of string to string) – A set of environment variables to be defined for the service.  
 
-- ~health_check~ (required, object) – Defines how the system determines whether the service is healthy.  
+~health_check~ (required, object) – Defines how the system determines whether the service is healthy.  
 
 Health checks can take different forms:
 
 Dummy/Placebo health check:
-  - ~always_healthy~ (boolean) – If set, forces the service to always be considered healthy (or never healthy).
+
+~always_healthy~ (boolean) – If set, forces the service to always be considered healthy (or never healthy).
     
 HTTP health check:
-  - ~path~ (required, string) – The HTTP route used to check the service’s health (e.g., "/health").  
-  - ~patience_seconds~ (required, integer) – The maximum time allowed for the service to become healthy. If the service is healthy before this deadline, the scenario setup continues without waiting.  
+
+~path~ (required, string) – The HTTP route used to check the service’s health (e.g., "/health").  
+
+~patience_seconds~ (required, integer) – The maximum time allowed for the service to become healthy. If the service is healthy before this deadline, the scenario setup continues without waiting.  
 
 
 ** pop_checks

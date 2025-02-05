@@ -108,44 +108,31 @@ Here follows an explanation of every individual field and parameter possible, in
 
 A service is defined by:  
 
-@itemize
-@item
 @code{id} (required, string) – A unique identifier for the service within the scenario. A common practice is to use a kebab-case version of the service name.  
 
-@item
 @code{dir} (required, string) – The working directory (pwd) from which the service process should be started. This can be an absolute path or a path starting with `$HOME`, which will be expanded to an absolute path.  
 
-@item
 @code{base_url} (required, string) – The URL where the service’s HTTP endpoint is reachable.  
 
-@item
 @code{start_cmd_args} (required, list of strings) – The command(s) needed to start the service. These will be executed via a shell interpreter (default: `bash -c`). For example, if `make run` is specified, the system will actually execute `bash -c make run`.
 
-@item
 @code{shell_path} (optional, string) - the path to the shell interpreter to use to run the service. This defaults to @code{bash}.  
 
-@item
 @code{env_vars} (optional, map of string to string) – A set of environment variables to be defined for the service.  
 
-@item
 @code{health_check} (required, object) – Defines how the system determines whether the service is healthy.  
-@end itemize
 
 Health checks can take different forms:
 
 Dummy/Placebo health check:
-@itemize
-@item
+
 @code{always_healthy} (boolean) – If set, forces the service to always be considered healthy (or never healthy).
-@end itemize
 
 HTTP health check:
-@itemize
-@item
+
 @code{path} (required, string) – The HTTP route used to check the service’s health (e.g., "/health").  
-@item
-@code{patience_seconds} (required, integer) – The maximum time allowed for the service to become healthy. If the service is healthy before this deadline, the scenario setup continues without waiting.  
-@end itemize
+
+@code{patience_seconds} (required, integer) – The maximum time allowed for the service to become healthy. If the service is healthy before this deadline, the scenario setup continues without waiting.
 
 @node pop@math{_checks}
 @section pop@math{_checks}

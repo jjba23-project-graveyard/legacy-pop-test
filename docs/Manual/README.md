@@ -1,12 +1,12 @@
 
 # Table of Contents
 
-1.  [Why pop-test?](#org0a806c7)
-2.  [Motivation](#org19752f5)
-3.  [The Scenario DSL (Domain Specific Language)](#orgd26349c)
-    1.  [pop<sub>services</sub>](#orgeec59a1)
-    2.  [pop<sub>checks</sub>](#orgbcaca7b)
-4.  [Example tests, using the DSL](#orgab11ebd)
+1.  [Why pop-test?](#orgabff192)
+2.  [Motivation](#org1c69c8a)
+3.  [The Scenario DSL (Domain Specific Language)](#org3aa28be)
+    1.  [pop<sub>services</sub>](#orgb5cf617)
+    2.  [pop<sub>checks</sub>](#org37bc706)
+4.  [Example tests, using the DSL](#orgd22e332)
 
 In Dutch 🇳🇱, *pop* means puppet or doll. But pop-test is not about dolls! It’s a tool that helps test computer programs in an easy and future-proof manner that improves reliability and engineering freedom.
 
@@ -19,7 +19,7 @@ pop-test is built with Rust, enhancing safety, performance and reliability, with
 pop-tests as we affectionately call them, can range from small scope integration tests to all encompassing end-to-end or black box tests.
 
 
-<a id="org0a806c7"></a>
+<a id="orgabff192"></a>
 
 # Why pop-test?
 
@@ -31,7 +31,7 @@ pop-tests as we affectionately call them, can range from small scope integration
 -   Fast and reliable – Built with Rust, a programming language known for speed and safety.
 
 
-<a id="org19752f5"></a>
+<a id="org1c69c8a"></a>
 
 # Motivation
 
@@ -56,7 +56,7 @@ As your system grows, you don’t need to rewrite tests every time. You just kee
 In short, pop-tests make engineers happier, business people more certain of what they sell and overall, it makes refactoring and maintaining things easier.
 
 
-<a id="orgd26349c"></a>
+<a id="org3aa28be"></a>
 
 # The Scenario DSL (Domain Specific Language)
 
@@ -67,7 +67,7 @@ Here follows an explanation of every individual field and parameter possible, in
 `pop_test` represents the top node under which all other nodes live.
 
 
-<a id="orgeec59a1"></a>
+<a id="orgb5cf617"></a>
 
 ## pop<sub>services</sub>
 
@@ -75,33 +75,34 @@ Here follows an explanation of every individual field and parameter possible, in
 
 A service is defined by:  
 
--   `id` (required, string) – A unique identifier for the service within the scenario. A common practice is to use a kebab-case version of the service name.
+`id` (required, string) – A unique identifier for the service within the scenario. A common practice is to use a kebab-case version of the service name.  
 
--   `dir` (required, string) – The working directory (pwd) from which the service process should be started. This can be an absolute path or a path starting with \`$HOME\`, which will be expanded to an absolute path.
+`dir` (required, string) – The working directory (pwd) from which the service process should be started. This can be an absolute path or a path starting with \`$HOME\`, which will be expanded to an absolute path.  
 
--   `base_url` (required, string) – The URL where the service’s HTTP endpoint is reachable.
+`base_url` (required, string) – The URL where the service’s HTTP endpoint is reachable.  
 
--   `start_cmd_args` (required, list of strings) – The command(s) needed to start the service. These will be executed via a shell interpreter (default: \`bash -c\`). For example, if \`make run\` is specified, the system will actually execute \`bash -c make run\`.
+`start_cmd_args` (required, list of strings) – The command(s) needed to start the service. These will be executed via a shell interpreter (default: \`bash -c\`). For example, if \`make run\` is specified, the system will actually execute \`bash -c make run\`.
 
--   `shell_path` (optional, string) - the path to the shell interpreter to use to run the service. This defaults to `bash`.
+`shell_path` (optional, string) - the path to the shell interpreter to use to run the service. This defaults to `bash`.  
 
--   `env_vars` (optional, map of string to string) – A set of environment variables to be defined for the service.
+`env_vars` (optional, map of string to string) – A set of environment variables to be defined for the service.  
 
--   `health_check` (required, object) – Defines how the system determines whether the service is healthy.
+`health_check` (required, object) – Defines how the system determines whether the service is healthy.  
 
 Health checks can take different forms:
 
 Dummy/Placebo health check:
 
--   `always_healthy` (boolean) – If set, forces the service to always be considered healthy (or never healthy).
+`always_healthy` (boolean) – If set, forces the service to always be considered healthy (or never healthy).
 
 HTTP health check:
 
--   `path` (required, string) – The HTTP route used to check the service’s health (e.g., "/health").
--   `patience_seconds` (required, integer) – The maximum time allowed for the service to become healthy. If the service is healthy before this deadline, the scenario setup continues without waiting.
+`path` (required, string) – The HTTP route used to check the service’s health (e.g., "/health").  
+
+`patience_seconds` (required, integer) – The maximum time allowed for the service to become healthy. If the service is healthy before this deadline, the scenario setup continues without waiting.  
 
 
-<a id="orgbcaca7b"></a>
+<a id="org37bc706"></a>
 
 ## pop<sub>checks</sub>
 
@@ -131,7 +132,7 @@ Supported conditions include:
 `<= 0` (ensures the field is non-positive)
 
 
-<a id="orgab11ebd"></a>
+<a id="orgd22e332"></a>
 
 # Example tests, using the DSL
 
