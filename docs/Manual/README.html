@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2025-02-05 wo 23:26 -->
+<!-- 2025-02-05 wo 23:27 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>pop-test manual</title>
@@ -201,21 +201,21 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orgf49d53d">1. Why pop-test?</a></li>
-<li><a href="#org248bc2a">2. Motivation</a></li>
-<li><a href="#org8ac938d">3. The Scenario DSL (Domain Specific Language)</a>
+<li><a href="#org3f7f3a8">1. Why pop-test?</a></li>
+<li><a href="#orgdf30236">2. Motivation</a></li>
+<li><a href="#org7aeb585">3. The Scenario DSL (Domain Specific Language)</a>
 <ul>
-<li><a href="#orgfe132be">3.1. pop services</a></li>
-<li><a href="#org01137e8">3.2. pop checks</a>
+<li><a href="#org0278c30">3.1. pop services</a></li>
+<li><a href="#orga6439ac">3.2. pop checks</a>
 <ul>
-<li><a href="#orgc2dcde1">3.2.1. Condition DSL</a></li>
+<li><a href="#org56af6c4">3.2.1. Condition DSL</a></li>
 </ul>
 </li>
-<li><a href="#orgd165828">3.3. pop postgres</a></li>
-<li><a href="#org3f4ba3d">3.4. pop kafka</a></li>
+<li><a href="#orgb0db2ec">3.3. pop postgres</a></li>
+<li><a href="#orgf91e1ee">3.4. pop kafka</a></li>
 </ul>
 </li>
-<li><a href="#org23a981f">4. Example tests, using the DSL</a></li>
+<li><a href="#org4ff396f">4. Example tests, using the DSL</a></li>
 </ul>
 </div>
 </div>
@@ -240,14 +240,14 @@ pop-tests as we affectionately call them, can range from small scope integration
 </p>
 
 
-<div id="org7989cb4" class="figure">
+<div id="org1e19855" class="figure">
 <p><img src="../../resources/img/wp10992149.jpg" alt="wp10992149.jpg" />
 </p>
 </div>
 
 
-<div id="outline-container-orgf49d53d" class="outline-2">
-<h2 id="orgf49d53d"><span class="section-number-2">1.</span> Why pop-test?</h2>
+<div id="outline-container-org3f7f3a8" class="outline-2">
+<h2 id="org3f7f3a8"><span class="section-number-2">1.</span> Why pop-test?</h2>
 <div class="outline-text-2" id="text-1">
 <ul class="org-ul">
 <li>Catches mistakes early – Helps find problems before real users do.</li>
@@ -260,8 +260,8 @@ pop-tests as we affectionately call them, can range from small scope integration
 </div>
 </div>
 
-<div id="outline-container-org248bc2a" class="outline-2">
-<h2 id="org248bc2a"><span class="section-number-2">2.</span> Motivation</h2>
+<div id="outline-container-orgdf30236" class="outline-2">
+<h2 id="orgdf30236"><span class="section-number-2">2.</span> Motivation</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 Imagine you're building a toy robot, but you don't need to understand all the small parts inside the robot to know if it works. You just need to press a button and see if it performs the task correctly.
@@ -305,8 +305,8 @@ In short, pop-tests make engineers happier, business people more certain of what
 </div>
 </div>
 
-<div id="outline-container-org8ac938d" class="outline-2">
-<h2 id="org8ac938d"><span class="section-number-2">3.</span> The Scenario DSL (Domain Specific Language)</h2>
+<div id="outline-container-org7aeb585" class="outline-2">
+<h2 id="org7aeb585"><span class="section-number-2">3.</span> The Scenario DSL (Domain Specific Language)</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 In order to provide an expressive and powerful way to describe test scenarios, a lot of care has gone into creating a good domain-specific language, which remains flexible but concise.
@@ -321,8 +321,8 @@ Here follows an explanation of every individual field and parameter possible, in
 </p>
 </div>
 
-<div id="outline-container-orgfe132be" class="outline-3">
-<h3 id="orgfe132be"><span class="section-number-3">3.1.</span> pop services</h3>
+<div id="outline-container-org0278c30" class="outline-3">
+<h3 id="org0278c30"><span class="section-number-3">3.1.</span> pop services</h3>
 <div class="outline-text-3" id="text-3-1">
 <p>
 <code>pop_services</code> is a list of services to be started for the scenario.
@@ -387,8 +387,8 @@ HTTP health check:
 </div>
 
 
-<div id="outline-container-org01137e8" class="outline-3">
-<h3 id="org01137e8"><span class="section-number-3">3.2.</span> pop checks</h3>
+<div id="outline-container-orga6439ac" class="outline-3">
+<h3 id="orga6439ac"><span class="section-number-3">3.2.</span> pop checks</h3>
 <div class="outline-text-3" id="text-3-2">
 <p>
 <code>pop_checks</code> is a list of checks that validate expected responses and behaviours from the services in the scenario. These checks help verify that the services return valid and expected data before proceeding with the scenario execution.
@@ -423,8 +423,8 @@ Each JSON body pattern entry includes:
 </p>
 </div>
 
-<div id="outline-container-orgc2dcde1" class="outline-4">
-<h4 id="orgc2dcde1"><span class="section-number-4">3.2.1.</span> Condition DSL</h4>
+<div id="outline-container-org56af6c4" class="outline-4">
+<h4 id="org56af6c4"><span class="section-number-4">3.2.1.</span> Condition DSL</h4>
 <div class="outline-text-4" id="text-3-2-1">
 <p>
 Supported conditions include:
@@ -442,8 +442,8 @@ Supported conditions include:
 </div>
 </div>
 
-<div id="outline-container-orgd165828" class="outline-3">
-<h3 id="orgd165828"><span class="section-number-3">3.3.</span> pop postgres</h3>
+<div id="outline-container-orgb0db2ec" class="outline-3">
+<h3 id="orgb0db2ec"><span class="section-number-3">3.3.</span> pop postgres</h3>
 <div class="outline-text-3" id="text-3-3">
 <p>
 You can use PostgreSQL in pop-tests easily.
@@ -483,8 +483,8 @@ You can use PostgreSQL in pop-tests easily.
 </div>
 </div>
 
-<div id="outline-container-org3f4ba3d" class="outline-3">
-<h3 id="org3f4ba3d"><span class="section-number-3">3.4.</span> pop kafka</h3>
+<div id="outline-container-orgf91e1ee" class="outline-3">
+<h3 id="orgf91e1ee"><span class="section-number-3">3.4.</span> pop kafka</h3>
 <div class="outline-text-3" id="text-3-4">
 <p>
 You can use Kafka in pop-tests easily.
@@ -509,8 +509,8 @@ You can use Kafka in pop-tests easily.
 </div>
 </div>
 
-<div id="outline-container-org23a981f" class="outline-2">
-<h2 id="org23a981f"><span class="section-number-2">4.</span> Example tests, using the DSL</h2>
+<div id="outline-container-org4ff396f" class="outline-2">
+<h2 id="org4ff396f"><span class="section-number-2">4.</span> Example tests, using the DSL</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 For example tests and learning demos, refer to the scenarios directory: <a href="../../resources/scenarios">../../resources/scenarios</a>
@@ -556,7 +556,7 @@ In this example we spin up a REST API written in Scala, with SBT, and poll its <
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Josep Bigorra</p>
-<p class="date">Created: 2025-02-05 wo 23:26</p>
+<p class="date">Created: 2025-02-05 wo 23:27</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
