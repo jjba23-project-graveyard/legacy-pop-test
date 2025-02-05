@@ -24,3 +24,8 @@ fmt:
 	find . -maxdepth 8 -name "*.rs" -type f -exec rustfmt --edition 2021 {} \;
 test: fmt
 	cargo test
+# publish-manual: Generates and publishes the manual from Org files using Emacs.
+publish-manual:
+	cd docs/Manual/ && emacs -Q --batch \
+		-l $(shell realpath ./src/manual/pop-test-manual.el) \
+		--funcall pop-test/publish-manual && cd ../../	

@@ -1,0 +1,97 @@
+
+# Table of Contents
+
+1.  [Why pop-test?](#org27af90a)
+2.  [Motivation](#org0f4c1bb)
+3.  [The DSL (Domain Specific Language)](#org591601f)
+4.  [Example tests, using the DSL](#orgdfcf83d)
+
+In Dutch 🇳🇱, *pop* means puppet or doll. But pop-test is not about dolls! It’s a tool that helps test computer programs in an easy and future-proof manner that improves reliability and engineering freedom.
+
+pop-test simplifies end-to-end testing by providing a powerful orchestration tool and expressive language for your applications and their dependencies.
+
+Define your test scenarios in a DSL (YAML, in the future also TOML or JSON) and automate the spinning up (and down) of complex environments involving multiple programs, databases, and services, executing comprehensive tests with ease.
+
+pop-test is built with Rust, enhancing safety, performance and reliability, with a modern and accessible code-base.
+
+pop-tests as we affectionately call them, can range from small scope integration tests to all encompassing end-to-end or black box tests.
+
+
+<a id="org27af90a"></a>
+
+# Why pop-test?
+
+-   Catches mistakes early – Helps find problems before real users do.
+-   Test coverage with a real meaning - test your systems from head to toe
+-   Frees you and allows you to refactor and test your systems more easily
+-   Saves time – No need to test every little part manually, test on higher level.
+-   Easy to use – Just write simple rules, in a comfy DSL and `pop-test` does the rest!
+-   Fast and reliable – Built with Rust, a programming language known for speed and safety.
+
+
+<a id="org0f4c1bb"></a>
+
+# Motivation
+
+Imagine you're building a toy robot, but you don't need to understand all the small parts inside the robot to know if it works. You just need to press a button and see if it performs the task correctly.
+
+A big advantage of this is that you test based on the output, not the code itself or implementation.
+
+Of course this doesn't mean you shouldn't add some unit/property-based tests when useful. But these shouldn't be the bulk of your tests.
+
+It's great when you change or improve your code (refactor), that you don’t need to worry about breaking anything as long as the system gives the same results as before.
+
+It's kind of like saying: "As long as pressing the button still works the same, everything’s fine."
+
+These tests are a safety net for changes to systems (specially if you aren't too familiar with the system yet). It gives you confidence when making changes to the code.
+
+How Does This "Free You"? You can change the internal code without fear because you already have pop-tests that check if everything works as expected. So, you can keep improving the system without worrying about accidentally breaking things.
+
+This also allows for faster development, since you don’t have to check every single little part of the code manually.
+
+As your system grows, you don’t need to rewrite tests every time. You just keep running your pop-tests, and you know that new features won’t break old ones.
+
+In short, pop-tests make engineers happier, business people more certain of what they sell and overall, it makes refactoring and maintaining things easier.
+
+
+<a id="org591601f"></a>
+
+# The DSL (Domain Specific Language)
+
+In order to provide an expressive and powerful way to describe test scenarios, a lot of care has gone into creating a good domain-specific language, which remains flexible but concise.
+
+Here follows an explanation of every individual field and parameter possible, including default or optional ones, as well as some recommendations.
+
+
+<a id="orgdfcf83d"></a>
+
+# Example tests, using the DSL
+
+Here follow some examples of pop-tests.
+
+In this example we spin up a REST API written in Scala, with SBT, and poll its `/health` endpoint for 90 seconds or until healthy. Then we perform some checks on the response of certain HTTP endpoints. These checks are performed using `jql` and this allows us to check deeply nested attributes of the JSON response.
+
+    pop_test:
+      pop_services:
+        - id: "green-energy-mix"
+          dir: "$HOME/Ontwikkeling/Werk"
+          base_url: "http://localhost:50000"
+          start_cmd_args:
+            - 'sbt "greenEnergyMix/run"'
+          env_vars:
+            SOME_TOKEN: "0027809ce9"
+          health_check:
+            path: "/health"
+            patience_seconds: 90
+    
+      pop_checks:
+        - check_url: "/api/v1/forecast"
+          service_id: "green-energy-mix"
+          json_body_patterns:
+            - pattern: '"meta""forecastDate"'
+              condition: '!= ""'
+            - pattern: '"data"[0]"load"'
+              condition: "> 0"
+            - pattern: '"data"[0]"solar"'
+              condition: ">= 0"
+
