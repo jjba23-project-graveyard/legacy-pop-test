@@ -36,8 +36,8 @@ integration tests to all encompassing end-to-end or black box tests.
 
 The Scenario DSL (Domain Specific Language)
 
-* pop_services::
-* pop_checks::
+* pop services::
+* pop checks::
 
 
 
@@ -121,13 +121,13 @@ the Scenario DSL will be used.
 
 * Menu:
 
-* pop_services::
-* pop_checks::
+* pop services::
+* pop checks::
 
 
-File: README.info,  Node: pop_services,  Next: pop_checks,  Up: The Scenario DSL (Domain Specific Language)
+File: README.info,  Node: pop services,  Next: pop checks,  Up: The Scenario DSL (Domain Specific Language)
 
-3.1 pop_services
+3.1 pop services
 ================
 
 ‘pop_services’ is a list of services to be started for the scenario.
@@ -140,15 +140,15 @@ service name.
 
    ‘dir’ (required, string) – The working directory (pwd) from which the
 service process should be started.  This can be an absolute path or a
-path starting with ‘$HOME‘, which will be expanded to an absolute path.
+path starting with ‘$HOME’, which will be expanded to an absolute path.
 
    ‘base_url’ (required, string) – The URL where the service’s HTTP
 endpoint is reachable.
 
    ‘start_cmd_args’ (required, list of strings) – The command(s) needed
 to start the service.  These will be executed via a shell interpreter
-(default: ‘bash -c‘).  For example, if ‘make run‘ is specified, the
-system will actually execute ‘bash -c make run‘.
+(default: ‘bash -c’).  For example, if ‘make run’ is specified, the
+system will actually execute ‘bash -c make run’.
 
    ‘shell_path’ (optional, string) - the path to the shell interpreter
 to use to run the service.  This defaults to ‘bash’.
@@ -169,16 +169,16 @@ considered healthy (or never healthy).
    HTTP health check:
 
    ‘path’ (required, string) – The HTTP route used to check the
-service’s health (e.g., "/health").
+service’s health (e.g., ‘/health’).
 
    ‘patience_seconds’ (required, integer) – The maximum time allowed for
 the service to become healthy.  If the service is healthy before this
 deadline, the scenario setup continues without waiting.
 
 
-File: README.info,  Node: pop_checks,  Prev: pop_services,  Up: The Scenario DSL (Domain Specific Language)
+File: README.info,  Node: pop checks,  Prev: pop services,  Up: The Scenario DSL (Domain Specific Language)
 
-3.2 pop_checks
+3.2 pop checks
 ==============
 
 ‘pop_checks’ is a list of checks that validate expected responses and
@@ -190,18 +190,18 @@ the scenario execution.
 
    ‘check_url’ (required, string) – The endpoint path to be tested
 within the service.  This should be a relative path, such as
-"/api/v1/forecast", which will be appended to the base_url of the
+‘/api/v1/forecast’, which will be appended to the base_url of the
 service.
 
    ‘service_id’ (required, string) – A reference to the id of the
 service being checked.  This links the check to a specific service
-defined in pop_services.
+defined in ‘pop_services’.
 
    ‘json_body_patterns’ (optional, list of objects) – A list of
 conditions that must be met within the JSON response body.  Each pattern
 defines a JSON field to inspect and a condition that must be satisfied.
 
-   Each json_body_patterns entry includes:
+   Each JSON body pattern entry includes:
 
    ‘pattern’ (required, string) – A JSON path-like expression that
 identifies the field in the response body.  This uses the Rust ‘jql’
@@ -262,9 +262,9 @@ Node: Top73
 Node: Why pop-test?1313
 Node: Motivation1970
 Node: The Scenario DSL (Domain Specific Language)3741
-Node: pop_services4512
-Node: pop_checks6427
-Node: Example tests using the DSL8028
+Node: pop services4512
+Node: pop checks6431
+Node: Example tests using the DSL8041
 
 End Tag Table
 

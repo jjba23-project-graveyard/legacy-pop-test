@@ -1,12 +1,12 @@
 
 # Table of Contents
 
-1.  [Why pop-test?](#orgabff192)
-2.  [Motivation](#org1c69c8a)
-3.  [The Scenario DSL (Domain Specific Language)](#org3aa28be)
-    1.  [pop<sub>services</sub>](#orgb5cf617)
-    2.  [pop<sub>checks</sub>](#org37bc706)
-4.  [Example tests, using the DSL](#orgd22e332)
+1.  [Why pop-test?](#org2b629a7)
+2.  [Motivation](#org56c3e1d)
+3.  [The Scenario DSL (Domain Specific Language)](#orgd781a5d)
+    1.  [pop services](#org169e454)
+    2.  [pop checks](#org659f7fa)
+4.  [Example tests, using the DSL](#orga6f2881)
 
 In Dutch 🇳🇱, *pop* means puppet or doll. But pop-test is not about dolls! It’s a tool that helps test computer programs in an easy and future-proof manner that improves reliability and engineering freedom.
 
@@ -19,7 +19,7 @@ pop-test is built with Rust, enhancing safety, performance and reliability, with
 pop-tests as we affectionately call them, can range from small scope integration tests to all encompassing end-to-end or black box tests.
 
 
-<a id="orgabff192"></a>
+<a id="org2b629a7"></a>
 
 # Why pop-test?
 
@@ -31,7 +31,7 @@ pop-tests as we affectionately call them, can range from small scope integration
 -   Fast and reliable – Built with Rust, a programming language known for speed and safety.
 
 
-<a id="org1c69c8a"></a>
+<a id="org56c3e1d"></a>
 
 # Motivation
 
@@ -56,7 +56,7 @@ As your system grows, you don’t need to rewrite tests every time. You just kee
 In short, pop-tests make engineers happier, business people more certain of what they sell and overall, it makes refactoring and maintaining things easier.
 
 
-<a id="org3aa28be"></a>
+<a id="orgd781a5d"></a>
 
 # The Scenario DSL (Domain Specific Language)
 
@@ -67,9 +67,9 @@ Here follows an explanation of every individual field and parameter possible, in
 `pop_test` represents the top node under which all other nodes live.
 
 
-<a id="orgb5cf617"></a>
+<a id="org169e454"></a>
 
-## pop<sub>services</sub>
+## pop services
 
 `pop_services` is a list of services to be started for the scenario.
 
@@ -77,11 +77,11 @@ A service is defined by:
 
 `id` (required, string) – A unique identifier for the service within the scenario. A common practice is to use a kebab-case version of the service name.  
 
-`dir` (required, string) – The working directory (pwd) from which the service process should be started. This can be an absolute path or a path starting with \`$HOME\`, which will be expanded to an absolute path.  
+`dir` (required, string) – The working directory (pwd) from which the service process should be started. This can be an absolute path or a path starting with `$HOME`, which will be expanded to an absolute path.  
 
 `base_url` (required, string) – The URL where the service’s HTTP endpoint is reachable.  
 
-`start_cmd_args` (required, list of strings) – The command(s) needed to start the service. These will be executed via a shell interpreter (default: \`bash -c\`). For example, if \`make run\` is specified, the system will actually execute \`bash -c make run\`.
+`start_cmd_args` (required, list of strings) – The command(s) needed to start the service. These will be executed via a shell interpreter (default: `bash -c`). For example, if `make run` is specified, the system will actually execute `bash -c make run`.
 
 `shell_path` (optional, string) - the path to the shell interpreter to use to run the service. This defaults to `bash`.  
 
@@ -97,26 +97,26 @@ Dummy/Placebo health check:
 
 HTTP health check:
 
-`path` (required, string) – The HTTP route used to check the service’s health (e.g., "/health").  
+`path` (required, string) – The HTTP route used to check the service’s health (e.g., `/health`).  
 
 `patience_seconds` (required, integer) – The maximum time allowed for the service to become healthy. If the service is healthy before this deadline, the scenario setup continues without waiting.  
 
 
-<a id="org37bc706"></a>
+<a id="org659f7fa"></a>
 
-## pop<sub>checks</sub>
+## pop checks
 
 `pop_checks` is a list of checks that validate expected responses and behaviours from the services in the scenario. These checks help verify that the services return valid and expected data before proceeding with the scenario execution.
 
 A check is defined by:
 
-`check_url` (required, string) – The endpoint path to be tested within the service. This should be a relative path, such as "/api/v1/forecast", which will be appended to the base<sub>url</sub> of the service.
+`check_url` (required, string) – The endpoint path to be tested within the service. This should be a relative path, such as `/api/v1/forecast`, which will be appended to the base<sub>url</sub> of the service.
 
-`service_id` (required, string) – A reference to the id of the service being checked. This links the check to a specific service defined in pop<sub>services</sub>.
+`service_id` (required, string) – A reference to the id of the service being checked. This links the check to a specific service defined in `pop_services`.
 
 `json_body_patterns` (optional, list of objects) – A list of conditions that must be met within the JSON response body. Each pattern defines a JSON field to inspect and a condition that must be satisfied.
 
-Each json<sub>body</sub><sub>patterns</sub> entry includes:
+Each JSON body pattern entry includes:
 
 `pattern` (required, string) – A JSON path-like expression that identifies the field in the response body. This uses the Rust `jql` library.
 
@@ -132,7 +132,7 @@ Supported conditions include:
 `<= 0` (ensures the field is non-positive)
 
 
-<a id="orgd22e332"></a>
+<a id="orga6f2881"></a>
 
 # Example tests, using the DSL
 

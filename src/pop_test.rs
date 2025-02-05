@@ -16,12 +16,19 @@
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
 use crate::pop_check::check_pat;
-use crate::pop_model::{BodyPattern, PopCheck, PopScenarioFile, PopService, PopServiceHealthCheck};
+use crate::pop_model::{
+    BodyPattern, PopCheck, PopPostgres, PopScenarioFile, PopService, PopServiceHealthCheck,
+};
 use core::time::Duration;
 use jql_runner::runner::raw;
 use paris::{error, info, success};
 use serde_json::json;
 use std::{env, process::Stdio};
+use testcontainers::{
+    core::{IntoContainerPort, WaitFor},
+    runners::AsyncRunner,
+    GenericImage, ImageExt,
+};
 use tokio::task::JoinSet;
 use tokio::{
     process::{Child, Command},
@@ -152,21 +159,42 @@ pub async fn start_h(pop_service: PopService) -> () {
     let _ = health_check(pp.id, pp.base_url, pp.health_check).await;
 }
 
+pub async fn start_postgres(pop_postgres: PopPostgres) {
+    let container = GenericImage::new(pop_postgres.image_name, pop_postgres.image_tag)
+        .with_exposed_port(5432.tcp())
+        .with_wait_for(WaitFor::message_on_stdout("started"))
+        .with_network("bridge")
+        .with_env_var("DEBUG", "1")
+        .start()
+        .await
+        .expect("Failed to start Postgres");
+}
+
 pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String> {
-    let mut h_set = JoinSet::new();
-    let mut children = Vec::new();
+    //let mut h_set = JoinSet::new();
+    //let mut children = Vec::new();
 
-    register_services(&mut h_set, &mut children, &scenario_file).await?;
+    let pg = scenario_file.pop_test.pop_postgres.clone();
+    match pg {
+        Some(postgres) => start_postgres(postgres).await,
+        _ => (),
+    }
+    // let _ = pg.map_or((), |p| async {
+    //     containers.spawn(start_postgres(p));
+    //     ()
+    // });
 
-    info!("awaiting for all services to be healthy");
-    h_set.join_all().await;
+    //register_services(&mut h_set, &mut children, &scenario_file).await?;
 
-    info!("performing tests and assertions");
-    perform_checks(&scenario_file).await;
+    // info!("awaiting for all services to be healthy");
+    // h_set.join_all().await;
 
-    terminate_processes(children).await;
+    // info!("performing tests and assertions");
+    // perform_checks(&scenario_file).await;
 
-    success!("finished playing scenario");
+    // terminate_processes(children).await;
+
+    // success!("finished playing scenario");
     Ok(())
 }
 

@@ -1,4 +1,4 @@
-% Created 2025-02-05 wo 10:08
+% Created 2025-02-05 wo 10:12
 % Intended LaTeX compiler: pdflatex
 \documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
@@ -39,7 +39,7 @@ pop-tests as we affectionately call them, can range from small scope integration
 
 
 \section{Why pop-test?}
-\label{sec:org1a107ce}
+\label{sec:orgcbfaa1c}
 
 \begin{itemize}
 \item Catches mistakes early – Helps find problems before real users do.
@@ -51,7 +51,7 @@ pop-tests as we affectionately call them, can range from small scope integration
 \end{itemize}
 
 \section{Motivation}
-\label{sec:org50e7560}
+\label{sec:org1712592}
 
 Imagine you're building a toy robot, but you don't need to understand all the small parts inside the robot to know if it works. You just need to press a button and see if it performs the task correctly.
 
@@ -74,7 +74,7 @@ As your system grows, you don’t need to rewrite tests every time. You just kee
 In short, pop-tests make engineers happier, business people more certain of what they sell and overall, it makes refactoring and maintaining things easier.
 
 \section{The Scenario DSL (Domain Specific Language)}
-\label{sec:org500f3e2}
+\label{sec:org2476c35}
 
 In order to provide an expressive and powerful way to describe test scenarios, a lot of care has gone into creating a good domain-specific language, which remains flexible but concise.
 
@@ -82,8 +82,8 @@ Here follows an explanation of every individual field and parameter possible, in
 
 \texttt{pop\_test} represents the top node under which all other nodes live.
 
-\subsection{pop\textsubscript{services}}
-\label{sec:org55187cd}
+\subsection{pop services}
+\label{sec:org31a9651}
 
 \texttt{pop\_services} is a list of services to be started for the scenario.
 
@@ -91,11 +91,11 @@ A service is defined by:
 
 \texttt{id} (required, string) – A unique identifier for the service within the scenario. A common practice is to use a kebab-case version of the service name.  
 
-\texttt{dir} (required, string) – The working directory (pwd) from which the service process should be started. This can be an absolute path or a path starting with `\$HOME`, which will be expanded to an absolute path.  
+\texttt{dir} (required, string) – The working directory (pwd) from which the service process should be started. This can be an absolute path or a path starting with \texttt{\$HOME}, which will be expanded to an absolute path.  
 
 \texttt{base\_url} (required, string) – The URL where the service’s HTTP endpoint is reachable.  
 
-\texttt{start\_cmd\_args} (required, list of strings) – The command(s) needed to start the service. These will be executed via a shell interpreter (default: `bash -c`). For example, if `make run` is specified, the system will actually execute `bash -c make run`.
+\texttt{start\_cmd\_args} (required, list of strings) – The command(s) needed to start the service. These will be executed via a shell interpreter (default: \texttt{bash -c}). For example, if \texttt{make run} is specified, the system will actually execute \texttt{bash -c make run}.
 
 \texttt{shell\_path} (optional, string) - the path to the shell interpreter to use to run the service. This defaults to \texttt{bash}.  
 
@@ -111,25 +111,25 @@ Dummy/Placebo health check:
 
 HTTP health check:
 
-\texttt{path} (required, string) – The HTTP route used to check the service’s health (e.g., "/health").  
+\texttt{path} (required, string) – The HTTP route used to check the service’s health (e.g., \texttt{/health}).  
 
 \texttt{patience\_seconds} (required, integer) – The maximum time allowed for the service to become healthy. If the service is healthy before this deadline, the scenario setup continues without waiting.  
 
 
-\subsection{pop\textsubscript{checks}}
-\label{sec:orgaf744b3}
+\subsection{pop checks}
+\label{sec:org250ac18}
 
 \texttt{pop\_checks} is a list of checks that validate expected responses and behaviours from the services in the scenario. These checks help verify that the services return valid and expected data before proceeding with the scenario execution.
 
 A check is defined by:
 
-\texttt{check\_url} (required, string) – The endpoint path to be tested within the service. This should be a relative path, such as "/api/v1/forecast", which will be appended to the base\textsubscript{url} of the service.
+\texttt{check\_url} (required, string) – The endpoint path to be tested within the service. This should be a relative path, such as \texttt{/api/v1/forecast}, which will be appended to the base\textsubscript{url} of the service.
 
-\texttt{service\_id} (required, string) – A reference to the id of the service being checked. This links the check to a specific service defined in pop\textsubscript{services}.
+\texttt{service\_id} (required, string) – A reference to the id of the service being checked. This links the check to a specific service defined in \texttt{pop\_services}.
 
 \texttt{json\_body\_patterns} (optional, list of objects) – A list of conditions that must be met within the JSON response body. Each pattern defines a JSON field to inspect and a condition that must be satisfied.
 
-Each json\textsubscript{body}\textsubscript{patterns} entry includes:
+Each JSON body pattern entry includes:
 
 \texttt{pattern} (required, string) – A JSON path-like expression that identifies the field in the response body. This uses the Rust \texttt{jql} library.
 
@@ -146,7 +146,7 @@ Supported conditions include:
 
 
 \section{Example tests, using the DSL}
-\label{sec:org7b1cd48}
+\label{sec:orgea254a3}
 
 Here follow some examples of pop-tests.
 

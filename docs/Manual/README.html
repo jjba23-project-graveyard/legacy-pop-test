@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2025-02-05 wo 10:08 -->
+<!-- 2025-02-05 wo 10:12 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>pop-test manual</title>
@@ -201,15 +201,15 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orgb55d3ee">1. Why pop-test?</a></li>
-<li><a href="#org9227be5">2. Motivation</a></li>
-<li><a href="#org588312d">3. The Scenario DSL (Domain Specific Language)</a>
+<li><a href="#org7bcaaa8">1. Why pop-test?</a></li>
+<li><a href="#org47b454d">2. Motivation</a></li>
+<li><a href="#orga3b69b2">3. The Scenario DSL (Domain Specific Language)</a>
 <ul>
-<li><a href="#org47e0598">3.1. pop<sub>services</sub></a></li>
-<li><a href="#orgf849ea2">3.2. pop<sub>checks</sub></a></li>
+<li><a href="#orgddce9f1">3.1. pop services</a></li>
+<li><a href="#org2ed9258">3.2. pop checks</a></li>
 </ul>
 </li>
-<li><a href="#org0064e94">4. Example tests, using the DSL</a></li>
+<li><a href="#org222535f">4. Example tests, using the DSL</a></li>
 </ul>
 </div>
 </div>
@@ -234,8 +234,8 @@ pop-tests as we affectionately call them, can range from small scope integration
 </p>
 
 
-<div id="outline-container-orgb55d3ee" class="outline-2">
-<h2 id="orgb55d3ee"><span class="section-number-2">1.</span> Why pop-test?</h2>
+<div id="outline-container-org7bcaaa8" class="outline-2">
+<h2 id="org7bcaaa8"><span class="section-number-2">1.</span> Why pop-test?</h2>
 <div class="outline-text-2" id="text-1">
 <ul class="org-ul">
 <li>Catches mistakes early – Helps find problems before real users do.</li>
@@ -248,8 +248,8 @@ pop-tests as we affectionately call them, can range from small scope integration
 </div>
 </div>
 
-<div id="outline-container-org9227be5" class="outline-2">
-<h2 id="org9227be5"><span class="section-number-2">2.</span> Motivation</h2>
+<div id="outline-container-org47b454d" class="outline-2">
+<h2 id="org47b454d"><span class="section-number-2">2.</span> Motivation</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 Imagine you're building a toy robot, but you don't need to understand all the small parts inside the robot to know if it works. You just need to press a button and see if it performs the task correctly.
@@ -293,8 +293,8 @@ In short, pop-tests make engineers happier, business people more certain of what
 </div>
 </div>
 
-<div id="outline-container-org588312d" class="outline-2">
-<h2 id="org588312d"><span class="section-number-2">3.</span> The Scenario DSL (Domain Specific Language)</h2>
+<div id="outline-container-orga3b69b2" class="outline-2">
+<h2 id="orga3b69b2"><span class="section-number-2">3.</span> The Scenario DSL (Domain Specific Language)</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 In order to provide an expressive and powerful way to describe test scenarios, a lot of care has gone into creating a good domain-specific language, which remains flexible but concise.
@@ -309,8 +309,8 @@ Here follows an explanation of every individual field and parameter possible, in
 </p>
 </div>
 
-<div id="outline-container-org47e0598" class="outline-3">
-<h3 id="org47e0598"><span class="section-number-3">3.1.</span> pop<sub>services</sub></h3>
+<div id="outline-container-orgddce9f1" class="outline-3">
+<h3 id="orgddce9f1"><span class="section-number-3">3.1.</span> pop services</h3>
 <div class="outline-text-3" id="text-3-1">
 <p>
 <code>pop_services</code> is a list of services to be started for the scenario.
@@ -325,7 +325,7 @@ A service is defined by:
 </p>
 
 <p>
-<code>dir</code> (required, string) – The working directory (pwd) from which the service process should be started. This can be an absolute path or a path starting with `$HOME`, which will be expanded to an absolute path.  
+<code>dir</code> (required, string) – The working directory (pwd) from which the service process should be started. This can be an absolute path or a path starting with <code>$HOME</code>, which will be expanded to an absolute path.  
 </p>
 
 <p>
@@ -333,7 +333,7 @@ A service is defined by:
 </p>
 
 <p>
-<code>start_cmd_args</code> (required, list of strings) – The command(s) needed to start the service. These will be executed via a shell interpreter (default: `bash -c`). For example, if `make run` is specified, the system will actually execute `bash -c make run`.
+<code>start_cmd_args</code> (required, list of strings) – The command(s) needed to start the service. These will be executed via a shell interpreter (default: <code>bash -c</code>). For example, if <code>make run</code> is specified, the system will actually execute <code>bash -c make run</code>.
 </p>
 
 <p>
@@ -365,7 +365,7 @@ HTTP health check:
 </p>
 
 <p>
-<code>path</code> (required, string) – The HTTP route used to check the service’s health (e.g., "/health").  
+<code>path</code> (required, string) – The HTTP route used to check the service’s health (e.g., <code>/health</code>).  
 </p>
 
 <p>
@@ -375,8 +375,8 @@ HTTP health check:
 </div>
 
 
-<div id="outline-container-orgf849ea2" class="outline-3">
-<h3 id="orgf849ea2"><span class="section-number-3">3.2.</span> pop<sub>checks</sub></h3>
+<div id="outline-container-org2ed9258" class="outline-3">
+<h3 id="org2ed9258"><span class="section-number-3">3.2.</span> pop checks</h3>
 <div class="outline-text-3" id="text-3-2">
 <p>
 <code>pop_checks</code> is a list of checks that validate expected responses and behaviours from the services in the scenario. These checks help verify that the services return valid and expected data before proceeding with the scenario execution.
@@ -387,11 +387,11 @@ A check is defined by:
 </p>
 
 <p>
-<code>check_url</code> (required, string) – The endpoint path to be tested within the service. This should be a relative path, such as "/api/v1/forecast", which will be appended to the base<sub>url</sub> of the service.
+<code>check_url</code> (required, string) – The endpoint path to be tested within the service. This should be a relative path, such as <code>/api/v1/forecast</code>, which will be appended to the base<sub>url</sub> of the service.
 </p>
 
 <p>
-<code>service_id</code> (required, string) – A reference to the id of the service being checked. This links the check to a specific service defined in pop<sub>services</sub>.
+<code>service_id</code> (required, string) – A reference to the id of the service being checked. This links the check to a specific service defined in <code>pop_services</code>.
 </p>
 
 <p>
@@ -399,7 +399,7 @@ A check is defined by:
 </p>
 
 <p>
-Each json<sub>body</sub><sub>patterns</sub> entry includes:
+Each JSON body pattern entry includes:
 </p>
 
 <p>
@@ -427,8 +427,8 @@ Supported conditions include:
 </div>
 
 
-<div id="outline-container-org0064e94" class="outline-2">
-<h2 id="org0064e94"><span class="section-number-2">4.</span> Example tests, using the DSL</h2>
+<div id="outline-container-org222535f" class="outline-2">
+<h2 id="org222535f"><span class="section-number-2">4.</span> Example tests, using the DSL</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 Here follow some examples of pop-tests.
@@ -470,7 +470,7 @@ In this example we spin up a REST API written in Scala, with SBT, and poll its <
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Music Player Daemon (MPD) user</p>
-<p class="date">Created: 2025-02-05 wo 10:08</p>
+<p class="date">Created: 2025-02-05 wo 10:12</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
