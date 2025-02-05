@@ -1,4 +1,4 @@
-% Created 2025-02-05 wo 23:27
+% Created 2025-02-05 wo 23:30
 % Intended LaTeX compiler: pdflatex
 \documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
@@ -43,7 +43,7 @@ pop-tests as we affectionately call them, can range from small scope integration
 
 
 \section{Why pop-test?}
-\label{sec:org1d4be37}
+\label{sec:org627c3e8}
 
 \begin{itemize}
 \item Catches mistakes early – Helps find problems before real users do.
@@ -55,7 +55,7 @@ pop-tests as we affectionately call them, can range from small scope integration
 \end{itemize}
 
 \section{Motivation}
-\label{sec:orgf2c6459}
+\label{sec:orgc40c73c}
 
 Imagine you're building a toy robot, but you don't need to understand all the small parts inside the robot to know if it works. You just need to press a button and see if it performs the task correctly.
 
@@ -77,8 +77,10 @@ As your system grows, you don’t need to rewrite tests every time. You just kee
 
 In short, pop-tests make engineers happier, business people more certain of what they sell and overall, it makes refactoring and maintaining things easier.
 
+\noindent\rule{\textwidth}{0.5pt}
+
 \section{The Scenario DSL (Domain Specific Language)}
-\label{sec:orgbe922db}
+\label{sec:org3817599}
 
 In order to provide an expressive and powerful way to describe test scenarios, a lot of care has gone into creating a good domain-specific language, which remains flexible but concise.
 
@@ -86,8 +88,10 @@ Here follows an explanation of every individual field and parameter possible, in
 
 \texttt{pop\_test} represents the top node under which all other nodes live.
 
-\subsection{pop services}
-\label{sec:org2498e65}
+\noindent\rule{\textwidth}{0.5pt}
+
+\section{pop services}
+\label{sec:org085c1f7}
 
 \texttt{pop\_services} is a list of services to be started for the scenario.
 
@@ -119,9 +123,10 @@ HTTP health check:
 
 \texttt{patience\_seconds} (required, integer) – The maximum time allowed for the service to become healthy. If the service is healthy before this deadline, the scenario setup continues without waiting.  
 
+\noindent\rule{\textwidth}{0.5pt}
 
-\subsection{pop checks}
-\label{sec:org84ce5e9}
+\section{pop checks}
+\label{sec:org5058f3c}
 
 \texttt{pop\_checks} is a list of checks that validate expected responses and behaviours from the services in the scenario. These checks help verify that the services return valid and expected data before proceeding with the scenario execution.
 
@@ -139,20 +144,27 @@ Each JSON body pattern entry includes:
 
 \texttt{condition} (required, string) – A logical condition to be checked.
 
-\subsubsection{Condition DSL}
-\label{sec:org1e71980}
+\subsection{Condition DSL}
+\label{sec:org32b1647}
 
 Supported conditions include:
 
 \texttt{!= ""} (ensures the field is not empty)
+
 \texttt{== ""} (ensures the field is empty)
+
 \texttt{> 0} (ensures the field is greater than zero)
+
 \texttt{>= 0} (ensures the field is non-negative)
+
 \texttt{< 0} (ensures the field is smaller than zero)
+
 \texttt{<= 0} (ensures the field is non-positive)
 
-\subsection{pop postgres}
-\label{sec:orge042beb}
+\noindent\rule{\textwidth}{0.5pt}
+
+\section{pop postgres}
+\label{sec:orga6dac38}
 
 You can use PostgreSQL in pop-tests easily.
 
@@ -172,8 +184,10 @@ You can use PostgreSQL in pop-tests easily.
 
 \texttt{pass\_var} (optional, string) - Container DB password will be injected on services, via environment variable, by default \texttt{POSTGRESQL\_PASSWORD}
 
-\subsection{pop kafka}
-\label{sec:org92981ed}
+\noindent\rule{\textwidth}{0.5pt}
+
+\section{pop kafka}
+\label{sec:orga750554}
 
 You can use Kafka in pop-tests easily.
 
@@ -186,7 +200,7 @@ You can use Kafka in pop-tests easily.
 \texttt{bootstrap\_server\_var} (optional, string) - Container HTTP connection string for Kafka will be injected on services, via environment variable, by default \texttt{KAFKA\_BOOTSTRAP\_SERVER}
 
 \section{Example tests, using the DSL}
-\label{sec:orgf950de8}
+\label{sec:org8aad19f}
 
 For example tests and learning demos, refer to the scenarios directory: \url{../../resources/scenarios}
 

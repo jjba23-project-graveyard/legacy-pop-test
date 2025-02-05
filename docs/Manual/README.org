@@ -46,6 +46,8 @@ As your system grows, you don’t need to rewrite tests every time. You just kee
 
 In short, pop-tests make engineers happier, business people more certain of what they sell and overall, it makes refactoring and maintaining things easier.
 
+-----
+
 * The Scenario DSL (Domain Specific Language)
 
 In order to provide an expressive and powerful way to describe test scenarios, a lot of care has gone into creating a good domain-specific language, which remains flexible but concise.
@@ -54,7 +56,9 @@ Here follows an explanation of every individual field and parameter possible, in
 
 ~pop_test~ represents the top node under which all other nodes live.
 
-** pop services
+-----
+
+* pop services
 
 ~pop_services~ is a list of services to be started for the scenario.
 
@@ -86,8 +90,9 @@ HTTP health check:
 
 ~patience_seconds~ (required, integer) – The maximum time allowed for the service to become healthy. If the service is healthy before this deadline, the scenario setup continues without waiting.  
 
+-----
 
-** pop checks
+* pop checks
 
 ~pop_checks~ is a list of checks that validate expected responses and behaviours from the services in the scenario. These checks help verify that the services return valid and expected data before proceeding with the scenario execution.
 
@@ -105,18 +110,25 @@ Each JSON body pattern entry includes:
 
 ~condition~ (required, string) – A logical condition to be checked.
 
-*** Condition DSL
+** Condition DSL
 
 Supported conditions include:
 
 ~!= ""~ (ensures the field is not empty)
+
 ~== ""~ (ensures the field is empty)
+
 ~> 0~ (ensures the field is greater than zero)
+
 ~>= 0~ (ensures the field is non-negative)
+
 ~< 0~ (ensures the field is smaller than zero)
+
 ~<= 0~ (ensures the field is non-positive)
 
-** pop postgres
+-----
+
+* pop postgres
 
 You can use PostgreSQL in pop-tests easily.
 
@@ -136,7 +148,9 @@ You can use PostgreSQL in pop-tests easily.
 
 ~pass_var~ (optional, string) - Container DB password will be injected on services, via environment variable, by default ~POSTGRESQL_PASSWORD~
 
-** pop kafka
+-----
+
+* pop kafka
 
 You can use Kafka in pop-tests easily.
 
