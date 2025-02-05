@@ -3,11 +3,11 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2025-02-05 wo 10:12 -->
+<!-- 2025-02-05 wo 23:20 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>pop-test manual</title>
-<meta name="author" content="Music Player Daemon (MPD) user" />
+<meta name="author" content="Josep Bigorra" />
 <meta name="generator" content="Org Mode" />
 <style>
   #content { max-width: 60em; margin: auto; }
@@ -201,15 +201,21 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org7bcaaa8">1. Why pop-test?</a></li>
-<li><a href="#org47b454d">2. Motivation</a></li>
-<li><a href="#orga3b69b2">3. The Scenario DSL (Domain Specific Language)</a>
+<li><a href="#orgf881412">1. Why pop-test?</a></li>
+<li><a href="#org941c57c">2. Motivation</a></li>
+<li><a href="#org7d032d3">3. The Scenario DSL (Domain Specific Language)</a>
 <ul>
-<li><a href="#orgddce9f1">3.1. pop services</a></li>
-<li><a href="#org2ed9258">3.2. pop checks</a></li>
+<li><a href="#org3f5ff33">3.1. pop services</a></li>
+<li><a href="#org98e6bd3">3.2. pop checks</a>
+<ul>
+<li><a href="#org495ba8b">3.2.1. Condition DSL</a></li>
 </ul>
 </li>
-<li><a href="#org222535f">4. Example tests, using the DSL</a></li>
+<li><a href="#orgc635aa5">3.3. pop postgres</a></li>
+<li><a href="#orga58edc1">3.4. pop kafka</a></li>
+</ul>
+</li>
+<li><a href="#org37d1737">4. Example tests, using the DSL</a></li>
 </ul>
 </div>
 </div>
@@ -234,8 +240,8 @@ pop-tests as we affectionately call them, can range from small scope integration
 </p>
 
 
-<div id="outline-container-org7bcaaa8" class="outline-2">
-<h2 id="org7bcaaa8"><span class="section-number-2">1.</span> Why pop-test?</h2>
+<div id="outline-container-orgf881412" class="outline-2">
+<h2 id="orgf881412"><span class="section-number-2">1.</span> Why pop-test?</h2>
 <div class="outline-text-2" id="text-1">
 <ul class="org-ul">
 <li>Catches mistakes early – Helps find problems before real users do.</li>
@@ -248,8 +254,8 @@ pop-tests as we affectionately call them, can range from small scope integration
 </div>
 </div>
 
-<div id="outline-container-org47b454d" class="outline-2">
-<h2 id="org47b454d"><span class="section-number-2">2.</span> Motivation</h2>
+<div id="outline-container-org941c57c" class="outline-2">
+<h2 id="org941c57c"><span class="section-number-2">2.</span> Motivation</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 Imagine you're building a toy robot, but you don't need to understand all the small parts inside the robot to know if it works. You just need to press a button and see if it performs the task correctly.
@@ -293,8 +299,8 @@ In short, pop-tests make engineers happier, business people more certain of what
 </div>
 </div>
 
-<div id="outline-container-orga3b69b2" class="outline-2">
-<h2 id="orga3b69b2"><span class="section-number-2">3.</span> The Scenario DSL (Domain Specific Language)</h2>
+<div id="outline-container-org7d032d3" class="outline-2">
+<h2 id="org7d032d3"><span class="section-number-2">3.</span> The Scenario DSL (Domain Specific Language)</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 In order to provide an expressive and powerful way to describe test scenarios, a lot of care has gone into creating a good domain-specific language, which remains flexible but concise.
@@ -309,8 +315,8 @@ Here follows an explanation of every individual field and parameter possible, in
 </p>
 </div>
 
-<div id="outline-container-orgddce9f1" class="outline-3">
-<h3 id="orgddce9f1"><span class="section-number-3">3.1.</span> pop services</h3>
+<div id="outline-container-org3f5ff33" class="outline-3">
+<h3 id="org3f5ff33"><span class="section-number-3">3.1.</span> pop services</h3>
 <div class="outline-text-3" id="text-3-1">
 <p>
 <code>pop_services</code> is a list of services to be started for the scenario.
@@ -375,8 +381,8 @@ HTTP health check:
 </div>
 
 
-<div id="outline-container-org2ed9258" class="outline-3">
-<h3 id="org2ed9258"><span class="section-number-3">3.2.</span> pop checks</h3>
+<div id="outline-container-org98e6bd3" class="outline-3">
+<h3 id="org98e6bd3"><span class="section-number-3">3.2.</span> pop checks</h3>
 <div class="outline-text-3" id="text-3-2">
 <p>
 <code>pop_checks</code> is a list of checks that validate expected responses and behaviours from the services in the scenario. These checks help verify that the services return valid and expected data before proceeding with the scenario execution.
@@ -409,7 +415,11 @@ Each JSON body pattern entry includes:
 <p>
 <code>condition</code> (required, string) – A logical condition to be checked.
 </p>
+</div>
 
+<div id="outline-container-org495ba8b" class="outline-4">
+<h4 id="org495ba8b"><span class="section-number-4">3.2.1.</span> Condition DSL</h4>
+<div class="outline-text-4" id="text-3-2-1">
 <p>
 Supported conditions include:
 </p>
@@ -426,12 +436,82 @@ Supported conditions include:
 </div>
 </div>
 
+<div id="outline-container-orgc635aa5" class="outline-3">
+<h3 id="orgc635aa5"><span class="section-number-3">3.3.</span> pop postgres</h3>
+<div class="outline-text-3" id="text-3-3">
+<p>
+You can use PostgreSQL in pop-tests easily.
+</p>
 
-<div id="outline-container-org222535f" class="outline-2">
-<h2 id="org222535f"><span class="section-number-2">4.</span> Example tests, using the DSL</h2>
+<p>
+<code>enabled</code> (optional, boolean) - Whether to enable PostgreSQL in a container or not
+</p>
+
+<p>
+<code>image_name</code> (optional, string) - Container image name for PostgreSQL, by default <code>postgres</code>
+</p>
+
+<p>
+<code>image_tag</code> (optional, string) - Container image tag for PostgreSQL, by default <code>17.2</code> or newer
+</p>
+
+<p>
+<code>host_var</code> (optional, string) - Container hostname will be injected on services, via environment variable, by default <code>POSTGRESQL_HOST</code>
+</p>
+
+<p>
+<code>port_var</code> (optional, string) - Container DB port will be injected on services, via environment variable, by default ~POSTGRESQL<sub>PORT</sub>
+</p>
+
+<p>
+<code>db_var</code> (optional, string) - Container DB schema name will be injected on services, via environment variable, by default <code>POSTGRESQL_DB</code>
+</p>
+
+<p>
+<code>user_var</code> (optional, string) - Container DB username will be injected on services, via environment variable, by default <code>POSTGRESQL_USER</code>
+</p>
+
+<p>
+<code>pass_var</code> (optional, string) - Container DB password will be injected on services, via environment variable, by default <code>POSTGRESQL_PASSWORD</code>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orga58edc1" class="outline-3">
+<h3 id="orga58edc1"><span class="section-number-3">3.4.</span> pop kafka</h3>
+<div class="outline-text-3" id="text-3-4">
+<p>
+You can use Kafka in pop-tests easily.
+</p>
+
+<p>
+<code>enabled</code> (optional, boolean) - Whether to enable Kafka in a container or not
+</p>
+
+<p>
+<code>image_name</code> (optional, string) - Container image for Kafka, by default <code>confluentinc/cp-kafka</code>
+</p>
+
+<p>
+<code>image_tag</code> (optional, string) - Container image tag for Kafka, by default <code>6.1.1</code>
+</p>
+
+<p>
+<code>bootstrap_server_var</code> (optional, string) - Container HTTP connection string for Kafka will be injected on services, via environment variable, by default <code>KAFKA_BOOTSTRAP_SERVER</code>
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org37d1737" class="outline-2">
+<h2 id="org37d1737"><span class="section-number-2">4.</span> Example tests, using the DSL</h2>
 <div class="outline-text-2" id="text-4">
 <p>
-Here follow some examples of pop-tests.
+For example tests and learning demos, refer to the scenarios directory: <a href="../../resources/scenarios">../../resources/scenarios</a>
+</p>
+
+<p>
+Here follows also a trivial example of pop-tests.
 </p>
 
 <p>
@@ -469,8 +549,8 @@ In this example we spin up a REST API written in Scala, with SBT, and poll its <
 </div>
 </div>
 <div id="postamble" class="status">
-<p class="author">Author: Music Player Daemon (MPD) user</p>
-<p class="date">Created: 2025-02-05 wo 10:12</p>
+<p class="author">Author: Josep Bigorra</p>
+<p class="date">Created: 2025-02-05 wo 23:20</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

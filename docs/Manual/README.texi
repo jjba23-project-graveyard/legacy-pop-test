@@ -9,7 +9,7 @@
 @finalout
 @titlepage
 @title pop-test manual
-@author Music Player Daemon (MPD) user
+@author Josep Bigorra
 @end titlepage
 
 @contents
@@ -42,6 +42,12 @@ The Scenario DSL (Domain Specific Language)
 
 * pop services::
 * pop checks::
+* pop postgres::
+* pop kafka::
+
+pop checks
+
+* Condition DSL::
 
 @end detailmenu
 @end menu
@@ -99,6 +105,8 @@ Here follows an explanation of every individual field and parameter possible, in
 @menu
 * pop services::
 * pop checks::
+* pop postgres::
+* pop kafka::
 @end menu
 
 @node pop services
@@ -153,6 +161,13 @@ Each JSON body pattern entry includes:
 
 @code{condition} (required, string) – A logical condition to be checked.
 
+@menu
+* Condition DSL::
+@end menu
+
+@node Condition DSL
+@subsection Condition DSL
+
 Supported conditions include:
 
 @code{!= ""} (ensures the field is not empty)
@@ -162,10 +177,46 @@ Supported conditions include:
 @code{< 0} (ensures the field is smaller than zero)
 @code{<= 0} (ensures the field is non-positive)
 
+@node pop postgres
+@section pop postgres
+
+You can use PostgreSQL in pop-tests easily.
+
+@code{enabled} (optional, boolean) - Whether to enable PostgreSQL in a container or not
+
+@code{image_name} (optional, string) - Container image name for PostgreSQL, by default @code{postgres}
+
+@code{image_tag} (optional, string) - Container image tag for PostgreSQL, by default @code{17.2} or newer
+
+@code{host_var} (optional, string) - Container hostname will be injected on services, via environment variable, by default @code{POSTGRESQL_HOST}
+
+@code{port_var} (optional, string) - Container DB port will be injected on services, via environment variable, by default ~POSTGRESQL@math{_PORT}
+
+@code{db_var} (optional, string) - Container DB schema name will be injected on services, via environment variable, by default @code{POSTGRESQL_DB}
+
+@code{user_var} (optional, string) - Container DB username will be injected on services, via environment variable, by default @code{POSTGRESQL_USER}
+
+@code{pass_var} (optional, string) - Container DB password will be injected on services, via environment variable, by default @code{POSTGRESQL_PASSWORD}
+
+@node pop kafka
+@section pop kafka
+
+You can use Kafka in pop-tests easily.
+
+@code{enabled} (optional, boolean) - Whether to enable Kafka in a container or not
+
+@code{image_name} (optional, string) - Container image for Kafka, by default @code{confluentinc/cp-kafka}
+
+@code{image_tag} (optional, string) - Container image tag for Kafka, by default @code{6.1.1}
+
+@code{bootstrap_server_var} (optional, string) - Container HTTP connection string for Kafka will be injected on services, via environment variable, by default @code{KAFKA_BOOTSTRAP_SERVER}
+
 @node Example tests using the DSL
 @chapter Example tests, using the DSL
 
-Here follow some examples of pop-tests.
+For example tests and learning demos, refer to the scenarios directory: @uref{../../resources/scenarios}
+
+Here follows also a trivial example of pop-tests.
 
 In this example we spin up a REST API written in Scala, with SBT, and poll its @code{/health} endpoint for 90 seconds or until healthy. Then we perform some checks on the response of certain HTTP endpoints. These checks are performed using @code{jql} and this allows us to check deeply nested attributes of the JSON response.
 

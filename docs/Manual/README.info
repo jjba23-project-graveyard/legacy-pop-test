@@ -38,6 +38,12 @@ The Scenario DSL (Domain Specific Language)
 
 * pop services::
 * pop checks::
+* pop postgres::
+* pop kafka::
+
+pop checks
+
+* Condition DSL::
 
 
 
@@ -123,6 +129,8 @@ the Scenario DSL will be used.
 
 * pop services::
 * pop checks::
+* pop postgres::
+* pop kafka::
 
 
 File: README.info,  Node: pop services,  Next: pop checks,  Up: The Scenario DSL (Domain Specific Language)
@@ -176,7 +184,7 @@ the service to become healthy.  If the service is healthy before this
 deadline, the scenario setup continues without waiting.
 
 
-File: README.info,  Node: pop checks,  Prev: pop services,  Up: The Scenario DSL (Domain Specific Language)
+File: README.info,  Node: pop checks,  Next: pop postgres,  Prev: pop services,  Up: The Scenario DSL (Domain Specific Language)
 
 3.2 pop checks
 ==============
@@ -209,7 +217,17 @@ library.
 
    ‘condition’ (required, string) – A logical condition to be checked.
 
-   Supported conditions include:
+* Menu:
+
+* Condition DSL::
+
+
+File: README.info,  Node: Condition DSL,  Up: pop checks
+
+3.2.1 Condition DSL
+-------------------
+
+Supported conditions include:
 
    ‘!= ""’ (ensures the field is not empty) ‘== ""’ (ensures the field
 is empty) ‘> 0’ (ensures the field is greater than zero) ‘>= 0’ (ensures
@@ -217,12 +235,71 @@ the field is non-negative) ‘< 0’ (ensures the field is smaller than
 zero) ‘<= 0’ (ensures the field is non-positive)
 
 
+File: README.info,  Node: pop postgres,  Next: pop kafka,  Prev: pop checks,  Up: The Scenario DSL (Domain Specific Language)
+
+3.3 pop postgres
+================
+
+You can use PostgreSQL in pop-tests easily.
+
+   ‘enabled’ (optional, boolean) - Whether to enable PostgreSQL in a
+container or not
+
+   ‘image_name’ (optional, string) - Container image name for
+PostgreSQL, by default ‘postgres’
+
+   ‘image_tag’ (optional, string) - Container image tag for PostgreSQL,
+by default ‘17.2’ or newer
+
+   ‘host_var’ (optional, string) - Container hostname will be injected
+on services, via environment variable, by default ‘POSTGRESQL_HOST’
+
+   ‘port_var’ (optional, string) - Container DB port will be injected on
+services, via environment variable, by default ~POSTGRESQL_PORT
+
+   ‘db_var’ (optional, string) - Container DB schema name will be
+injected on services, via environment variable, by default
+‘POSTGRESQL_DB’
+
+   ‘user_var’ (optional, string) - Container DB username will be
+injected on services, via environment variable, by default
+‘POSTGRESQL_USER’
+
+   ‘pass_var’ (optional, string) - Container DB password will be
+injected on services, via environment variable, by default
+‘POSTGRESQL_PASSWORD’
+
+
+File: README.info,  Node: pop kafka,  Prev: pop postgres,  Up: The Scenario DSL (Domain Specific Language)
+
+3.4 pop kafka
+=============
+
+You can use Kafka in pop-tests easily.
+
+   ‘enabled’ (optional, boolean) - Whether to enable Kafka in a
+container or not
+
+   ‘image_name’ (optional, string) - Container image for Kafka, by
+default ‘confluentinc/cp-kafka’
+
+   ‘image_tag’ (optional, string) - Container image tag for Kafka, by
+default ‘6.1.1’
+
+   ‘bootstrap_server_var’ (optional, string) - Container HTTP connection
+string for Kafka will be injected on services, via environment variable,
+by default ‘KAFKA_BOOTSTRAP_SERVER’
+
+
 File: README.info,  Node: Example tests using the DSL,  Prev: The Scenario DSL (Domain Specific Language),  Up: Top
 
 4 Example tests, using the DSL
 ******************************
 
-Here follow some examples of pop-tests.
+For example tests and learning demos, refer to the scenarios directory:
+<../../resources/scenarios>
+
+   Here follows also a trivial example of pop-tests.
 
    In this example we spin up a REST API written in Scala, with SBT, and
 poll its ‘/health’ endpoint for 90 seconds or until healthy.  Then we
@@ -259,12 +336,15 @@ nested attributes of the JSON response.
 
 Tag Table:
 Node: Top73
-Node: Why pop-test?1313
-Node: Motivation1970
-Node: The Scenario DSL (Domain Specific Language)3741
-Node: pop services4512
-Node: pop checks6431
-Node: Example tests using the DSL8041
+Node: Why pop-test?1375
+Node: Motivation2032
+Node: The Scenario DSL (Domain Specific Language)3803
+Node: pop services4605
+Node: pop checks6524
+Node: Condition DSL7863
+Node: pop postgres8281
+Node: pop kafka9540
+Node: Example tests using the DSL10199
 
 End Tag Table
 

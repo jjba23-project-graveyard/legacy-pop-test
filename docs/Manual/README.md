@@ -1,12 +1,15 @@
 
 # Table of Contents
 
-1.  [Why pop-test?](#org2b629a7)
-2.  [Motivation](#org56c3e1d)
-3.  [The Scenario DSL (Domain Specific Language)](#orgd781a5d)
-    1.  [pop services](#org169e454)
-    2.  [pop checks](#org659f7fa)
-4.  [Example tests, using the DSL](#orga6f2881)
+1.  [Why pop-test?](#org3beb36a)
+2.  [Motivation](#org3892fd0)
+3.  [The Scenario DSL (Domain Specific Language)](#orge6e32d1)
+    1.  [pop services](#org7bfd42d)
+    2.  [pop checks](#orgd7e4460)
+        1.  [Condition DSL](#org585a31e)
+    3.  [pop postgres](#org951cdf1)
+    4.  [pop kafka](#org9327347)
+4.  [Example tests, using the DSL](#orgf25ccc4)
 
 In Dutch 🇳🇱, *pop* means puppet or doll. But pop-test is not about dolls! It’s a tool that helps test computer programs in an easy and future-proof manner that improves reliability and engineering freedom.
 
@@ -19,7 +22,7 @@ pop-test is built with Rust, enhancing safety, performance and reliability, with
 pop-tests as we affectionately call them, can range from small scope integration tests to all encompassing end-to-end or black box tests.
 
 
-<a id="org2b629a7"></a>
+<a id="org3beb36a"></a>
 
 # Why pop-test?
 
@@ -31,7 +34,7 @@ pop-tests as we affectionately call them, can range from small scope integration
 -   Fast and reliable – Built with Rust, a programming language known for speed and safety.
 
 
-<a id="org56c3e1d"></a>
+<a id="org3892fd0"></a>
 
 # Motivation
 
@@ -56,7 +59,7 @@ As your system grows, you don’t need to rewrite tests every time. You just kee
 In short, pop-tests make engineers happier, business people more certain of what they sell and overall, it makes refactoring and maintaining things easier.
 
 
-<a id="orgd781a5d"></a>
+<a id="orge6e32d1"></a>
 
 # The Scenario DSL (Domain Specific Language)
 
@@ -67,7 +70,7 @@ Here follows an explanation of every individual field and parameter possible, in
 `pop_test` represents the top node under which all other nodes live.
 
 
-<a id="org169e454"></a>
+<a id="org7bfd42d"></a>
 
 ## pop services
 
@@ -102,7 +105,7 @@ HTTP health check:
 `patience_seconds` (required, integer) – The maximum time allowed for the service to become healthy. If the service is healthy before this deadline, the scenario setup continues without waiting.  
 
 
-<a id="org659f7fa"></a>
+<a id="orgd7e4460"></a>
 
 ## pop checks
 
@@ -122,6 +125,11 @@ Each JSON body pattern entry includes:
 
 `condition` (required, string) – A logical condition to be checked.
 
+
+<a id="org585a31e"></a>
+
+### Condition DSL
+
 Supported conditions include:
 
 `!= ""` (ensures the field is not empty)
@@ -132,11 +140,51 @@ Supported conditions include:
 `<= 0` (ensures the field is non-positive)
 
 
-<a id="orga6f2881"></a>
+<a id="org951cdf1"></a>
+
+## pop postgres
+
+You can use PostgreSQL in pop-tests easily.
+
+`enabled` (optional, boolean) - Whether to enable PostgreSQL in a container or not
+
+`image_name` (optional, string) - Container image name for PostgreSQL, by default `postgres`
+
+`image_tag` (optional, string) - Container image tag for PostgreSQL, by default `17.2` or newer
+
+`host_var` (optional, string) - Container hostname will be injected on services, via environment variable, by default `POSTGRESQL_HOST`
+
+`port_var` (optional, string) - Container DB port will be injected on services, via environment variable, by default ~POSTGRESQL<sub>PORT</sub>
+
+`db_var` (optional, string) - Container DB schema name will be injected on services, via environment variable, by default `POSTGRESQL_DB`
+
+`user_var` (optional, string) - Container DB username will be injected on services, via environment variable, by default `POSTGRESQL_USER`
+
+`pass_var` (optional, string) - Container DB password will be injected on services, via environment variable, by default `POSTGRESQL_PASSWORD`
+
+
+<a id="org9327347"></a>
+
+## pop kafka
+
+You can use Kafka in pop-tests easily.
+
+`enabled` (optional, boolean) - Whether to enable Kafka in a container or not
+
+`image_name` (optional, string) - Container image for Kafka, by default `confluentinc/cp-kafka`
+
+`image_tag` (optional, string) - Container image tag for Kafka, by default `6.1.1`
+
+`bootstrap_server_var` (optional, string) - Container HTTP connection string for Kafka will be injected on services, via environment variable, by default `KAFKA_BOOTSTRAP_SERVER`
+
+
+<a id="orgf25ccc4"></a>
 
 # Example tests, using the DSL
 
-Here follow some examples of pop-tests.
+For example tests and learning demos, refer to the scenarios directory: <../../resources/scenarios>
+
+Here follows also a trivial example of pop-tests.
 
 In this example we spin up a REST API written in Scala, with SBT, and poll its `/health` endpoint for 90 seconds or until healthy. Then we perform some checks on the response of certain HTTP endpoints. These checks are performed using `jql` and this allows us to check deeply nested attributes of the JSON response.
 

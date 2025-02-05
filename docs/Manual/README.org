@@ -103,6 +103,8 @@ Each JSON body pattern entry includes:
 
 ~condition~ (required, string) – A logical condition to be checked.
 
+*** Condition DSL
+
 Supported conditions include:
 
 ~!= ""~ (ensures the field is not empty)
@@ -114,11 +116,41 @@ Supported conditions include:
 
 ** pop postgres
 
+You can use PostgreSQL in pop-tests easily.
+
+~enabled~ (optional, boolean) - Whether to enable PostgreSQL in a container or not
+
+~image_name~ (optional, string) - Container image name for PostgreSQL, by default ~postgres~
+
+~image_tag~ (optional, string) - Container image tag for PostgreSQL, by default ~17.2~ or newer
+
+~host_var~ (optional, string) - Container hostname will be injected on services, via environment variable, by default ~POSTGRESQL_HOST~
+
+~port_var~ (optional, string) - Container DB port will be injected on services, via environment variable, by default ~POSTGRESQL_PORT
+
+~db_var~ (optional, string) - Container DB schema name will be injected on services, via environment variable, by default ~POSTGRESQL_DB~
+
+~user_var~ (optional, string) - Container DB username will be injected on services, via environment variable, by default ~POSTGRESQL_USER~
+
+~pass_var~ (optional, string) - Container DB password will be injected on services, via environment variable, by default ~POSTGRESQL_PASSWORD~
+
 ** pop kafka
+
+You can use Kafka in pop-tests easily.
+
+~enabled~ (optional, boolean) - Whether to enable Kafka in a container or not
+
+~image_name~ (optional, string) - Container image for Kafka, by default ~confluentinc/cp-kafka~
+
+~image_tag~ (optional, string) - Container image tag for Kafka, by default ~6.1.1~
+
+~bootstrap_server_var~ (optional, string) - Container HTTP connection string for Kafka will be injected on services, via environment variable, by default ~KAFKA_BOOTSTRAP_SERVER~
 
 * Example tests, using the DSL
 
-Here follow some examples of pop-tests.
+For example tests and learning demos, refer to the scenarios directory: [[file:../../resources/scenarios]]
+
+Here follows also a trivial example of pop-tests.
 
 In this example we spin up a REST API written in Scala, with SBT, and poll its ~/health~ endpoint for 90 seconds or until healthy. Then we perform some checks on the response of certain HTTP endpoints. These checks are performed using ~jql~ and this allows us to check deeply nested attributes of the JSON response.
 
