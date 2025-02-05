@@ -30,7 +30,7 @@ pop_test:
 
   pop_checks:
     - check_url: "/api/v1/vehicles/2c7f6e13-59ea-4aea-bacc-a226fbd19abd/session-history"
-      service_id: "green-energy-mix"
+      service_id: "dynamic-tariff-charging"
       json_body_patterns:
         - pattern: '"meta""forecastDate"'
           condition: '!= ""'
@@ -41,4 +41,8 @@ pop_test:
 
   pop_postgres:
     image_name: "postgres"
-    image_tag: "17.2-alpine"
+    image_tag: "17.2"
+    
+  pop_kafka:
+    image_name: "confluentinc/cp-kafka"
+    image_tag: "6.1.1"

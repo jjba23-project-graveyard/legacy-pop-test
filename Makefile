@@ -18,7 +18,9 @@
 run-green-energy-mix: fmt
 	cargo run -- play-scenario ./resources/scenarios/test-green-energy-mix.yaml
 run-byggsteg: fmt
-	cargo run -- play-scenario ./resources/scenarios/test-byggsteg.yaml	
+	cargo run -- play-scenario ./resources/scenarios/test-byggsteg.yaml
+run-dynamic-tariff-charging: fmt
+	cargo run -- play-scenario ./resources/scenarios/test-dynamic-tariff-charging.yaml	
 fmt:
 	cargo fix --allow-dirty --bin "pop-test"
 	find . -maxdepth 8 -name "*.rs" -type f -exec rustfmt --edition 2021 {} \;

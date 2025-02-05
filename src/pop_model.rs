@@ -61,10 +61,17 @@ pub struct PopPostgres {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct PopKafka {
+    pub image_name: String,
+    pub image_tag: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct PopScenario {
     pub pop_services: Vec<PopService>,
     pub pop_checks: Vec<PopCheck>,
     pub pop_postgres: Option<PopPostgres>,
+    pub pop_kafka: Option<PopKafka>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

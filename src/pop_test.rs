@@ -17,18 +17,19 @@
 
 use crate::pop_check::check_pat;
 use crate::pop_model::{
-    BodyPattern, PopCheck, PopPostgres, PopScenarioFile, PopService, PopServiceHealthCheck,
+    BodyPattern, PopCheck, PopKafka, PopPostgres, PopScenarioFile, PopService,
+    PopServiceHealthCheck,
 };
 use core::time::Duration;
 use jql_runner::runner::raw;
 use paris::{error, info, success};
 use serde_json::json;
 use std::{env, process::Stdio};
-use testcontainers::{
-    core::{IntoContainerPort, WaitFor},
-    runners::AsyncRunner,
-    GenericImage, ImageExt,
-};
+use testcontainers::ContainerAsync;
+use testcontainers::{runners::AsyncRunner, ImageExt};
+use testcontainers_modules::kafka::Kafka;
+
+use testcontainers_modules::postgres::Postgres;
 use tokio::task::JoinSet;
 use tokio::{
     process::{Child, Command},
@@ -159,42 +160,49 @@ pub async fn start_h(pop_service: PopService) -> () {
     let _ = health_check(pp.id, pp.base_url, pp.health_check).await;
 }
 
-pub async fn start_postgres(pop_postgres: PopPostgres) {
-    let container = GenericImage::new(pop_postgres.image_name, pop_postgres.image_tag)
-        .with_exposed_port(5432.tcp())
-        .with_wait_for(WaitFor::message_on_stdout("started"))
-        .with_network("bridge")
-        .with_env_var("DEBUG", "1")
+pub async fn start_postgres(pop_postgres: PopPostgres) -> Result<ContainerAsync<Postgres>, String> {
+    Postgres::default()
+        .with_name(pop_postgres.image_name)
+        .with_tag(pop_postgres.image_tag)
         .start()
         .await
-        .expect("Failed to start Postgres");
+        .map_err(|e| format!("{}", e))
+}
+
+pub async fn start_kafka(pop_kafka: PopKafka) -> Result<ContainerAsync<Kafka>, String> {
+    Kafka::default()
+        .with_name(pop_kafka.image_name)
+        .with_tag(pop_kafka.image_tag)
+        .start()
+        .await
+        .map_err(|e| format!("{}", e))
 }
 
 pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String> {
-    //let mut h_set = JoinSet::new();
-    //let mut children = Vec::new();
+    let mut h_set = JoinSet::new();
+    let mut children = Vec::new();
 
-    let pg = scenario_file.pop_test.pop_postgres.clone();
-    match pg {
-        Some(postgres) => start_postgres(postgres).await,
-        _ => (),
-    }
-    // let _ = pg.map_or((), |p| async {
-    //     containers.spawn(start_postgres(p));
-    //     ()
-    // });
+    let _postgres_container = match &scenario_file.pop_test.pop_postgres {
+        Some(postgres) => Some(start_postgres(postgres.clone()).await.unwrap()),
+        _ => None,
+    };
 
-    //register_services(&mut h_set, &mut children, &scenario_file).await?;
+    let _kafka_container = match &scenario_file.pop_test.pop_kafka {
+        Some(kafka) => Some(start_kafka(kafka.clone()).await.unwrap()),
+        _ => None,
+    };
 
-    // info!("awaiting for all services to be healthy");
-    // h_set.join_all().await;
+    register_services(&mut h_set, &mut children, &scenario_file).await?;
 
-    // info!("performing tests and assertions");
-    // perform_checks(&scenario_file).await;
+    info!("awaiting for all services to be healthy");
+    h_set.join_all().await;
 
-    // terminate_processes(children).await;
+    info!("performing tests and assertions");
+    perform_checks(&scenario_file).await;
 
-    // success!("finished playing scenario");
+    terminate_processes(children).await;
+
+    success!("finished playing scenario");
     Ok(())
 }
 
