@@ -1,9 +1,11 @@
-#+title: pop-test
+#+title: 🍹 pop-test
 #+options: num:nil
 #+language: en
 #+email: jjbigorra@gmail.com
 
-[[https://raster.shields.io/badge/Rust-1.84-b7410e.png]]
+[[https://raster.shields.io/badge/Rust-1.84-b7410e.png]] [[https://raster.shields.io/badge/Nix-Flake-1f5cd6.png]]
+
+pop-test - /your test orchestration master of puppets/
 
 pop-test simplifies end-to-end testing by providing a powerful orchestration tool and expressive language for your applications and their dependencies.
 
@@ -16,9 +18,7 @@ pop-tests as we affectionately call them, can range from small scope integration
 I strive to provide proper and extensive documentation on pop-test, in several formats, available at your convenience.
 
 - Org format [[file:docs/Manual/README.org]]
-- PDF format [[file:docs/Manual/README.pdf]]  
-- HTML format [[file:docs/Manual/README.html]]
-- Markdown format [[file:docs/Manual/README.md]]  
-- texi format [[file:docs/Manual/README.texi]]
-- info format [[file:docs/Manual/README.info]]    
+- PDF format [[file:docs/Manual/README.pdf]]
+
+HTML, Markdown, texi, info also available at: [[file:docs/Manual/]]
 
