@@ -34,10 +34,10 @@ pub async fn start_service(
     pop_service: PopService,
     with_env: HashMap<String, String>,
 ) -> Result<Child, std::io::Error> {
-    do_work(pop_service, with_env).await
+    run_proc_from_service(pop_service, with_env).await
 }
 
-async fn do_work(
+async fn run_proc_from_service(
     pop_service: PopService,
     with_env: HashMap<String, String>,
 ) -> Result<Child, std::io::Error> {

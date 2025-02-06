@@ -21,12 +21,21 @@ use crate::pop_model::{PopService, PopServiceHealthCheck};
 use paris::{error, info, success};
 use tokio::time::sleep;
 
-pub async fn health_check(
+pub async fn start_health_check(pop_service: PopService) {
+    let _ = health_check(
+        &pop_service.id,
+        &pop_service.base_url,
+        &pop_service.health_check,
+    )
+    .await;
+}
+
+async fn health_check(
     id: &String,
     base_url: &String,
     health_check: &PopServiceHealthCheck,
 ) -> Result<(), String> {
-    info!("starting healthcheck for service: {}", id);
+    info!("starting health check for service: {}", id);
     match health_check {
         crate::pop_model::PopServiceHealthCheck::Http {
             path,
@@ -35,12 +44,16 @@ pub async fn health_check(
             let mut elapsed = 0;
             let url = format!("{}{}", base_url, path);
             while elapsed <= *patience_seconds {
-                info!("calling health check URL ({}): {}", elapsed, url);
+                info!(
+                    "calling health check URL ({}/{}): {}",
+                    elapsed, patience_seconds, url
+                );
                 let resp = reqwest::get(url.clone()).await;
-                println!("{resp:#?}");
                 match resp {
                     Err(e) => {
-                        error!("{}", e);
+                        if elapsed >= (patience_seconds / 2) {
+                            error!("{}", e);
+                        }
                         sleep(Duration::from_secs(2)).await;
                         elapsed += 5;
                         continue;
@@ -62,13 +75,4 @@ pub async fn health_check(
             }
         }
     }
-}
-
-pub async fn start_h(pop_service: PopService) {
-    let _ = health_check(
-        &pop_service.id,
-        &pop_service.base_url,
-        &pop_service.health_check,
-    )
-    .await;
 }

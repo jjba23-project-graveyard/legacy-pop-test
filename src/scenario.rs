@@ -16,7 +16,7 @@
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
 use crate::checks::perform_checks;
-use crate::health_check::start_h;
+use crate::health_check::start_health_check;
 use crate::kafka::start_kafka_container;
 use crate::pop_model::PopScenarioFile;
 use crate::postgres::start_postgres_container;
@@ -59,7 +59,7 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
 
     for pop_service in scenario_file.pop_test.pop_services.clone() {
         info!("registering service: {}", pop_service.id);
-        h_set.spawn(start_h(pop_service.clone()));
+        h_set.spawn(start_health_check(pop_service.clone()));
 
         let mut with_env = HashMap::from([]);
 
