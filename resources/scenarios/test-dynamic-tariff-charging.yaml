@@ -26,11 +26,17 @@ pop_test:
         SOME_TOKEN: "a"
       health_check:
         path: "/health"
-        patience_seconds: 90
+        patience_seconds: 120
       postgres:
         enabled: true
       kafka:
         enabled: true
+      pop_server:
+        enabled: true
+        url_vars:
+          - "OCPP_FACADE_URL"
+          - "DYNAMIC_TARIFF_SERVICE_URL"
+          - "KEYCLOAK_AUTH_SERVER_URL"
 
   pop_postgres:
     enabled: true

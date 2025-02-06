@@ -42,6 +42,12 @@ pub struct PopServiceKafka {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct PopServicePopServer {
+    pub enabled: Option<bool>,
+    pub url_vars: Option<Vec<String>>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct PopService {
     pub id: String,
     pub name: Option<String>,
@@ -53,6 +59,7 @@ pub struct PopService {
     pub health_check: PopServiceHealthCheck,
     pub postgres: Option<PopServicePostgres>,
     pub kafka: Option<PopServiceKafka>,
+    pub pop_server: Option<PopServicePopServer>,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]

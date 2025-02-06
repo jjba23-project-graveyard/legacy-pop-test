@@ -193,6 +193,45 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
             };
         }
 
+        if scenario_file.clone().pop_test.pop_server.map(|p| p.enabled) == Some(Some(true))
+            && pop_service
+                .pop_server
+                .clone()
+                .map(|p| p.enabled)
+                .unwrap_or(Some(false))
+                == Some(true)
+        {
+            let pop_server_host = if let Some(p) = &pop_server_container {
+                Some(p.get_host().await.unwrap().to_string())
+            } else {
+                None
+            };
+
+            let pop_server_port: i32 = if let Some(p) = &pop_server_container {
+                p.ports()
+                    .await
+                    .unwrap()
+                    .map_to_host_port_ipv4(50088)
+                    .unwrap_or(50088)
+                    .into()
+            } else {
+                50088
+            };
+
+            if let Some(h) = pop_server_host {
+                pop_service
+                    .clone()
+                    .pop_server
+                    .unwrap()
+                    .url_vars
+                    .unwrap()
+                    .into_iter()
+                    .for_each(|v| {
+                        with_env.insert(v, format!("http://{}:{}", h, pop_server_port));
+                    });
+            };
+        }
+
         let p = start_service(pop_service, with_env.clone())
             .await
             .map_err(|_| "Failed to start process")?;
