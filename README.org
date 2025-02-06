@@ -3,6 +3,7 @@
 #+language: en
 #+email: jjbigorra@gmail.com
 
+[[https://img.shields.io/badge/rust-1.84-orange.png]]
 
 pop-test simplifies end-to-end testing by providing a powerful orchestration tool and expressive language for your applications and their dependencies.
 
