@@ -76,7 +76,9 @@ A service is defined by:
 
 ~env_vars~ (optional, map of string to string) – A set of environment variables to be defined for the service.  
 
-~health_check~ (required, object) – Defines how the system determines whether the service is healthy.  
+*** service health check
+
+Defines how pop-test determines whether the service is healthy. Field is ~health_check~, a required object.
 
 Health checks can take different forms:
 
@@ -88,7 +90,31 @@ HTTP health check:
 
 ~path~ (required, string) – The HTTP route used to check the service’s health (e.g., ~/health~).  
 
-~patience_seconds~ (required, integer) – The maximum time allowed for the service to become healthy. If the service is healthy before this deadline, the scenario setup continues without waiting.  
+~patience_seconds~ (required, integer) – The maximum time allowed for the service to become healthy. If the service is healthy before this deadline, the scenario setup continues without waiting.
+
+*** service postgres
+
+Defines how PostgreSQL is used in the service. Field is ~postgres~, an optional object.
+
+~enabled~ (optional, boolean) - Whether to inject environment variables with PostgreSQL details
+
+~host_var~ (optional, string) - Container hostname will be injected on services, via environment variable, by default ~POSTGRESQL_HOST~
+
+~port_var~ (optional, string) - Container DB port will be injected on services, via environment variable, by default ~POSTGRESQL_PORT
+
+~db_var~ (optional, string) - Container DB schema name will be injected on services, via environment variable, by default ~POSTGRESQL_DB~
+
+~user_var~ (optional, string) - Container DB username will be injected on services, via environment variable, by default ~POSTGRESQL_USER~
+
+~pass_var~ (optional, string) - Container DB password will be injected on services, via environment variable, by default ~POSTGRESQL_PASSWORD~
+
+*** service kafka
+
+Defines how Kafka is used in the service. Field is ~kafka~, an optional object.
+
+~enabled~ (optional, boolean) - Whether to inject environment variables with Kafka details
+
+~bootstrap_server_var~ (optional, string) - Container HTTP connection string for Kafka will be injected on services, via environment variable, by default ~KAFKA_BOOTSTRAP_SERVER~
 
 -----
 
@@ -138,16 +164,6 @@ You can use PostgreSQL in pop-tests easily.
 
 ~image_tag~ (optional, string) - Container image tag for PostgreSQL, by default ~17.2~ or newer
 
-~host_var~ (optional, string) - Container hostname will be injected on services, via environment variable, by default ~POSTGRESQL_HOST~
-
-~port_var~ (optional, string) - Container DB port will be injected on services, via environment variable, by default ~POSTGRESQL_PORT
-
-~db_var~ (optional, string) - Container DB schema name will be injected on services, via environment variable, by default ~POSTGRESQL_DB~
-
-~user_var~ (optional, string) - Container DB username will be injected on services, via environment variable, by default ~POSTGRESQL_USER~
-
-~pass_var~ (optional, string) - Container DB password will be injected on services, via environment variable, by default ~POSTGRESQL_PASSWORD~
-
 -----
 
 ** pop kafka
@@ -160,7 +176,6 @@ You can use Kafka in pop-tests easily.
 
 ~image_tag~ (optional, string) - Container image tag for Kafka, by default ~6.1.1~
 
-~bootstrap_server_var~ (optional, string) - Container HTTP connection string for Kafka will be injected on services, via environment variable, by default ~KAFKA_BOOTSTRAP_SERVER~
 
 -----
 

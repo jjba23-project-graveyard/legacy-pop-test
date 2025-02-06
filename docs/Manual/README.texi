@@ -9,7 +9,7 @@
 @finalout
 @titlepage
 @title pop-test manual
-@author Josep Bigorra
+@author Music Player Daemon (MPD) user
 @end titlepage
 
 @contents
@@ -47,6 +47,12 @@ The Scenario DSL (Domain Specific Language)
 * Condition DSL::
 * pop postgres::
 * pop kafka::
+
+pop services
+
+* service health check::
+* service postgres::
+* service kafka::
 
 @end detailmenu
 @end menu
@@ -128,7 +134,16 @@ A service is defined by:
 
 @code{env_vars} (optional, map of string to string) – A set of environment variables to be defined for the service.  
 
-@code{health_check} (required, object) – Defines how the system determines whether the service is healthy.  
+@menu
+* service health check::
+* service postgres::
+* service kafka::
+@end menu
+
+@node service health check
+@subsection service health check
+
+Defines how pop-test determines whether the service is healthy. Field is @code{health_check}, a required object.
 
 Health checks can take different forms:
 
@@ -141,6 +156,32 @@ HTTP health check:
 @code{path} (required, string) – The HTTP route used to check the service’s health (e.g., @code{/health}).  
 
 @code{patience_seconds} (required, integer) – The maximum time allowed for the service to become healthy. If the service is healthy before this deadline, the scenario setup continues without waiting.
+
+@node service postgres
+@subsection service postgres
+
+Defines how PostgreSQL is used in the service. Field is @code{postgres}, an optional object.
+
+@code{enabled} (optional, boolean) - Whether to inject environment variables with PostgreSQL details
+
+@code{host_var} (optional, string) - Container hostname will be injected on services, via environment variable, by default @code{POSTGRESQL_HOST}
+
+@code{port_var} (optional, string) - Container DB port will be injected on services, via environment variable, by default ~POSTGRESQL@math{_PORT}
+
+@code{db_var} (optional, string) - Container DB schema name will be injected on services, via environment variable, by default @code{POSTGRESQL_DB}
+
+@code{user_var} (optional, string) - Container DB username will be injected on services, via environment variable, by default @code{POSTGRESQL_USER}
+
+@code{pass_var} (optional, string) - Container DB password will be injected on services, via environment variable, by default @code{POSTGRESQL_PASSWORD}
+
+@node service kafka
+@subsection service kafka
+
+Defines how Kafka is used in the service. Field is @code{kafka}, an optional object.
+
+@code{enabled} (optional, boolean) - Whether to inject environment variables with Kafka details
+
+@code{bootstrap_server_var} (optional, string) - Container HTTP connection string for Kafka will be injected on services, via environment variable, by default @code{KAFKA_BOOTSTRAP_SERVER}
 
 @node pop checks
 @section pop checks
@@ -189,16 +230,6 @@ You can use PostgreSQL in pop-tests easily.
 
 @code{image_tag} (optional, string) - Container image tag for PostgreSQL, by default @code{17.2} or newer
 
-@code{host_var} (optional, string) - Container hostname will be injected on services, via environment variable, by default @code{POSTGRESQL_HOST}
-
-@code{port_var} (optional, string) - Container DB port will be injected on services, via environment variable, by default ~POSTGRESQL@math{_PORT}
-
-@code{db_var} (optional, string) - Container DB schema name will be injected on services, via environment variable, by default @code{POSTGRESQL_DB}
-
-@code{user_var} (optional, string) - Container DB username will be injected on services, via environment variable, by default @code{POSTGRESQL_USER}
-
-@code{pass_var} (optional, string) - Container DB password will be injected on services, via environment variable, by default @code{POSTGRESQL_PASSWORD}
-
 @node pop kafka
 @section pop kafka
 
@@ -209,8 +240,6 @@ You can use Kafka in pop-tests easily.
 @code{image_name} (optional, string) - Container image for Kafka, by default @code{confluentinc/cp-kafka}
 
 @code{image_tag} (optional, string) - Container image tag for Kafka, by default @code{6.1.1}
-
-@code{bootstrap_server_var} (optional, string) - Container HTTP connection string for Kafka will be injected on services, via environment variable, by default @code{KAFKA_BOOTSTRAP_SERVER}
 
 @node Example tests using the DSL
 @chapter Example tests, using the DSL

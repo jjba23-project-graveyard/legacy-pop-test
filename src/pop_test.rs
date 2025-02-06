@@ -21,9 +21,7 @@ use crate::pop_model::{
     PopServiceHealthCheck,
 };
 use core::time::Duration;
-use jql_runner::runner::raw;
 use paris::{error, info, success};
-use serde_json::json;
 use std::collections::HashMap;
 use std::{env, process::Stdio};
 use testcontainers::ContainerAsync;
@@ -43,9 +41,6 @@ pub async fn do_with_http_check(
     service_url: String,
     json_body_patterns: Option<Vec<BodyPattern>>,
 ) -> Result<(), String> {
-    let a = raw(r#""a","b""#, &json!({ "a": 1, "b": 2 }));
-    info!("{:?}", a);
-
     let url = format!("{}{}", service_url, check_url);
 
     let maybe_response = reqwest::get(url.clone()).await;

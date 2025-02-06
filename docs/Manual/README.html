@@ -3,11 +3,11 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2025-02-05 wo 23:34 -->
+<!-- 2025-02-06 do 11:39 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>pop-test manual</title>
-<meta name="author" content="Josep Bigorra" />
+<meta name="author" content="Music Player Daemon (MPD) user" />
 <meta name="generator" content="Org Mode" />
 <style>
   #content { max-width: 60em; margin: auto; }
@@ -201,18 +201,24 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org9849978">1. Why pop-test?</a></li>
-<li><a href="#org89e0447">2. Motivation</a></li>
-<li><a href="#org9c1a33f">3. The Scenario DSL (Domain Specific Language)</a>
+<li><a href="#orgcf30571">1. Why pop-test?</a></li>
+<li><a href="#org4e2081a">2. Motivation</a></li>
+<li><a href="#org04f6c12">3. The Scenario DSL (Domain Specific Language)</a>
 <ul>
-<li><a href="#orgca6dfac">3.1. pop services</a></li>
-<li><a href="#org8190cbd">3.2. pop checks</a></li>
-<li><a href="#org3779f49">3.3. Condition DSL</a></li>
-<li><a href="#orgc5a386a">3.4. pop postgres</a></li>
-<li><a href="#org64c85bc">3.5. pop kafka</a></li>
+<li><a href="#org9cdd6cb">3.1. pop services</a>
+<ul>
+<li><a href="#org3fb0c43">3.1.1. service health check</a></li>
+<li><a href="#orga803692">3.1.2. service postgres</a></li>
+<li><a href="#orgec22085">3.1.3. service kafka</a></li>
 </ul>
 </li>
-<li><a href="#org739b991">4. Example tests, using the DSL</a></li>
+<li><a href="#org2c9182d">3.2. pop checks</a></li>
+<li><a href="#orgbc72a29">3.3. Condition DSL</a></li>
+<li><a href="#org4750b3e">3.4. pop postgres</a></li>
+<li><a href="#org2cf999e">3.5. pop kafka</a></li>
+</ul>
+</li>
+<li><a href="#org2730a62">4. Example tests, using the DSL</a></li>
 </ul>
 </div>
 </div>
@@ -237,14 +243,14 @@ pop-tests as we affectionately call them, can range from small scope integration
 </p>
 
 
-<div id="orgad99cf0" class="figure">
+<div id="orgf645a5a" class="figure">
 <p><img src="../../resources/img/wp10992149.jpg" alt="wp10992149.jpg" />
 </p>
 </div>
 
 
-<div id="outline-container-org9849978" class="outline-2">
-<h2 id="org9849978"><span class="section-number-2">1.</span> Why pop-test?</h2>
+<div id="outline-container-orgcf30571" class="outline-2">
+<h2 id="orgcf30571"><span class="section-number-2">1.</span> Why pop-test?</h2>
 <div class="outline-text-2" id="text-1">
 <ul class="org-ul">
 <li>Catches mistakes early – Helps find problems before real users do.</li>
@@ -257,8 +263,8 @@ pop-tests as we affectionately call them, can range from small scope integration
 </div>
 </div>
 
-<div id="outline-container-org89e0447" class="outline-2">
-<h2 id="org89e0447"><span class="section-number-2">2.</span> Motivation</h2>
+<div id="outline-container-org4e2081a" class="outline-2">
+<h2 id="org4e2081a"><span class="section-number-2">2.</span> Motivation</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 Imagine you're building a toy robot, but you don't need to understand all the small parts inside the robot to know if it works. You just need to press a button and see if it performs the task correctly.
@@ -304,8 +310,8 @@ In short, pop-tests make engineers happier, business people more certain of what
 </div>
 </div>
 
-<div id="outline-container-org9c1a33f" class="outline-2">
-<h2 id="org9c1a33f"><span class="section-number-2">3.</span> The Scenario DSL (Domain Specific Language)</h2>
+<div id="outline-container-org04f6c12" class="outline-2">
+<h2 id="org04f6c12"><span class="section-number-2">3.</span> The Scenario DSL (Domain Specific Language)</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 In order to provide an expressive and powerful way to describe test scenarios, a lot of care has gone into creating a good domain-specific language, which remains flexible but concise.
@@ -322,8 +328,8 @@ Here follows an explanation of every individual field and parameter possible, in
 <hr />
 </div>
 
-<div id="outline-container-orgca6dfac" class="outline-3">
-<h3 id="orgca6dfac"><span class="section-number-3">3.1.</span> pop services</h3>
+<div id="outline-container-org9cdd6cb" class="outline-3">
+<h3 id="org9cdd6cb"><span class="section-number-3">3.1.</span> pop services</h3>
 <div class="outline-text-3" id="text-3-1">
 <p>
 <code>pop_services</code> is a list of services to be started for the scenario.
@@ -356,9 +362,13 @@ A service is defined by:
 <p>
 <code>env_vars</code> (optional, map of string to string) – A set of environment variables to be defined for the service.  
 </p>
+</div>
 
+<div id="outline-container-org3fb0c43" class="outline-4">
+<h4 id="org3fb0c43"><span class="section-number-4">3.1.1.</span> service health check</h4>
+<div class="outline-text-4" id="text-3-1-1">
 <p>
-<code>health_check</code> (required, object) – Defines how the system determines whether the service is healthy.  
+Defines how pop-test determines whether the service is healthy. Field is <code>health_check</code>, a required object.
 </p>
 
 <p>
@@ -382,15 +392,66 @@ HTTP health check:
 </p>
 
 <p>
-<code>patience_seconds</code> (required, integer) – The maximum time allowed for the service to become healthy. If the service is healthy before this deadline, the scenario setup continues without waiting.  
+<code>patience_seconds</code> (required, integer) – The maximum time allowed for the service to become healthy. If the service is healthy before this deadline, the scenario setup continues without waiting.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orga803692" class="outline-4">
+<h4 id="orga803692"><span class="section-number-4">3.1.2.</span> service postgres</h4>
+<div class="outline-text-4" id="text-3-1-2">
+<p>
+Defines how PostgreSQL is used in the service. Field is <code>postgres</code>, an optional object.
+</p>
+
+<p>
+<code>enabled</code> (optional, boolean) - Whether to inject environment variables with PostgreSQL details
+</p>
+
+<p>
+<code>host_var</code> (optional, string) - Container hostname will be injected on services, via environment variable, by default <code>POSTGRESQL_HOST</code>
+</p>
+
+<p>
+<code>port_var</code> (optional, string) - Container DB port will be injected on services, via environment variable, by default ~POSTGRESQL<sub>PORT</sub>
+</p>
+
+<p>
+<code>db_var</code> (optional, string) - Container DB schema name will be injected on services, via environment variable, by default <code>POSTGRESQL_DB</code>
+</p>
+
+<p>
+<code>user_var</code> (optional, string) - Container DB username will be injected on services, via environment variable, by default <code>POSTGRESQL_USER</code>
+</p>
+
+<p>
+<code>pass_var</code> (optional, string) - Container DB password will be injected on services, via environment variable, by default <code>POSTGRESQL_PASSWORD</code>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgec22085" class="outline-4">
+<h4 id="orgec22085"><span class="section-number-4">3.1.3.</span> service kafka</h4>
+<div class="outline-text-4" id="text-3-1-3">
+<p>
+Defines how Kafka is used in the service. Field is <code>kafka</code>, an optional object.
+</p>
+
+<p>
+<code>enabled</code> (optional, boolean) - Whether to inject environment variables with Kafka details
+</p>
+
+<p>
+<code>bootstrap_server_var</code> (optional, string) - Container HTTP connection string for Kafka will be injected on services, via environment variable, by default <code>KAFKA_BOOTSTRAP_SERVER</code>
 </p>
 
 <hr />
 </div>
 </div>
+</div>
 
-<div id="outline-container-org8190cbd" class="outline-3">
-<h3 id="org8190cbd"><span class="section-number-3">3.2.</span> pop checks</h3>
+<div id="outline-container-org2c9182d" class="outline-3">
+<h3 id="org2c9182d"><span class="section-number-3">3.2.</span> pop checks</h3>
 <div class="outline-text-3" id="text-3-2">
 <p>
 <code>pop_checks</code> is a list of checks that validate expected responses and behaviours from the services in the scenario. These checks help verify that the services return valid and expected data before proceeding with the scenario execution.
@@ -426,8 +487,8 @@ Each JSON body pattern entry includes:
 </div>
 </div>
 
-<div id="outline-container-org3779f49" class="outline-3">
-<h3 id="org3779f49"><span class="section-number-3">3.3.</span> Condition DSL</h3>
+<div id="outline-container-orgbc72a29" class="outline-3">
+<h3 id="orgbc72a29"><span class="section-number-3">3.3.</span> Condition DSL</h3>
 <div class="outline-text-3" id="text-3-3">
 <p>
 Supported conditions include:
@@ -461,8 +522,8 @@ Supported conditions include:
 </div>
 </div>
 
-<div id="outline-container-orgc5a386a" class="outline-3">
-<h3 id="orgc5a386a"><span class="section-number-3">3.4.</span> pop postgres</h3>
+<div id="outline-container-org4750b3e" class="outline-3">
+<h3 id="org4750b3e"><span class="section-number-3">3.4.</span> pop postgres</h3>
 <div class="outline-text-3" id="text-3-4">
 <p>
 You can use PostgreSQL in pop-tests easily.
@@ -480,32 +541,12 @@ You can use PostgreSQL in pop-tests easily.
 <code>image_tag</code> (optional, string) - Container image tag for PostgreSQL, by default <code>17.2</code> or newer
 </p>
 
-<p>
-<code>host_var</code> (optional, string) - Container hostname will be injected on services, via environment variable, by default <code>POSTGRESQL_HOST</code>
-</p>
-
-<p>
-<code>port_var</code> (optional, string) - Container DB port will be injected on services, via environment variable, by default ~POSTGRESQL<sub>PORT</sub>
-</p>
-
-<p>
-<code>db_var</code> (optional, string) - Container DB schema name will be injected on services, via environment variable, by default <code>POSTGRESQL_DB</code>
-</p>
-
-<p>
-<code>user_var</code> (optional, string) - Container DB username will be injected on services, via environment variable, by default <code>POSTGRESQL_USER</code>
-</p>
-
-<p>
-<code>pass_var</code> (optional, string) - Container DB password will be injected on services, via environment variable, by default <code>POSTGRESQL_PASSWORD</code>
-</p>
-
 <hr />
 </div>
 </div>
 
-<div id="outline-container-org64c85bc" class="outline-3">
-<h3 id="org64c85bc"><span class="section-number-3">3.5.</span> pop kafka</h3>
+<div id="outline-container-org2cf999e" class="outline-3">
+<h3 id="org2cf999e"><span class="section-number-3">3.5.</span> pop kafka</h3>
 <div class="outline-text-3" id="text-3-5">
 <p>
 You can use Kafka in pop-tests easily.
@@ -523,17 +564,14 @@ You can use Kafka in pop-tests easily.
 <code>image_tag</code> (optional, string) - Container image tag for Kafka, by default <code>6.1.1</code>
 </p>
 
-<p>
-<code>bootstrap_server_var</code> (optional, string) - Container HTTP connection string for Kafka will be injected on services, via environment variable, by default <code>KAFKA_BOOTSTRAP_SERVER</code>
-</p>
 
 <hr />
 </div>
 </div>
 </div>
 
-<div id="outline-container-org739b991" class="outline-2">
-<h2 id="org739b991"><span class="section-number-2">4.</span> Example tests, using the DSL</h2>
+<div id="outline-container-org2730a62" class="outline-2">
+<h2 id="org2730a62"><span class="section-number-2">4.</span> Example tests, using the DSL</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 For example tests and learning demos, refer to the scenarios directory: <a href="../../resources/scenarios">../../resources/scenarios</a>
@@ -578,8 +616,8 @@ In this example we spin up a REST API written in Scala, with SBT, and poll its <
 </div>
 </div>
 <div id="postamble" class="status">
-<p class="author">Author: Josep Bigorra</p>
-<p class="date">Created: 2025-02-05 wo 23:34</p>
+<p class="author">Author: Music Player Daemon (MPD) user</p>
+<p class="date">Created: 2025-02-06 do 11:39</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

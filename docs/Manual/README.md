@@ -1,15 +1,18 @@
 
 # Table of Contents
 
-1.  [Why pop-test?](#org7939fc2)
-2.  [Motivation](#orgd468e53)
-3.  [The Scenario DSL (Domain Specific Language)](#org0647882)
-    1.  [pop services](#org556e4b6)
-    2.  [pop checks](#org604c216)
-    3.  [Condition DSL](#orgd1eede8)
-    4.  [pop postgres](#org4e60825)
-    5.  [pop kafka](#org7dd49db)
-4.  [Example tests, using the DSL](#orgb975632)
+1.  [Why pop-test?](#orga9e5cf6)
+2.  [Motivation](#org73c24f9)
+3.  [The Scenario DSL (Domain Specific Language)](#org7f69233)
+    1.  [pop services](#org4093ee2)
+        1.  [service health check](#org850428c)
+        2.  [service postgres](#org3d7c321)
+        3.  [service kafka](#org79b5975)
+    2.  [pop checks](#org286744a)
+    3.  [Condition DSL](#org29cf1b1)
+    4.  [pop postgres](#org466c22b)
+    5.  [pop kafka](#org0a03acd)
+4.  [Example tests, using the DSL](#org5c313cd)
 
 In Dutch 🇳🇱, *pop* means puppet or doll. But pop-test is not about dolls! It’s a tool that helps test computer programs in an easy and future-proof manner that improves reliability and engineering freedom.
 
@@ -24,7 +27,7 @@ pop-tests as we affectionately call them, can range from small scope integration
 ![img](../../resources/img/wp10992149.jpg)
 
 
-<a id="org7939fc2"></a>
+<a id="orga9e5cf6"></a>
 
 # Why pop-test?
 
@@ -36,7 +39,7 @@ pop-tests as we affectionately call them, can range from small scope integration
 -   Fast and reliable – Built with Rust, a programming language known for speed and safety.
 
 
-<a id="orgd468e53"></a>
+<a id="org73c24f9"></a>
 
 # Motivation
 
@@ -63,7 +66,7 @@ In short, pop-tests make engineers happier, business people more certain of what
 ---
 
 
-<a id="org0647882"></a>
+<a id="org7f69233"></a>
 
 # The Scenario DSL (Domain Specific Language)
 
@@ -76,7 +79,7 @@ Here follows an explanation of every individual field and parameter possible, in
 ---
 
 
-<a id="org556e4b6"></a>
+<a id="org4093ee2"></a>
 
 ## pop services
 
@@ -96,7 +99,12 @@ A service is defined by:
 
 `env_vars` (optional, map of string to string) – A set of environment variables to be defined for the service.  
 
-`health_check` (required, object) – Defines how the system determines whether the service is healthy.  
+
+<a id="org850428c"></a>
+
+### service health check
+
+Defines how pop-test determines whether the service is healthy. Field is `health_check`, a required object.
 
 Health checks can take different forms:
 
@@ -108,12 +116,42 @@ HTTP health check:
 
 `path` (required, string) – The HTTP route used to check the service’s health (e.g., `/health`).  
 
-`patience_seconds` (required, integer) – The maximum time allowed for the service to become healthy. If the service is healthy before this deadline, the scenario setup continues without waiting.  
+`patience_seconds` (required, integer) – The maximum time allowed for the service to become healthy. If the service is healthy before this deadline, the scenario setup continues without waiting.
+
+
+<a id="org3d7c321"></a>
+
+### service postgres
+
+Defines how PostgreSQL is used in the service. Field is `postgres`, an optional object.
+
+`enabled` (optional, boolean) - Whether to inject environment variables with PostgreSQL details
+
+`host_var` (optional, string) - Container hostname will be injected on services, via environment variable, by default `POSTGRESQL_HOST`
+
+`port_var` (optional, string) - Container DB port will be injected on services, via environment variable, by default ~POSTGRESQL<sub>PORT</sub>
+
+`db_var` (optional, string) - Container DB schema name will be injected on services, via environment variable, by default `POSTGRESQL_DB`
+
+`user_var` (optional, string) - Container DB username will be injected on services, via environment variable, by default `POSTGRESQL_USER`
+
+`pass_var` (optional, string) - Container DB password will be injected on services, via environment variable, by default `POSTGRESQL_PASSWORD`
+
+
+<a id="org79b5975"></a>
+
+### service kafka
+
+Defines how Kafka is used in the service. Field is `kafka`, an optional object.
+
+`enabled` (optional, boolean) - Whether to inject environment variables with Kafka details
+
+`bootstrap_server_var` (optional, string) - Container HTTP connection string for Kafka will be injected on services, via environment variable, by default `KAFKA_BOOTSTRAP_SERVER`
 
 ---
 
 
-<a id="org604c216"></a>
+<a id="org286744a"></a>
 
 ## pop checks
 
@@ -134,7 +172,7 @@ Each JSON body pattern entry includes:
 `condition` (required, string) – A logical condition to be checked.
 
 
-<a id="orgd1eede8"></a>
+<a id="org29cf1b1"></a>
 
 ## Condition DSL
 
@@ -155,7 +193,7 @@ Supported conditions include:
 ---
 
 
-<a id="org4e60825"></a>
+<a id="org466c22b"></a>
 
 ## pop postgres
 
@@ -167,20 +205,10 @@ You can use PostgreSQL in pop-tests easily.
 
 `image_tag` (optional, string) - Container image tag for PostgreSQL, by default `17.2` or newer
 
-`host_var` (optional, string) - Container hostname will be injected on services, via environment variable, by default `POSTGRESQL_HOST`
-
-`port_var` (optional, string) - Container DB port will be injected on services, via environment variable, by default ~POSTGRESQL<sub>PORT</sub>
-
-`db_var` (optional, string) - Container DB schema name will be injected on services, via environment variable, by default `POSTGRESQL_DB`
-
-`user_var` (optional, string) - Container DB username will be injected on services, via environment variable, by default `POSTGRESQL_USER`
-
-`pass_var` (optional, string) - Container DB password will be injected on services, via environment variable, by default `POSTGRESQL_PASSWORD`
-
 ---
 
 
-<a id="org7dd49db"></a>
+<a id="org0a03acd"></a>
 
 ## pop kafka
 
@@ -192,12 +220,10 @@ You can use Kafka in pop-tests easily.
 
 `image_tag` (optional, string) - Container image tag for Kafka, by default `6.1.1`
 
-`bootstrap_server_var` (optional, string) - Container HTTP connection string for Kafka will be injected on services, via environment variable, by default `KAFKA_BOOTSTRAP_SERVER`
-
 ---
 
 
-<a id="orgb975632"></a>
+<a id="org5c313cd"></a>
 
 # Example tests, using the DSL
 
