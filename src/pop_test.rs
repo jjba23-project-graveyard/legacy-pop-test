@@ -214,115 +214,129 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
         _ => None,
     };
 
-    let mut with_env = HashMap::from([]);
+    for pop_service in scenario_file.pop_test.pop_services.clone() {
+        info!("registering service: {}", pop_service.id);
+        h_set.spawn(start_h(pop_service.clone()));
 
-    if scenario_file
-        .clone()
-        .pop_test
-        .pop_postgres
-        .map(|p| p.enabled)
-        == Some(Some(true))
-    {
-        let postgres_host = if let Some(p) = &postgres_container {
-            Some(p.get_host().await.unwrap().to_string())
-        } else {
-            None
-        };
+        let mut with_env = HashMap::from([]);
 
-        let postgres_port: i32 = if let Some(p) = &postgres_container {
-            p.ports()
-                .await
-                .unwrap()
-                .map_to_host_port_ipv4(5432)
-                .unwrap_or(5432)
-                .into()
-        } else {
-            5432
-        };
+        if scenario_file
+            .clone()
+            .pop_test
+            .pop_postgres
+            .map(|p| p.enabled)
+            == Some(Some(true))
+            && pop_service
+                .postgres
+                .clone()
+                .map(|p| p.enabled)
+                .unwrap_or(Some(false))
+                == Some(true)
+        {
+            let postgres_host = if let Some(p) = &postgres_container {
+                Some(p.get_host().await.unwrap().to_string())
+            } else {
+                None
+            };
 
-        if let Some(h) = postgres_host {
-            with_env.insert(
-                scenario_file
-                    .pop_test
-                    .pop_postgres
-                    .as_ref()
-                    .and_then(|pp| pp.db_var.clone())
-                    .unwrap_or("POSTGRES_DB".to_string()),
-                "postgres".to_string(),
-            );
-            with_env.insert(
-                scenario_file
-                    .pop_test
-                    .pop_postgres
-                    .as_ref()
-                    .and_then(|pp| pp.user_var.clone())
-                    .unwrap_or("POSTGRES_USER".to_string()),
-                "postgres".to_string(),
-            );
-            with_env.insert(
-                scenario_file
-                    .pop_test
-                    .pop_postgres
-                    .as_ref()
-                    .and_then(|pp| pp.pass_var.clone())
-                    .unwrap_or("POSTGRES_PASSWORD".to_string()),
-                "postgres".to_string(),
-            );
-            with_env.insert(
-                scenario_file
-                    .pop_test
-                    .pop_postgres
-                    .as_ref()
-                    .and_then(|pp| pp.port_var.clone())
-                    .unwrap_or("POSTGRES_PORT".to_string()),
-                postgres_port.to_string(),
-            );
-            with_env.insert(
-                scenario_file
-                    .pop_test
-                    .pop_postgres
-                    .as_ref()
-                    .and_then(|pp| pp.host_var.clone())
-                    .unwrap_or("POSTGRES_HOST".to_string()),
-                h.clone(),
-            );
+            let postgres_port: i32 = if let Some(p) = &postgres_container {
+                p.ports()
+                    .await
+                    .unwrap()
+                    .map_to_host_port_ipv4(5432)
+                    .unwrap_or(5432)
+                    .into()
+            } else {
+                5432
+            };
+
+            if let Some(h) = postgres_host {
+                with_env.insert(
+                    pop_service
+                        .postgres
+                        .as_ref()
+                        .and_then(|pp| pp.db_var.clone())
+                        .unwrap_or("POSTGRES_DB".to_string()),
+                    "postgres".to_string(),
+                );
+                with_env.insert(
+                    pop_service
+                        .postgres
+                        .as_ref()
+                        .and_then(|pp| pp.user_var.clone())
+                        .unwrap_or("POSTGRES_USER".to_string()),
+                    "postgres".to_string(),
+                );
+                with_env.insert(
+                    pop_service
+                        .postgres
+                        .as_ref()
+                        .and_then(|pp| pp.pass_var.clone())
+                        .unwrap_or("POSTGRES_PASSWORD".to_string()),
+                    "postgres".to_string(),
+                );
+                with_env.insert(
+                    pop_service
+                        .postgres
+                        .as_ref()
+                        .and_then(|pp| pp.port_var.clone())
+                        .unwrap_or("POSTGRES_PORT".to_string()),
+                    postgres_port.to_string(),
+                );
+                with_env.insert(
+                    pop_service
+                        .postgres
+                        .as_ref()
+                        .and_then(|pp| pp.host_var.clone())
+                        .unwrap_or("POSTGRES_HOST".to_string()),
+                    h.clone(),
+                );
+            }
         }
+
+        if scenario_file.clone().pop_test.pop_kafka.map(|k| k.enabled) == Some(Some(true))
+            && pop_service
+                .kafka
+                .clone()
+                .map(|k| k.enabled)
+                .unwrap_or(Some(false))
+                == Some(true)
+        {
+            let kafka_host = if let Some(k) = &kafka_container {
+                Some(k.get_host().await.unwrap().to_string())
+            } else {
+                None
+            };
+
+            let kafka_port: i32 = if let Some(k) = &kafka_container {
+                k.ports()
+                    .await
+                    .unwrap()
+                    .map_to_host_port_ipv4(9092)
+                    .unwrap_or(9092)
+                    .into()
+            } else {
+                9092
+            };
+
+            match kafka_host {
+                Some(h) => with_env.insert(
+                    pop_service
+                        .kafka
+                        .as_ref()
+                        .and_then(|pp| pp.bootstrap_server_var.clone())
+                        .unwrap_or("KAFKA_BOOTSTRAP_SERVER".to_string()),
+                    format!("{}:{}", h, kafka_port),
+                ),
+                _ => None,
+            };
+        }
+
+        let p = start_p(pop_service, with_env.clone())
+            .await
+            .map_err(|_| "Failed to start process")?;
+        children.push(p);
     }
-
-    if scenario_file.clone().pop_test.pop_kafka.map(|k| k.enabled) == Some(Some(true)) {
-        let kafka_host = if let Some(k) = &kafka_container {
-            Some(k.get_host().await.unwrap().to_string())
-        } else {
-            None
-        };
-
-        let kafka_port: i32 = if let Some(k) = &kafka_container {
-            k.ports()
-                .await
-                .unwrap()
-                .map_to_host_port_ipv4(9092)
-                .unwrap_or(9092)
-                .into()
-        } else {
-            9092
-        };
-
-        match kafka_host {
-            Some(h) => with_env.insert(
-                scenario_file
-                    .pop_test
-                    .pop_kafka
-                    .clone()
-                    .as_ref()
-                    .and_then(|pp| pp.bootstrap_server_var.clone())
-                    .unwrap_or("KAFKA_BOOTSTRAP_SERVER".to_string()),
-                format!("{}:{}", h, kafka_port),
-            ),
-            _ => None,
-        };
-    }
-
-    register_services(&mut h_set, &mut children, &scenario_file, with_env).await?;
 
     info!("awaiting for all services to be healthy");
     h_set.join_all().await;
@@ -333,23 +347,6 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
     terminate_processes(children).await;
 
     success!("finished playing scenario");
-    Ok(())
-}
-
-pub async fn register_services(
-    h_set: &mut JoinSet<()>,
-    children: &mut Vec<Child>,
-    scenario_file: &PopScenarioFile,
-    with_env: HashMap<String, String>,
-) -> Result<(), String> {
-    for pop_service in scenario_file.pop_test.pop_services.clone() {
-        info!("registering service: {}", pop_service.id);
-        h_set.spawn(start_h(pop_service.clone()));
-        let p = start_p(pop_service, with_env.clone())
-            .await
-            .map_err(|_| "Failed to start process")?;
-        children.push(p);
-    }
     Ok(())
 }
 

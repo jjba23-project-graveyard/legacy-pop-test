@@ -27,24 +27,13 @@ pop_test:
       health_check:
         path: "/health"
         patience_seconds: 90
-
-
-  pop_checks: []        
-  # pop_checks:
-  #   - check_url: "/api/v1/vehicles/2c7f6e13-59ea-4aea-bacc-a226fbd19abd/session-history"
-  #     service_id: "dynamic-tariff-charging"
-  #     json_body_patterns:
-  #       - pattern: '"meta""forecastDate"'
-  #         condition: '!= ""'
-  #       - pattern: '"data"[0]"load"'
-  #         condition: "> 0"
-  #       - pattern: '"data"[0]"solar"'
-  #         condition: ">= 0"
+      postgres:
+        enabled: true
+      kafka:
+        enabled: true
 
   pop_postgres:
     enabled: true
     
   pop_kafka:
     enabled: true
-    image_name: "confluentinc/cp-kafka"
-    image_tag: "6.1.1"

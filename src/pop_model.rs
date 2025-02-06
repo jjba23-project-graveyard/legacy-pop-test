@@ -26,6 +26,22 @@ pub enum PopServiceHealthCheck {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct PopServicePostgres {
+    pub enabled: Option<bool>,
+    pub host_var: Option<String>,
+    pub port_var: Option<String>,
+    pub db_var: Option<String>,
+    pub user_var: Option<String>,
+    pub pass_var: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct PopServiceKafka {
+    pub enabled: Option<bool>,
+    pub bootstrap_server_var: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct PopService {
     pub id: String,
     pub name: Option<String>,
@@ -35,6 +51,8 @@ pub struct PopService {
     pub start_cmd_args: Vec<String>,
     pub env_vars: HashMap<String, String>,
     pub health_check: PopServiceHealthCheck,
+    pub postgres: Option<PopServicePostgres>,
+    pub kafka: Option<PopServiceKafka>,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
@@ -59,11 +77,6 @@ pub struct PopPostgres {
     pub enabled: Option<bool>,
     pub image_name: Option<String>,
     pub image_tag: Option<String>,
-    pub host_var: Option<String>,
-    pub port_var: Option<String>,
-    pub db_var: Option<String>,
-    pub user_var: Option<String>,
-    pub pass_var: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -71,7 +84,6 @@ pub struct PopKafka {
     pub enabled: Option<bool>,
     pub image_name: Option<String>,
     pub image_tag: Option<String>,
-    pub bootstrap_server_var: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
