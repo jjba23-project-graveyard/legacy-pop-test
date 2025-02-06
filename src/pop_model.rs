@@ -87,11 +87,19 @@ pub struct PopKafka {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct PopServer {
+    pub enabled: Option<bool>,
+    pub image_name: Option<String>,
+    pub image_tag: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct PopScenario {
     pub pop_services: Vec<PopService>,
     pub pop_checks: Option<Vec<PopCheck>>,
     pub pop_postgres: Option<PopPostgres>,
     pub pop_kafka: Option<PopKafka>,
+    pub pop_server: Option<PopServer>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

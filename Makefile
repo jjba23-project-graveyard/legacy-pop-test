@@ -16,17 +16,17 @@
 # along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
 run-green-energy-mix: fmt
-	cargo run -- play-scenario ./resources/scenarios/test-green-energy-mix.yaml
+	nix develop -c cargo run -- play-scenario ./resources/scenarios/test-green-energy-mix.yaml
 run-byggsteg: fmt
-	cargo run -- play-scenario ./resources/scenarios/test-byggsteg.yaml
+	nix develop -c cargo run -- play-scenario ./resources/scenarios/test-byggsteg.yaml
 run-dynamic-tariff-charging: fmt
-	cargo run -- play-scenario ./resources/scenarios/test-dynamic-tariff-charging.yaml	
+	nix develop -c cargo run -- play-scenario ./resources/scenarios/test-dynamic-tariff-charging.yaml	
 fmt:
-	cargo fix --allow-dirty --bin "pop-test"
-	cargo clippy --fix --allow-dirty
-	find . -maxdepth 8 -name "*.rs" -type f -exec rustfmt --edition 2021 {} \;
+	nix develop -c cargo fix --allow-dirty --bin "pop-test"
+	nix develop -c cargo clippy --fix --allow-dirty
+	nix develop -c find . -maxdepth 8 -name "*.rs" -type f -exec rustfmt --edition 2021 {} \;
 test: fmt
-	cargo test
+	nix develop -c cargo test
 # publish-manual: Generates and publishes the manual from Org files using Emacs.
 publish-manual:
 	cd docs/Manual/ && emacs -Q --batch \

@@ -19,12 +19,13 @@ use crate::checks::perform_checks;
 use crate::health_check::start_health_check;
 use crate::kafka::start_kafka_container;
 use crate::pop_model::PopScenarioFile;
+use crate::pop_server::start_pop_server_container;
 use crate::postgres::start_postgres_container;
 use crate::proc::{start_service, terminate_services};
 
 use paris::{info, success};
 use std::collections::HashMap;
-use testcontainers::ContainerAsync;
+use testcontainers::{ContainerAsync, GenericImage};
 use testcontainers_modules::kafka::Kafka;
 
 use testcontainers_modules::postgres::Postgres;
@@ -56,6 +57,23 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
         }
         _ => None,
     };
+
+    let pop_server_container: Option<ContainerAsync<GenericImage>> =
+        match &scenario_file.pop_test.pop_server {
+            Some(pop_server) => {
+                if pop_server.enabled == Some(true) {
+                    info!("start setting up pop_server");
+                    Some(
+                        start_pop_server_container(pop_server.clone())
+                            .await
+                            .unwrap(),
+                    )
+                } else {
+                    None
+                }
+            }
+            _ => None,
+        };
 
     for pop_service in scenario_file.pop_test.pop_services.clone() {
         info!("registering service: {}", pop_service.id);

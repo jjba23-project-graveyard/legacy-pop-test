@@ -37,3 +37,6 @@ pop_test:
     
   pop_kafka:
     enabled: true
+
+  pop_server:
+    enabled: true

@@ -26,6 +26,7 @@ mod condition_dsl;
 mod health_check;
 mod kafka;
 mod pop_model;
+mod pop_server;
 mod postgres;
 mod proc;
 mod scenario;
