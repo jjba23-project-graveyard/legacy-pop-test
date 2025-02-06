@@ -17,14 +17,14 @@
 
 use std::time::Duration;
 
-use crate::pop_model::PopServiceHealthCheck;
+use crate::pop_model::{PopService, PopServiceHealthCheck};
 use paris::{error, info, success};
 use tokio::time::sleep;
 
 pub async fn health_check(
-    id: String,
-    base_url: String,
-    health_check: PopServiceHealthCheck,
+    id: &String,
+    base_url: &String,
+    health_check: &PopServiceHealthCheck,
 ) -> Result<(), String> {
     info!("starting healthcheck for service: {}", id);
     match health_check {
@@ -34,7 +34,7 @@ pub async fn health_check(
         } => {
             let mut elapsed = 0;
             let url = format!("{}{}", base_url, path);
-            while elapsed <= patience_seconds {
+            while elapsed <= *patience_seconds {
                 info!("calling health check URL ({}): {}", elapsed, url);
                 let resp = reqwest::get(url.clone()).await;
                 println!("{resp:#?}");
@@ -55,11 +55,20 @@ pub async fn health_check(
             Ok(())
         }
         crate::pop_model::PopServiceHealthCheck::Dummy { always_healthy } => {
-            if always_healthy {
+            if always_healthy.to_owned() {
                 Ok(())
             } else {
                 Err("".to_string())
             }
         }
     }
+}
+
+pub async fn start_h(pop_service: PopService) {
+    let _ = health_check(
+        &pop_service.id,
+        &pop_service.base_url,
+        &pop_service.health_check,
+    )
+    .await;
 }

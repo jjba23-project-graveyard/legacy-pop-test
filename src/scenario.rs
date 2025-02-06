@@ -16,68 +16,19 @@
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
 use crate::checks::perform_checks;
-use crate::health_check::health_check;
+use crate::health_check::start_h;
 use crate::kafka::start_kafka_container;
-use crate::pop_model::{PopScenarioFile, PopService};
+use crate::pop_model::PopScenarioFile;
 use crate::postgres::start_postgres_container;
+use crate::proc::{start_service, terminate_services};
 
-use paris::{error, info, success};
+use paris::{info, success};
 use std::collections::HashMap;
-use std::{env, process::Stdio};
 use testcontainers::ContainerAsync;
 use testcontainers_modules::kafka::Kafka;
 
 use testcontainers_modules::postgres::Postgres;
-use tokio::process::{Child, Command};
 use tokio::task::JoinSet;
-
-pub async fn do_work(
-    pop_service: PopService,
-    with_env: HashMap<String, String>,
-) -> Result<Child, std::io::Error> {
-    info!("Task is running...");
-    let user_home = env::var("HOME").unwrap();
-
-    let dir = str::replace(&pop_service.dir, "$HOME", &user_home);
-
-    info!("in dir {}", &dir);
-    info!("with args {:?}", &pop_service.start_cmd_args);
-    info!("with env {:?}", &with_env);
-
-    let mut arg: Vec<String> = Vec::new();
-    arg.push("-c".to_string());
-    for b in &pop_service.start_cmd_args {
-        arg.push(b.to_string());
-    }
-
-    info!("run shell with args {:?}", &arg);
-
-    let b = &pop_service
-        .shell_path
-        .clone()
-        .unwrap_or_else(|| "bash".to_string());
-
-    let shell_path = str::replace(b, "$HOME", &user_home);
-    let env: HashMap<String, String> = pop_service.env_vars.into_iter().chain(with_env).collect();
-    Command::new(shell_path)
-        .args(&arg)
-        .current_dir(dir)
-        .envs(env)
-        .stdout(Stdio::inherit())
-        .spawn()
-}
-
-pub async fn start_p(
-    pop_service: PopService,
-    with_env: HashMap<String, String>,
-) -> Result<Child, std::io::Error> {
-    do_work(pop_service, with_env).await
-}
-
-pub async fn start_h(pop_service: PopService) {
-    let pp = pop_service.clone();
-    let _ = health_check(pp.id, pp.base_url, pp.health_check).await;
-}
 
 pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String> {
     let mut h_set = JoinSet::new();
@@ -224,7 +175,7 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
             };
         }
 
-        let p = start_p(pop_service, with_env.clone())
+        let p = start_service(pop_service, with_env.clone())
             .await
             .map_err(|_| "Failed to start process")?;
         children.push(p);
@@ -236,30 +187,8 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
     info!("performing tests and assertions");
     perform_checks(&scenario_file).await;
 
-    terminate_processes(children).await;
+    terminate_services(children).await;
 
     success!("finished playing scenario");
     Ok(())
-}
-
-pub async fn terminate_processes(children: Vec<Child>) {
-    info!("terminating all processes");
-    for mut child in children {
-        info!("terminating pid: {:?}", child.id());
-        let _ = child.kill().await;
-    }
-}
-
-pub async fn do_with_file_data(user_cmd: String, file_data: String) -> Result<(), String> {
-    info!("parsing YAML from file");
-    let scenario_file: PopScenarioFile = serde_yml::from_str(&file_data).unwrap();
-
-    success!("parsed pop scenario properly from YAML file");
-    if user_cmd == "play-scenario" {
-        play_scenario(scenario_file).await
-    } else {
-        let msg = "could not understand the wanted task to execute";
-        error!("{}", msg);
-        Err(msg.to_string())
-    }
 }

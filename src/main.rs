@@ -16,6 +16,8 @@
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
 use paris::{error, info, success};
+use pop_model::PopScenarioFile;
+use scenario::play_scenario;
 use std::env;
 use std::fs;
 
@@ -24,8 +26,9 @@ mod condition_dsl;
 mod health_check;
 mod kafka;
 mod pop_model;
-mod pop_test;
 mod postgres;
+mod proc;
+mod scenario;
 
 #[tokio::main]
 async fn main() -> Result<(), String> {
@@ -50,7 +53,7 @@ async fn main() -> Result<(), String> {
     async {
         success!("scenario file read successfully to string");
 
-        pop_test::do_with_file_data(user_cmd.clone(), file_data)
+        do_with_file_data(user_cmd.clone(), file_data)
             .await
             .map_err(|e| {
                 error!("{}", e);
@@ -61,4 +64,18 @@ async fn main() -> Result<(), String> {
         Ok(())
     }
     .await
+}
+
+pub async fn do_with_file_data(user_cmd: String, file_data: String) -> Result<(), String> {
+    info!("parsing YAML from file");
+    let scenario_file: PopScenarioFile = serde_yml::from_str(&file_data).unwrap();
+
+    success!("parsed pop scenario properly from YAML file");
+    if user_cmd == "play-scenario" {
+        play_scenario(scenario_file).await
+    } else {
+        let msg = "could not understand the wanted task to execute";
+        error!("{}", msg);
+        Err(msg.to_string())
+    }
 }
