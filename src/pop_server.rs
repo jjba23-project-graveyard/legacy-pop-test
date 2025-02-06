@@ -26,7 +26,7 @@ pub async fn start_pop_server_container(
         pop_server
             .image_name
             .unwrap_or("jjba23/pop-server".to_string()),
-        pop_server.image_tag.unwrap_or("0.2.0".to_string()),
+        pop_server.image_tag.unwrap_or("0.2.1".to_string()),
     )
     .start()
     .await
