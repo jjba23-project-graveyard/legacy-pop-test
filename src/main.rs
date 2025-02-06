@@ -19,9 +19,13 @@ use paris::{error, info, success};
 use std::env;
 use std::fs;
 
-mod pop_check;
+mod checks;
+mod condition_dsl;
+mod health_check;
+mod kafka;
 mod pop_model;
 mod pop_test;
+mod postgres;
 
 #[tokio::main]
 async fn main() -> Result<(), String> {

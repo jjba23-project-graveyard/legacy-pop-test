@@ -1,18 +1,18 @@
 
 # Table of Contents
 
-1.  [Why pop-test?](#orga9e5cf6)
-2.  [Motivation](#org73c24f9)
-3.  [The Scenario DSL (Domain Specific Language)](#org7f69233)
-    1.  [pop services](#org4093ee2)
-        1.  [service health check](#org850428c)
-        2.  [service postgres](#org3d7c321)
-        3.  [service kafka](#org79b5975)
-    2.  [pop checks](#org286744a)
-    3.  [Condition DSL](#org29cf1b1)
-    4.  [pop postgres](#org466c22b)
-    5.  [pop kafka](#org0a03acd)
-4.  [Example tests, using the DSL](#org5c313cd)
+1.  [Why pop-test?](#org41e8e2b)
+2.  [Motivation](#org8db5bcc)
+3.  [The Scenario DSL (Domain Specific Language)](#org3b3c343)
+    1.  [pop services](#org67d0dda)
+        1.  [service health check](#org2f79c13)
+        2.  [service postgres](#org70b5754)
+        3.  [service kafka](#org03289d0)
+    2.  [pop checks](#org67ed03f)
+    3.  [Condition DSL](#org11c2c8d)
+    4.  [pop postgres](#org7f3681f)
+    5.  [pop kafka](#org5486dd9)
+4.  [Example tests, using the DSL](#orgf22495f)
 
 In Dutch 🇳🇱, *pop* means puppet or doll. But pop-test is not about dolls! It’s a tool that helps test computer programs in an easy and future-proof manner that improves reliability and engineering freedom.
 
@@ -27,7 +27,7 @@ pop-tests as we affectionately call them, can range from small scope integration
 ![img](../../resources/img/wp10992149.jpg)
 
 
-<a id="orga9e5cf6"></a>
+<a id="org41e8e2b"></a>
 
 # Why pop-test?
 
@@ -39,7 +39,7 @@ pop-tests as we affectionately call them, can range from small scope integration
 -   Fast and reliable – Built with Rust, a programming language known for speed and safety.
 
 
-<a id="org73c24f9"></a>
+<a id="org8db5bcc"></a>
 
 # Motivation
 
@@ -66,7 +66,7 @@ In short, pop-tests make engineers happier, business people more certain of what
 ---
 
 
-<a id="org7f69233"></a>
+<a id="org3b3c343"></a>
 
 # The Scenario DSL (Domain Specific Language)
 
@@ -79,7 +79,7 @@ Here follows an explanation of every individual field and parameter possible, in
 ---
 
 
-<a id="org4093ee2"></a>
+<a id="org67d0dda"></a>
 
 ## pop services
 
@@ -100,7 +100,7 @@ A service is defined by:
 `env_vars` (optional, map of string to string) – A set of environment variables to be defined for the service.  
 
 
-<a id="org850428c"></a>
+<a id="org2f79c13"></a>
 
 ### service health check
 
@@ -119,7 +119,7 @@ HTTP health check:
 `patience_seconds` (required, integer) – The maximum time allowed for the service to become healthy. If the service is healthy before this deadline, the scenario setup continues without waiting.
 
 
-<a id="org3d7c321"></a>
+<a id="org70b5754"></a>
 
 ### service postgres
 
@@ -138,7 +138,7 @@ Defines how PostgreSQL is used in the service. Field is `postgres`, an optional 
 `pass_var` (optional, string) - Container DB password will be injected on services, via environment variable, by default `POSTGRESQL_PASSWORD`
 
 
-<a id="org79b5975"></a>
+<a id="org03289d0"></a>
 
 ### service kafka
 
@@ -151,7 +151,7 @@ Defines how Kafka is used in the service. Field is `kafka`, an optional object.
 ---
 
 
-<a id="org286744a"></a>
+<a id="org67ed03f"></a>
 
 ## pop checks
 
@@ -172,7 +172,7 @@ Each JSON body pattern entry includes:
 `condition` (required, string) – A logical condition to be checked.
 
 
-<a id="org29cf1b1"></a>
+<a id="org11c2c8d"></a>
 
 ## Condition DSL
 
@@ -193,7 +193,7 @@ Supported conditions include:
 ---
 
 
-<a id="org466c22b"></a>
+<a id="org7f3681f"></a>
 
 ## pop postgres
 
@@ -208,7 +208,7 @@ You can use PostgreSQL in pop-tests easily.
 ---
 
 
-<a id="org0a03acd"></a>
+<a id="org5486dd9"></a>
 
 ## pop kafka
 
@@ -223,7 +223,7 @@ You can use Kafka in pop-tests easily.
 ---
 
 
-<a id="org5c313cd"></a>
+<a id="orgf22495f"></a>
 
 # Example tests, using the DSL
 

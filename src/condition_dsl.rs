@@ -21,7 +21,7 @@ use jql_runner::runner::raw;
 use paris::success;
 use serde_json::Value;
 
-pub fn check_pat(body: &Value, patterns: Vec<BodyPattern>) -> Result<(), String> {
+pub fn eval_condition(body: &Value, patterns: Vec<BodyPattern>) -> Result<(), String> {
     for pat in patterns {
         let good_match = raw(&pat.pattern, body).map_err(|e| e.to_string())?;
         success!("{:?}", good_match);
@@ -104,7 +104,7 @@ mod tests {
             pattern: pattern.to_string(),
             condition: condition.to_string(),
         }];
-        let result = check_pat(&body, patterns);
+        let result = eval_condition(&body, patterns);
         assert_eq!(result, expected);
     }
 
@@ -155,7 +155,7 @@ mod tests {
             condition: "!= \"\"".to_string(),
         }];
         let body = json!({"sut": "something"});
-        let result = check_pat(&body, patterns);
+        let result = eval_condition(&body, patterns);
         error!("{:?}", result);
         assert_ne!(result, Ok(()));
     }
@@ -167,7 +167,7 @@ mod tests {
             condition: "weird-condition".to_string(),
         }];
         let body = json!({"sut": "something"});
-        let result = check_pat(&body, patterns);
+        let result = eval_condition(&body, patterns);
         error!("{:?}", result);
         assert_ne!(result, Ok(()));
     }
