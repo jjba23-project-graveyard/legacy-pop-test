@@ -86,7 +86,7 @@ pub async fn setup_keycloak_env(
                 .bootstrap_server_var
                 .clone()
                 .unwrap_or("KEYCLOAK_AUTH_SERVER_URL".to_string());
-            with_env.insert(k, format!("{}:{}", host, port));
+            with_env.insert(k, format!("http://{}:{}", host, port));
         }
     }
 }
