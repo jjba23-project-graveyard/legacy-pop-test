@@ -33,7 +33,7 @@ pub async fn run_keycloak_container(
         pop_keycloak.image_tag.unwrap_or("26.1".to_string()),
     )
     .with_exposed_port(ContainerPort::Tcp(8080))
-    .with_cmd(["start-dev"])
+    .with_cmd(["--verbose", "start-dev"])
     .start()
     .await
     .map_err(|e| format!("{}", e))
