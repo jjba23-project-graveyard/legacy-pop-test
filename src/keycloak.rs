@@ -286,9 +286,10 @@ pub async fn setup_keycloak_env(
 
             let params = HashMap::from([
                 ("username", "batterypack-services"),
-                ("password", "test"),
+                ("password", "password"),
                 ("grant_type", "password"),
                 ("client_id", "batterypack-services"),
+                ("client_secret", "test"),
             ]);
 
             let get_user_token_response = reqwest::Client::new()
