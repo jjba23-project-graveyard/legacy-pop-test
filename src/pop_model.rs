@@ -95,10 +95,20 @@ pub struct PopKafka {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct PopServerBehavior {
+    pub path: String,
+    pub method: String,
+    pub status: u16,
+    pub content_type: String,
+    pub body_file: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct PopServer {
     pub enabled: Option<bool>,
     pub image_name: Option<String>,
     pub image_tag: Option<String>,
+    pub behaviors: Option<Vec<PopServerBehavior>>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

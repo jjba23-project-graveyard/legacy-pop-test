@@ -15,9 +15,11 @@
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
-use crate::pop_model::PopServer;
+use crate::pop_model::{PopServer, PopServerBehavior};
+use paris::info;
 use testcontainers::runners::AsyncRunner;
 use testcontainers::{ContainerAsync, GenericImage};
+use tokio::fs;
 
 pub async fn start_pop_server_container(
     pop_server: PopServer,
@@ -31,4 +33,30 @@ pub async fn start_pop_server_container(
     .start()
     .await
     .map_err(|e| format!("{}", e))
+}
+
+pub async fn register_pop_server_behavior(
+    pop_server_url: String,
+    pop_server_behavior: PopServerBehavior,
+) {
+    let client = reqwest::Client::new();
+    let body = fs::read_to_string(pop_server_behavior.body_file)
+        .await
+        .unwrap_or("".to_string());
+    let resp = client
+        .post(format!(
+            "{}/api/v2/pop-server/register-behavior",
+            pop_server_url
+        ))
+        .header("x-pop-server-method", pop_server_behavior.method)
+        .header("x-pop-server-path", pop_server_behavior.path)
+        .header("x-pop-server-status", pop_server_behavior.status)
+        .header(
+            "x-pop-server-content-type",
+            pop_server_behavior.content_type,
+        )
+        .body(body)
+        .send()
+        .await;
+    info!("{:?}", resp)
 }

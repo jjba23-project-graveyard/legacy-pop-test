@@ -19,7 +19,7 @@ use crate::checks::perform_checks;
 use crate::health_check::start_health_check;
 use crate::kafka::start_kafka_container;
 use crate::pop_model::PopScenarioFile;
-use crate::pop_server::start_pop_server_container;
+use crate::pop_server::{register_pop_server_behavior, start_pop_server_container};
 use crate::postgres::start_postgres_container;
 use crate::proc::{start_service, terminate_services};
 
@@ -226,6 +226,22 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
                     .for_each(|v| {
                         with_env.insert(v, format!("http://{}:{}", h, pop_server_port));
                     });
+                if let Some(bs) = scenario_file
+                    .clone()
+                    .pop_test
+                    .pop_server
+                    .and_then(|p| p.behaviors)
+                {
+                    info!("registering behavior in pop-server: {:?}", bs);
+                    for b in bs {
+                        register_pop_server_behavior(
+                            format!("http://{}:{}", h, pop_server_port),
+                            b,
+                        )
+                        .await;
+                        success!("done registering behavior in pop-server")
+                    }
+                }
             };
         }
 

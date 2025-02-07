@@ -42,7 +42,7 @@ pop_test:
   pop_checks:
     - check_url: "/api/v1/registeredChargepoints/3514fbab-9a15-4869-9a7d-895e9dfb3560"
       service_id: "dynamic-tariff-charging"
-      # delay_seconds: 9000
+      delay_seconds: 900
       json_body_patterns:
         - pattern: '"data""vehicleId"'
           condition: '!= ""'
@@ -56,3 +56,10 @@ pop_test:
 
   pop_server:
     enabled: true
+    behaviors:
+      - path: "/realms/vandebron/.well-known/openid-configuration"
+        method: "GET"
+        status: 200
+        content_type: "application/json"
+        body_file: "/home/joe/Ontwikkeling/Persoonlijk/pop-test/resources/behavior-data/realms::vandebron::.well-known::openid-configuration.json"
+        
