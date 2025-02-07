@@ -25,6 +25,7 @@ mod checks;
 mod condition_dsl;
 mod health_check;
 mod kafka;
+mod keycloak;
 mod pop_model;
 mod pop_server;
 mod postgres;

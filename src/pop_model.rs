@@ -48,6 +48,12 @@ pub struct PopServicePopServer {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct PopServiceKeycloak {
+    pub enabled: Option<bool>,
+    pub url_var: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct PopService {
     pub id: String,
     pub name: Option<String>,
@@ -60,6 +66,7 @@ pub struct PopService {
     pub postgres: Option<PopServicePostgres>,
     pub kafka: Option<PopServiceKafka>,
     pub pop_server: Option<PopServicePopServer>,
+    pub keycloak: Option<PopServiceKeycloak>,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
@@ -95,6 +102,13 @@ pub struct PopKafka {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct PopKeycloak {
+    pub enabled: Option<bool>,
+    pub image_name: Option<String>,
+    pub image_tag: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct PopServerBehavior {
     pub path: String,
     pub method: String,
@@ -118,6 +132,7 @@ pub struct PopScenario {
     pub pop_postgres: Option<PopPostgres>,
     pub pop_kafka: Option<PopKafka>,
     pub pop_server: Option<PopServer>,
+    pub pop_keycloak: Option<PopKeycloak>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

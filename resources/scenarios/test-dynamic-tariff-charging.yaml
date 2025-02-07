@@ -31,6 +31,8 @@ pop_test:
         enabled: true
       kafka:
         enabled: true
+      keycloak:
+        enabled: true        
       pop_server:
         enabled: true
         url_vars:
@@ -46,7 +48,9 @@ pop_test:
       json_body_patterns:
         - pattern: '"data""vehicleId"'
           condition: '!= ""'
-          
+
+  pop_keycloak:
+    enabled: true
 
   pop_postgres:
     enabled: true
@@ -56,10 +60,5 @@ pop_test:
 
   pop_server:
     enabled: true
-    behaviors:
-      - path: "/realms/vandebron/.well-known/openid-configuration"
-        method: "GET"
-        status: 200
-        content_type: "application/json"
-        body_file: "/home/joe/Ontwikkeling/Persoonlijk/pop-test/resources/behavior-data/realms::vandebron::.well-known::openid-configuration.json"
+
         
