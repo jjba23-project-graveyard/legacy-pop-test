@@ -39,6 +39,12 @@ struct CreateClientRequest {
     pub attributes: HashMap<String, String>,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+struct CreateRealmRequest {
+    pub enabled: bool,
+    pub realm: String,
+}
+
 pub async fn run_keycloak_container(
     pop_keycloak: PopKeycloak,
 ) -> Result<ContainerAsync<GenericImage>, String> {
@@ -49,6 +55,7 @@ pub async fn run_keycloak_container(
         pop_keycloak.image_tag.unwrap_or("26.1".to_string()),
     )
     .with_exposed_port(ContainerPort::Tcp(8080))
+    .with_exposed_port(ContainerPort::Tcp(9000))
     .with_env_var("KC_BOOTSTRAP_ADMIN_USERNAME", "admin")
     .with_env_var("KC_BOOTSTRAP_ADMIN_PASSWORD", "admin")
     .with_env_var("DEBUG", "true")
@@ -106,15 +113,23 @@ pub async fn setup_keycloak_env(
         if let Some(k) = keycloak_container {
             let host = k.get_host().await.unwrap().to_string();
 
-            let port = k
+            let http_port = k
                 .ports()
                 .await
                 .unwrap()
                 .map_to_host_port_ipv4(8080)
                 .unwrap_or(8080);
 
-            let keycloak_url = format!("http://{}:{}", host, port);
-            let realm = "master".to_string();
+            let admin_port = k
+                .ports()
+                .await
+                .unwrap()
+                .map_to_host_port_ipv4(9000)
+                .unwrap_or(9000);
+
+            let keycloak_url = format!("http://{}:{}", host, http_port);
+            let keycloak_admin_url = format!("http://{}:{}", host, admin_port);
+            let realm = "vandebron".to_string();
 
             // todo health check on keycloak container
             tokio::time::sleep(Duration::from_secs(10)).await;
@@ -126,10 +141,10 @@ pub async fn setup_keycloak_env(
                 ("client_id", "admin-cli"),
             ]);
 
-            let c = reqwest::Client::new()
+            let get_admin_token_response = reqwest::Client::new()
                 .post(format!(
                     "{}/realms/{}/protocol/openid-connect/token",
-                    keycloak_url, realm
+                    keycloak_url, "master"
                 ))
                 .header("content-type", "application/x-www-form-urlencoded")
                 .form(&params)
@@ -140,13 +155,36 @@ pub async fn setup_keycloak_env(
                 .await
                 .unwrap();
 
-            let tok = c
+            let tok = get_admin_token_response
                 .get("access_token")
                 .map(|v| v.to_string())
                 .unwrap_or("".to_string());
             info!("{}", tok);
 
-            let cr = CreateClientRequest {
+            let create_realm_request = CreateRealmRequest {
+                enabled: true,
+                realm: realm.clone(),
+            };
+
+            let create_realm_response = reqwest::Client::new()
+                .post(format!("{}/admin/realms", keycloak_admin_url))
+                .header("content-type", "application/json")
+                .header("authorization", format!("Bearer {}", tok))
+                .json(&create_realm_request)
+                .send()
+                .await;
+            info!("{:?}", create_realm_response);
+
+            let byt = create_realm_response
+                .unwrap()
+                .bytes()
+                .await
+                .unwrap()
+                .to_vec();
+            let bod = String::from_utf8_lossy(&byt).to_string();
+            info!("{}", bod);
+
+            let create_client_request = CreateClientRequest {
                 protocol: "openid-connect".to_string(),
                 clientId: "batterypack-services".to_string(),
                 enabled: true,
@@ -155,22 +193,32 @@ pub async fn setup_keycloak_env(
                 standardFlowEnabled: true,
                 serviceAccountsEnabled: true,
                 directAccessGrantsEnabled: true,
-                attributes: HashMap::from([(
-                    "oauth2.device.authorization.grant.enabled".to_string(),
-                    "true".to_string(),
-                )]),
+                attributes: HashMap::new(),
+                // attributes: HashMap::from([(
+                //     "oauth2.device.authorization.grant.enabled".to_string(),
+                //     "true".to_string(),
+                // )]),
             };
 
-            let cc = reqwest::Client::new()
-                .post(format!("{}/admin/realms/{}/clients", keycloak_url, realm))
+            let create_client_response = reqwest::Client::new()
+                .post(format!(
+                    "{}/admin/realms/{}/clients",
+                    keycloak_admin_url,
+                    realm.clone()
+                ))
                 .header("content-type", "application/json")
                 .header("authorization", format!("Bearer {}", tok))
-                .json(&cr)
+                .json(&create_client_request)
                 .send()
                 .await;
-            info!("{:?}", cc);
+            info!("{:?}", create_client_response);
 
-            let byt = cc.unwrap().bytes().await.unwrap().to_vec();
+            let byt = create_client_response
+                .unwrap()
+                .bytes()
+                .await
+                .unwrap()
+                .to_vec();
             let bod = String::from_utf8_lossy(&byt).to_string();
             info!("{}", bod);
 
