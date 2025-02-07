@@ -16,6 +16,7 @@
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
 use std::collections::HashMap;
+use std::path::PathBuf;
 
 use crate::pop_model::{PopKeycloak, PopScenarioFile, PopService};
 use paris::info;
@@ -33,7 +34,23 @@ pub async fn run_keycloak_container(
         pop_keycloak.image_tag.unwrap_or("26.1".to_string()),
     )
     .with_exposed_port(ContainerPort::Tcp(8080))
-    .with_cmd(["--verbose", "start-dev"])
+    .with_env_var("KC_BOOTSTRAP_ADMIN_USERNAME", "admin")
+    .with_env_var("KC_BOOTSTRAP_ADMIN_PASSWORD", "admin")
+    .with_env_var("DEBUG", "true")
+    .with_cmd([
+        "--verbose",
+        "start-dev",
+        "--spi-theme-static-max-age=-1",
+        "--spi-theme-cache-themes=false",
+        "--spi-theme-cache-templates=false",
+        "--import-realm",
+    ])
+    .with_copy_to(
+        "/opt/keycloak/data/import/my-realm.json",
+        PathBuf::from(
+            "/home/joe/Ontwikkeling/Persoonlijk/pop-test/resources/realms/vandebron.json",
+        ),
+    )
     .start()
     .await
     .map_err(|e| format!("{}", e))
