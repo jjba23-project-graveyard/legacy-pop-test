@@ -40,9 +40,9 @@ pop_test:
 
 
   pop_checks:
-    - check_url: "/api/v1/vehicles/3514fbab-9a15-4869-9a7d-895e9dfb3560/session-history"
+    - check_url: "/api/v1/registeredChargepoints/3514fbab-9a15-4869-9a7d-895e9dfb3560"
       service_id: "dynamic-tariff-charging"
-      delay_seconds: 9000
+      # delay_seconds: 9000
       json_body_patterns:
         - pattern: '"data""vehicleId"'
           condition: '!= ""'
