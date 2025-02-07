@@ -75,55 +75,41 @@ pub async fn setup_postgres_env(
                 .unwrap()
                 .map_to_host_port_ipv4(5432)
                 .unwrap_or(5432);
+            let postgres = pop_service.postgres.as_ref().unwrap();
 
             with_env.insert(
-                pop_service
-                    .postgres
-                    .as_ref()
-                    .unwrap()
+                postgres
                     .db_var
                     .clone()
-                    .unwrap_or("POSTGRES_DB".to_string()),
+                    .unwrap_or_else(|| "POSTGRES_DB".to_string()),
                 "postgres".to_string(),
             );
             with_env.insert(
-                pop_service
-                    .postgres
-                    .as_ref()
-                    .unwrap()
+                postgres
                     .user_var
                     .clone()
-                    .unwrap_or("POSTGRES_USER".to_string()),
+                    .unwrap_or_else(|| "POSTGRES_USER".to_string()),
                 "postgres".to_string(),
             );
             with_env.insert(
-                pop_service
-                    .postgres
-                    .as_ref()
-                    .unwrap()
+                postgres
                     .pass_var
                     .clone()
-                    .unwrap_or("POSTGRES_PASSWORD".to_string()),
+                    .unwrap_or_else(|| "POSTGRES_PASSWORD".to_string()),
                 "postgres".to_string(),
             );
             with_env.insert(
-                pop_service
-                    .postgres
-                    .as_ref()
-                    .unwrap()
+                postgres
                     .port_var
                     .clone()
-                    .unwrap_or("POSTGRES_PORT".to_string()),
+                    .unwrap_or_else(|| "POSTGRES_PORT".to_string()),
                 port.to_string(),
             );
             with_env.insert(
-                pop_service
-                    .postgres
-                    .as_ref()
-                    .unwrap()
+                postgres
                     .host_var
                     .clone()
-                    .unwrap_or("POSTGRES_HOST".to_string()),
+                    .unwrap_or_else(|| "POSTGRES_HOST".to_string()),
                 host,
             );
         }
