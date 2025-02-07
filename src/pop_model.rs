@@ -51,6 +51,7 @@ pub struct PopServicePopServer {
 pub struct PopServiceKeycloak {
     pub enabled: Option<bool>,
     pub url_var: Option<String>,
+    pub realm_var: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

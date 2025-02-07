@@ -16,13 +16,28 @@
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
 use std::collections::HashMap;
-use std::path::PathBuf;
+use std::time::Duration;
 
 use crate::pop_model::{PopKeycloak, PopScenarioFile, PopService};
 use paris::info;
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use testcontainers::core::ContainerPort;
 use testcontainers::runners::AsyncRunner;
 use testcontainers::{ContainerAsync, GenericImage, ImageExt};
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+struct CreateClientRequest {
+    pub protocol: String,
+    pub clientId: String,
+    pub enabled: bool,
+    pub publicClient: bool,
+    pub secret: String,
+    pub standardFlowEnabled: bool,
+    pub serviceAccountsEnabled: bool,
+    pub directAccessGrantsEnabled: bool,
+    pub attributes: HashMap<String, String>,
+}
 
 pub async fn run_keycloak_container(
     pop_keycloak: PopKeycloak,
@@ -43,14 +58,14 @@ pub async fn run_keycloak_container(
         "--spi-theme-static-max-age=-1",
         "--spi-theme-cache-themes=false",
         "--spi-theme-cache-templates=false",
-        "--import-realm",
+        //        "--import-realm",
     ])
-    .with_copy_to(
-        "/opt/keycloak/data/import/my-realm.json",
-        PathBuf::from(
-            "/home/joe/Ontwikkeling/Persoonlijk/pop-test/resources/realms/vandebron.json",
-        ),
-    )
+    // .with_copy_to(
+    //     "/opt/keycloak/data/import/my-realm.json",
+    //     PathBuf::from(
+    //         "/home/joe/Ontwikkeling/Persoonlijk/pop-test/resources/realms/vandebron.json",
+    //     ),
+    // )
     .start()
     .await
     .map_err(|e| format!("{}", e))
@@ -90,20 +105,87 @@ pub async fn setup_keycloak_env(
     {
         if let Some(k) = keycloak_container {
             let host = k.get_host().await.unwrap().to_string();
+
             let port = k
                 .ports()
                 .await
                 .unwrap()
                 .map_to_host_port_ipv4(8080)
                 .unwrap_or(8080);
+
+            let keycloak_url = format!("http://{}:{}", host, port);
+            let realm = "master".to_string();
+
+            // todo health check on keycloak container
+            tokio::time::sleep(Duration::from_secs(10)).await;
+
+            let params = HashMap::from([
+                ("username", "admin"),
+                ("password", "admin"),
+                ("grant_type", "password"),
+                ("client_id", "admin-cli"),
+            ]);
+
+            let c = reqwest::Client::new()
+                .post(format!(
+                    "{}/realms/{}/protocol/openid-connect/token",
+                    keycloak_url, realm
+                ))
+                .header("content-type", "application/x-www-form-urlencoded")
+                .form(&params)
+                .send()
+                .await
+                .unwrap()
+                .json::<Value>()
+                .await
+                .unwrap();
+
+            let tok = c
+                .get("access_token")
+                .map(|v| v.to_string())
+                .unwrap_or("".to_string());
+            info!("{:?}", tok);
+
+            let cr = CreateClientRequest {
+                protocol: "openid-connect".to_string(),
+                clientId: "batterypack-services".to_string(),
+                enabled: true,
+                secret: "test".to_string(),
+                publicClient: false,
+                standardFlowEnabled: true,
+                serviceAccountsEnabled: true,
+                directAccessGrantsEnabled: true,
+                attributes: HashMap::from([(
+                    "oauth2.device.authorization.grant.enabled".to_string(),
+                    "true".to_string(),
+                )]),
+            };
+
+            let cc = reqwest::Client::new()
+                .post(format!("{}/admin/realms/{}/clients", keycloak_url, realm))
+                .header("content-type", "application/json")
+                .header("authorization", format!("Bearer {}", tok))
+                .json(&cr)
+                .send()
+                .await;
+            info!("{:?}", cc);
+
             let k: String = pop_service
-                .kafka
+                .keycloak
                 .as_ref()
                 .unwrap()
-                .bootstrap_server_var
+                .url_var
                 .clone()
                 .unwrap_or("KEYCLOAK_AUTH_SERVER_URL".to_string());
-            with_env.insert(k, format!("http://{}:{}", host, port));
+            with_env.insert(k, keycloak_url.clone());
+            let k: String = pop_service
+                .keycloak
+                .as_ref()
+                .unwrap()
+                .realm_var
+                .clone()
+                .unwrap_or("KEYCLOAK_REALM".to_string());
+            with_env.insert(k, realm);
         }
     }
 }
