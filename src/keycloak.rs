@@ -49,6 +49,20 @@ struct LoginResponse {
     access_token: String,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+struct CreateUserRequestCredentials {
+    r#type: String,
+    value: String,
+    temporary: bool,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+struct CreateUserRequest {
+    username: String,
+    enabled: bool,
+    credentials: Vec<CreateUserRequestCredentials>,
+}
+
 pub async fn run_keycloak_container(
     pop_keycloak: PopKeycloak,
 ) -> Result<ContainerAsync<GenericImage>, String> {
@@ -138,6 +152,9 @@ pub async fn setup_keycloak_env(
             // todo health check on keycloak container
             tokio::time::sleep(Duration::from_secs(10)).await;
 
+            //
+            //
+
             let params = HashMap::from([
                 ("username", "admin"),
                 ("password", "admin"),
@@ -162,6 +179,9 @@ pub async fn setup_keycloak_env(
             let tok = get_admin_token_response.access_token;
             info!("{}", tok);
 
+            //
+            //
+
             let create_realm_request = CreateRealmRequest {
                 enabled: true,
                 realm: realm.clone(),
@@ -183,7 +203,10 @@ pub async fn setup_keycloak_env(
                 .unwrap()
                 .to_vec();
             let bod = String::from_utf8_lossy(&byt).to_string();
-            info!("{}", bod);
+            info!("create_realm_response: {}", bod);
+
+            //
+            //
 
             let create_client_request = CreateClientRequest {
                 protocol: "openid-connect".to_string(),
@@ -221,7 +244,76 @@ pub async fn setup_keycloak_env(
                 .unwrap()
                 .to_vec();
             let bod = String::from_utf8_lossy(&byt).to_string();
-            info!("{}", bod);
+            info!("create_client_response: {}", bod);
+
+            //
+            //
+
+            let create_user_request = CreateUserRequest {
+                username: "batterypack-services".to_string(),
+                enabled: true,
+                credentials: vec![CreateUserRequestCredentials {
+                    r#type: "password".to_string(),
+                    value: "password".to_string(),
+                    temporary: false,
+                }],
+            };
+
+            let create_user_response = reqwest::Client::new()
+                .post(format!(
+                    "{}/admin/realms/{}/users",
+                    keycloak_url,
+                    realm.clone()
+                ))
+                .header("content-type", "application/json")
+                .header("authorization", format!("Bearer {}", tok))
+                .json(&create_user_request)
+                .send()
+                .await;
+            info!("{:?}", create_user_response);
+
+            let byt = create_user_response
+                .unwrap()
+                .bytes()
+                .await
+                .unwrap()
+                .to_vec();
+            let bod = String::from_utf8_lossy(&byt).to_string();
+            info!("create_user_response: {}", bod);
+
+            //
+            //
+
+            let params = HashMap::from([
+                ("username", "batterypack-services"),
+                ("password", "test"),
+                ("grant_type", "password"),
+                ("client_id", "batterypack-services"),
+            ]);
+
+            let get_user_token_response = reqwest::Client::new()
+                .post(format!(
+                    "{}/realms/{}/protocol/openid-connect/token",
+                    keycloak_url, realm
+                ))
+                .header("content-type", "application/x-www-form-urlencoded")
+                .form(&params)
+                .send()
+                .await;
+
+            let byt = get_user_token_response
+                .unwrap()
+                .bytes()
+                .await
+                .unwrap()
+                .to_vec();
+            let bod = String::from_utf8_lossy(&byt).to_string();
+            info!("get_user_token_response: {}", bod);
+            // let tok = get_user_token_response.access_token;
+            // info!("get_user_token_response: {}", tok);
+
+            //
+            //
 
             let k: String = pop_service
                 .keycloak
