@@ -61,6 +61,9 @@ struct CreateUserRequest {
     username: String,
     enabled: bool,
     credentials: Vec<CreateUserRequestCredentials>,
+    firstName: String,
+    lastName: String,
+    emailVerified: bool,
 }
 
 pub async fn run_keycloak_container(
@@ -252,6 +255,9 @@ pub async fn setup_keycloak_env(
             let create_user_request = CreateUserRequest {
                 username: "batterypack-services".to_string(),
                 enabled: true,
+                firstName: "battery".to_string(),
+                lastName: "pack".to_string(),
+                emailVerified: true,
                 credentials: vec![CreateUserRequestCredentials {
                     r#type: "password".to_string(),
                     value: "password".to_string(),
