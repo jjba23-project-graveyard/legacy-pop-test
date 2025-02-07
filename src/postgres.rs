@@ -15,12 +15,15 @@
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
-use crate::pop_model::PopPostgres;
+use std::collections::HashMap;
+
+use crate::pop_model::{PopPostgres, PopScenarioFile, PopService};
+use paris::info;
 use testcontainers::ContainerAsync;
 use testcontainers::{runners::AsyncRunner, ImageExt};
 use testcontainers_modules::postgres::Postgres;
 
-pub async fn start_postgres_container(
+async fn run_postgres_container(
     pop_postgres: PopPostgres,
 ) -> Result<ContainerAsync<Postgres>, String> {
     Postgres::default()
@@ -29,4 +32,54 @@ pub async fn start_postgres_container(
         .start()
         .await
         .map_err(|e| format!("{}", e))
+}
+
+pub async fn maybe_start_postgres(
+    scenario_file: &PopScenarioFile,
+) -> Result<Option<ContainerAsync<Postgres>>, String> {
+    match &scenario_file.pop_test.pop_postgres {
+        Some(postgres) => {
+            info!("start setting up postgres");
+            Ok(Some(
+                run_postgres_container(postgres.clone()).await.unwrap(),
+            ))
+        }
+        _ => Ok(None),
+    }
+}
+
+pub async fn setup_postgres_env(
+    scenario_file: &PopScenarioFile,
+    pop_service: &PopService,
+    postgres_container: &Option<ContainerAsync<Postgres>>,
+    with_env: &mut HashMap<String, String>,
+) {
+    if scenario_file
+        .pop_test
+        .pop_postgres
+        .as_ref()
+        .map(|p| p.enabled)
+        == Some(Some(true))
+        && pop_service
+            .postgres
+            .as_ref()
+            .map(|p| p.enabled)
+            .unwrap_or(Some(false))
+            == Some(true)
+    {
+        if let Some(p) = postgres_container {
+            let host = p.get_host().await.unwrap().to_string();
+            let port = p
+                .ports()
+                .await
+                .unwrap()
+                .map_to_host_port_ipv4(5432)
+                .unwrap_or(5432);
+            with_env.insert("POSTGRES_DB".to_string(), "postgres".to_string());
+            with_env.insert("POSTGRES_USER".to_string(), "postgres".to_string());
+            with_env.insert("POSTGRES_PASSWORD".to_string(), "postgres".to_string());
+            with_env.insert("POSTGRES_PORT".to_string(), port.to_string());
+            with_env.insert("POSTGRES_HOST".to_string(), host);
+        }
+    }
 }

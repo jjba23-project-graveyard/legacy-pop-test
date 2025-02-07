@@ -15,12 +15,15 @@
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
-use crate::pop_model::PopKafka;
+use std::collections::HashMap;
+
+use crate::pop_model::{PopKafka, PopScenarioFile, PopService};
+use paris::info;
 use testcontainers::ContainerAsync;
 use testcontainers::{runners::AsyncRunner, ImageExt};
-use testcontainers_modules::kafka::Kafka;
+use testcontainers_modules::kafka::{Kafka, KAFKA_PORT};
 
-pub async fn start_kafka_container(pop_kafka: PopKafka) -> Result<ContainerAsync<Kafka>, String> {
+async fn run_kafka_container(pop_kafka: PopKafka) -> Result<ContainerAsync<Kafka>, String> {
     Kafka::default()
         .with_name(
             pop_kafka
@@ -31,4 +34,46 @@ pub async fn start_kafka_container(pop_kafka: PopKafka) -> Result<ContainerAsync
         .start()
         .await
         .map_err(|e| format!("{}", e))
+}
+
+pub async fn maybe_start_kafka(
+    scenario_file: &PopScenarioFile,
+) -> Result<Option<ContainerAsync<Kafka>>, String> {
+    match &scenario_file.pop_test.pop_kafka {
+        Some(kafka) if kafka.enabled == Some(true) => {
+            info!("start setting up kafka");
+            Ok(Some(run_kafka_container(kafka.clone()).await.unwrap()))
+        }
+        _ => Ok(None),
+    }
+}
+
+pub async fn setup_kafka_env(
+    scenario_file: &PopScenarioFile,
+    pop_service: &PopService,
+    kafka_container: &Option<ContainerAsync<Kafka>>,
+    with_env: &mut HashMap<String, String>,
+) {
+    if scenario_file.pop_test.pop_kafka.as_ref().map(|k| k.enabled) == Some(Some(true))
+        && pop_service
+            .kafka
+            .as_ref()
+            .map(|k| k.enabled)
+            .unwrap_or(Some(false))
+            == Some(true)
+    {
+        if let Some(k) = kafka_container {
+            let host = k.get_host().await.unwrap().to_string();
+            let port = k
+                .ports()
+                .await
+                .unwrap()
+                .map_to_host_port_ipv4(KAFKA_PORT)
+                .unwrap_or(KAFKA_PORT.as_u16());
+            with_env.insert(
+                "KAFKA_BOOTSTRAP_SERVER".to_string(),
+                format!("{}:{}", host, port),
+            );
+        }
+    }
 }

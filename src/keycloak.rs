@@ -15,12 +15,10 @@
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
-use crate::pop_model::{PopKeycloak, PopServer, PopServerBehavior};
-use reqwest::Response;
+use crate::pop_model::PopKeycloak;
 use testcontainers::core::ContainerPort;
 use testcontainers::runners::AsyncRunner;
 use testcontainers::{ContainerAsync, GenericImage};
-use tokio::fs;
 
 pub async fn start_keycloak_container(
     pop_keycloak: PopKeycloak,

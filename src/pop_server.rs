@@ -15,14 +15,17 @@
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
-use crate::pop_model::{PopServer, PopServerBehavior};
+use std::collections::HashMap;
+
+use crate::pop_model::{PopScenarioFile, PopServer, PopServerBehavior, PopService};
+use paris::{error, info, success};
 use reqwest::Response;
 use testcontainers::core::ContainerPort;
 use testcontainers::runners::AsyncRunner;
 use testcontainers::{ContainerAsync, GenericImage};
 use tokio::fs;
 
-pub async fn start_pop_server_container(
+async fn run_pop_server_container(
     pop_server: PopServer,
 ) -> Result<ContainerAsync<GenericImage>, String> {
     GenericImage::new(
@@ -35,6 +38,20 @@ pub async fn start_pop_server_container(
     .start()
     .await
     .map_err(|e| format!("{}", e))
+}
+
+pub async fn maybe_start_pop_server(
+    scenario_file: &PopScenarioFile,
+) -> Result<Option<ContainerAsync<GenericImage>>, String> {
+    match &scenario_file.pop_test.pop_server {
+        Some(pop_server) if pop_server.enabled == Some(true) => {
+            info!("start setting up pop_server");
+            Ok(Some(
+                run_pop_server_container(pop_server.clone()).await.unwrap(),
+            ))
+        }
+        _ => Ok(None),
+    }
 }
 
 pub async fn register_pop_server_behavior(
@@ -61,4 +78,60 @@ pub async fn register_pop_server_behavior(
         .body(body)
         .send()
         .await
+}
+
+pub async fn setup_pop_server_env(
+    scenario_file: &PopScenarioFile,
+    pop_service: &PopService,
+    pop_server_container: &Option<ContainerAsync<GenericImage>>,
+    with_env: &mut HashMap<String, String>,
+) {
+    if scenario_file
+        .pop_test
+        .pop_server
+        .as_ref()
+        .map(|p| p.enabled)
+        == Some(Some(true))
+        && pop_service
+            .pop_server
+            .as_ref()
+            .map(|p| p.enabled)
+            .unwrap_or(Some(false))
+            == Some(true)
+    {
+        if let Some(p) = pop_server_container {
+            let host = p.get_host().await.unwrap().to_string();
+            let port = p
+                .ports()
+                .await
+                .unwrap()
+                .map_to_host_port_ipv4(50088)
+                .unwrap_or(50088);
+            for v in pop_service
+                .pop_server
+                .as_ref()
+                .unwrap()
+                .url_vars
+                .as_ref()
+                .unwrap()
+            {
+                with_env.insert(v.clone(), format!("http://{}:{}", host, port));
+            }
+            if let Some(bs) = scenario_file
+                .pop_test
+                .pop_server
+                .as_ref()
+                .and_then(|p| p.behaviors.clone())
+            {
+                info!("registering behavior in pop-server: {:?}", bs);
+                for b in bs {
+                    match register_pop_server_behavior(format!("http://{}:{}", host, port), b).await
+                    {
+                        Ok(r) => success!("done registering behavior in pop-server: {:?}", r),
+                        Err(e) => error!("error registering behavior in pop-server: {:?}", e),
+                    }
+                }
+            }
+        }
+    }
 }
