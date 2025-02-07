@@ -58,14 +58,12 @@ pub async fn setup_kafka_env(
         .pop_test
         .pop_kafka
         .as_ref()
-        .map(|k| k.enabled)
-        .flatten()
+        .and_then(|k| k.enabled)
         .unwrap_or(false)
         && pop_service
             .kafka
             .as_ref()
-            .map(|k| k.enabled)
-            .flatten()
+            .and_then(|k| k.enabled)
             .unwrap_or(false)
     {
         if let Some(k) = kafka_container {

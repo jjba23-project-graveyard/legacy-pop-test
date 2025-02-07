@@ -90,14 +90,12 @@ pub async fn setup_pop_server_env(
         .pop_test
         .pop_server
         .as_ref()
-        .map(|p| p.enabled)
-        .flatten()
+        .and_then(|p| p.enabled)
         .unwrap_or(false)
         && pop_service
             .pop_server
             .as_ref()
-            .map(|p| p.enabled)
-            .flatten()
+            .and_then(|p| p.enabled)
             .unwrap_or(false)
     {
         if let Some(p) = pop_server_container {

@@ -58,14 +58,12 @@ pub async fn setup_postgres_env(
         .pop_test
         .pop_postgres
         .as_ref()
-        .map(|p| p.enabled)
-        .flatten()
+        .and_then(|p| p.enabled)
         .unwrap_or(false)
         && pop_service
             .postgres
             .as_ref()
-            .map(|p| p.enabled)
-            .flatten()
+            .and_then(|p| p.enabled)
             .unwrap_or(false)
     {
         if let Some(p) = postgres_container {

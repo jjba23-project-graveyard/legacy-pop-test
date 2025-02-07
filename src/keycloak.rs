@@ -21,7 +21,7 @@ use crate::pop_model::{PopKeycloak, PopScenarioFile, PopService};
 use paris::info;
 use testcontainers::core::ContainerPort;
 use testcontainers::runners::AsyncRunner;
-use testcontainers::{ContainerAsync, GenericImage};
+use testcontainers::{ContainerAsync, GenericImage, ImageExt};
 
 pub async fn run_keycloak_container(
     pop_keycloak: PopKeycloak,
@@ -33,6 +33,7 @@ pub async fn run_keycloak_container(
         pop_keycloak.image_tag.unwrap_or("26.1".to_string()),
     )
     .with_exposed_port(ContainerPort::Tcp(8080))
+    .with_cmd(["start-dev"])
     .start()
     .await
     .map_err(|e| format!("{}", e))
@@ -62,14 +63,12 @@ pub async fn setup_keycloak_env(
         .pop_test
         .pop_keycloak
         .as_ref()
-        .map(|k| k.enabled)
-        .flatten()
+        .and_then(|k| k.enabled)
         .unwrap_or(false)
         && pop_service
             .keycloak
             .as_ref()
-            .map(|k| k.enabled)
-            .flatten()
+            .and_then(|k| k.enabled)
             .unwrap_or(false)
     {
         if let Some(k) = keycloak_container {
