@@ -21,7 +21,6 @@ use std::time::Duration;
 use crate::pop_model::{PopKeycloak, PopScenarioFile, PopService};
 use paris::info;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 use testcontainers::core::ContainerPort;
 use testcontainers::runners::AsyncRunner;
 use testcontainers::{ContainerAsync, GenericImage, ImageExt};
@@ -43,6 +42,11 @@ struct CreateClientRequest {
 struct CreateRealmRequest {
     pub enabled: bool,
     pub realm: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+struct LoginResponse {
+    access_token: String,
 }
 
 pub async fn run_keycloak_container(
@@ -128,7 +132,7 @@ pub async fn setup_keycloak_env(
                 .unwrap_or(9000);
 
             let keycloak_url = format!("http://{}:{}", host, http_port);
-            let keycloak_admin_url = format!("http://{}:{}", host, admin_port);
+            let _keycloak_mgmt_url = format!("http://{}:{}", host, admin_port);
             let realm = "vandebron".to_string();
 
             // todo health check on keycloak container
@@ -151,14 +155,11 @@ pub async fn setup_keycloak_env(
                 .send()
                 .await
                 .unwrap()
-                .json::<Value>()
+                .json::<LoginResponse>()
                 .await
                 .unwrap();
 
-            let tok = get_admin_token_response
-                .get("access_token")
-                .map(|v| v.to_string())
-                .unwrap_or("".to_string());
+            let tok = get_admin_token_response.access_token;
             info!("{}", tok);
 
             let create_realm_request = CreateRealmRequest {
@@ -167,7 +168,7 @@ pub async fn setup_keycloak_env(
             };
 
             let create_realm_response = reqwest::Client::new()
-                .post(format!("{}/admin/realms", keycloak_admin_url))
+                .post(format!("{}/admin/realms", keycloak_url))
                 .header("content-type", "application/json")
                 .header("authorization", format!("Bearer {}", tok))
                 .json(&create_realm_request)
@@ -203,7 +204,7 @@ pub async fn setup_keycloak_env(
             let create_client_response = reqwest::Client::new()
                 .post(format!(
                     "{}/admin/realms/{}/clients",
-                    keycloak_admin_url,
+                    keycloak_url,
                     realm.clone()
                 ))
                 .header("content-type", "application/json")

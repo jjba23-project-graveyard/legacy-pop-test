@@ -21,6 +21,7 @@ test-byggsteg: fmt
 	nix develop -c cargo run -- play-scenario ./resources/scenarios/test-byggsteg.yaml
 test-dynamic-tariff-charging: fmt
 	nix develop -c cargo run -- play-scenario ./resources/scenarios/test-dynamic-tariff-charging.yaml
+
 test-dynamic-tariff-charging-call:
 	curl -v -X GET --header "Authorization: Bearer $(ADMIN_TOKEN)" http://localhost:8222/api/v1/registeredChargepoints/3514fbab-9a15-4869-9a7d-895e9dfb3560
 
