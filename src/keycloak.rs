@@ -63,13 +63,14 @@ pub async fn setup_keycloak_env(
         .pop_keycloak
         .as_ref()
         .map(|k| k.enabled)
-        == Some(Some(true))
+        .flatten()
+        .unwrap_or(false)
         && pop_service
             .keycloak
             .as_ref()
             .map(|k| k.enabled)
-            .unwrap_or(Some(false))
-            == Some(true)
+            .flatten()
+            .unwrap_or(false)
     {
         if let Some(k) = keycloak_container {
             let host = k.get_host().await.unwrap().to_string();

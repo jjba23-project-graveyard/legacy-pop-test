@@ -59,13 +59,14 @@ pub async fn setup_postgres_env(
         .pop_postgres
         .as_ref()
         .map(|p| p.enabled)
-        == Some(Some(true))
+        .flatten()
+        .unwrap_or(false)
         && pop_service
             .postgres
             .as_ref()
             .map(|p| p.enabled)
-            .unwrap_or(Some(false))
-            == Some(true)
+            .flatten()
+            .unwrap_or(false)
     {
         if let Some(p) = postgres_container {
             let host = p.get_host().await.unwrap().to_string();

@@ -54,13 +54,19 @@ pub async fn setup_kafka_env(
     kafka_container: &Option<ContainerAsync<Kafka>>,
     with_env: &mut HashMap<String, String>,
 ) {
-    if scenario_file.pop_test.pop_kafka.as_ref().map(|k| k.enabled) == Some(Some(true))
+    if scenario_file
+        .pop_test
+        .pop_kafka
+        .as_ref()
+        .map(|k| k.enabled)
+        .flatten()
+        .unwrap_or(false)
         && pop_service
             .kafka
             .as_ref()
             .map(|k| k.enabled)
-            .unwrap_or(Some(false))
-            == Some(true)
+            .flatten()
+            .unwrap_or(false)
     {
         if let Some(k) = kafka_container {
             let host = k.get_host().await.unwrap().to_string();

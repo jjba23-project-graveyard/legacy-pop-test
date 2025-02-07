@@ -91,13 +91,14 @@ pub async fn setup_pop_server_env(
         .pop_server
         .as_ref()
         .map(|p| p.enabled)
-        == Some(Some(true))
+        .flatten()
+        .unwrap_or(false)
         && pop_service
             .pop_server
             .as_ref()
             .map(|p| p.enabled)
-            .unwrap_or(Some(false))
-            == Some(true)
+            .flatten()
+            .unwrap_or(false)
     {
         if let Some(p) = pop_server_container {
             let host = p.get_host().await.unwrap().to_string();
