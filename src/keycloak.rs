@@ -144,7 +144,7 @@ pub async fn setup_keycloak_env(
                 .get("access_token")
                 .map(|v| v.to_string())
                 .unwrap_or("".to_string());
-            info!("{:?}", tok);
+            info!("{}", tok);
 
             let cr = CreateClientRequest {
                 protocol: "openid-connect".to_string(),
@@ -169,6 +169,10 @@ pub async fn setup_keycloak_env(
                 .send()
                 .await;
             info!("{:?}", cc);
+
+            let byt = cc.unwrap().bytes().await.unwrap().to_vec();
+            let bod = String::from_utf8_lossy(&byt).to_string();
+            info!("{}", bod);
 
             let k: String = pop_service
                 .keycloak
