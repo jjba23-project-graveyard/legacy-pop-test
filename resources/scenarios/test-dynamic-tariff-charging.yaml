@@ -38,6 +38,7 @@ pop_test:
           - "DYNAMIC_TARIFF_SERVICE_URL"
           - "KEYCLOAK_AUTH_SERVER_URL"
 
+
   pop_checks:
     - check_url: "/api/v1/vehicles/3514fbab-9a15-4869-9a7d-895e9dfb3560/session-history"
       service_id: "dynamic-tariff-charging"

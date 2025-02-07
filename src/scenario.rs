@@ -26,7 +26,7 @@ use crate::proc::{start_service, terminate_services};
 use paris::{info, success};
 use std::collections::HashMap;
 use testcontainers::{ContainerAsync, GenericImage};
-use testcontainers_modules::kafka::Kafka;
+use testcontainers_modules::kafka::{Kafka, KAFKA_PORT};
 
 use testcontainers_modules::postgres::Postgres;
 use tokio::task::JoinSet;
@@ -172,10 +172,10 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
                 k.ports()
                     .await
                     .unwrap()
-                    .map_to_host_port_ipv4(9092)
-                    .unwrap_or(9092)
+                    .map_to_host_port_ipv4(KAFKA_PORT)
+                    .unwrap_or(KAFKA_PORT.as_u16())
             } else {
-                9092
+                KAFKA_PORT.as_u16()
             };
 
             match kafka_host {
