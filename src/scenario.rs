@@ -23,7 +23,7 @@ use crate::pop_server::{register_pop_server_behavior, start_pop_server_container
 use crate::postgres::start_postgres_container;
 use crate::proc::{start_service, terminate_services};
 
-use paris::{info, success};
+use paris::{error, info, success};
 use std::collections::HashMap;
 use testcontainers::{ContainerAsync, GenericImage};
 use testcontainers_modules::kafka::{Kafka, KAFKA_PORT};
@@ -234,12 +234,15 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
                 {
                     info!("registering behavior in pop-server: {:?}", bs);
                     for b in bs {
-                        register_pop_server_behavior(
+                        let res = register_pop_server_behavior(
                             format!("http://{}:{}", h, pop_server_port),
                             b,
                         )
                         .await;
-                        success!("done registering behavior in pop-server")
+                        match res {
+                            Ok(r) => success!("done registering behavior in pop-server: {:?}", r),
+                            Err(e) => error!("error registering behavior in pop-server: {:?}", e),
+                        }
                     }
                 }
             };

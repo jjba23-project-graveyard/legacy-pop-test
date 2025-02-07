@@ -16,7 +16,8 @@
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
 use crate::pop_model::{PopServer, PopServerBehavior};
-use paris::info;
+use reqwest::Response;
+use testcontainers::core::ContainerPort;
 use testcontainers::runners::AsyncRunner;
 use testcontainers::{ContainerAsync, GenericImage};
 use tokio::fs;
@@ -30,6 +31,7 @@ pub async fn start_pop_server_container(
             .unwrap_or("jjba23/pop-server".to_string()),
         pop_server.image_tag.unwrap_or("0.2.2".to_string()),
     )
+    .with_exposed_port(ContainerPort::Tcp(50088))
     .start()
     .await
     .map_err(|e| format!("{}", e))
@@ -38,12 +40,13 @@ pub async fn start_pop_server_container(
 pub async fn register_pop_server_behavior(
     pop_server_url: String,
     pop_server_behavior: PopServerBehavior,
-) {
+) -> Result<Response, reqwest::Error> {
     let client = reqwest::Client::new();
     let body = fs::read_to_string(pop_server_behavior.body_file)
         .await
         .unwrap_or("".to_string());
-    let resp = client
+
+    client
         .post(format!(
             "{}/api/v2/pop-server/register-behavior",
             pop_server_url
@@ -57,6 +60,5 @@ pub async fn register_pop_server_behavior(
         )
         .body(body)
         .send()
-        .await;
-    info!("{:?}", resp)
+        .await
 }
