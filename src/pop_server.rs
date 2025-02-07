@@ -107,6 +107,7 @@ pub async fn setup_pop_server_env(
                 .unwrap()
                 .map_to_host_port_ipv4(50088)
                 .unwrap_or(50088);
+
             for v in pop_service
                 .pop_server
                 .as_ref()
@@ -117,6 +118,7 @@ pub async fn setup_pop_server_env(
             {
                 with_env.insert(v.clone(), format!("http://{}:{}", host, port));
             }
+
             if let Some(bs) = scenario_file
                 .pop_test
                 .pop_server

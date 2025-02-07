@@ -70,10 +70,15 @@ pub async fn setup_kafka_env(
                 .unwrap()
                 .map_to_host_port_ipv4(KAFKA_PORT)
                 .unwrap_or(KAFKA_PORT.as_u16());
-            with_env.insert(
-                "KAFKA_BOOTSTRAP_SERVER".to_string(),
-                format!("{}:{}", host, port),
-            );
+            let k: String = pop_service
+                .kafka
+                .as_ref()
+                .unwrap()
+                .bootstrap_server_var
+                .clone()
+                .unwrap_or("KAFKA_BOOTSTRAP_SERVER".to_string());
+
+            with_env.insert(k, format!("{}:{}", host, port));
         }
     }
 }

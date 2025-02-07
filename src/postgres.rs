@@ -75,11 +75,57 @@ pub async fn setup_postgres_env(
                 .unwrap()
                 .map_to_host_port_ipv4(5432)
                 .unwrap_or(5432);
-            with_env.insert("POSTGRES_DB".to_string(), "postgres".to_string());
-            with_env.insert("POSTGRES_USER".to_string(), "postgres".to_string());
-            with_env.insert("POSTGRES_PASSWORD".to_string(), "postgres".to_string());
-            with_env.insert("POSTGRES_PORT".to_string(), port.to_string());
-            with_env.insert("POSTGRES_HOST".to_string(), host);
+
+            with_env.insert(
+                pop_service
+                    .postgres
+                    .as_ref()
+                    .unwrap()
+                    .db_var
+                    .clone()
+                    .unwrap_or("POSTGRES_DB".to_string()),
+                "postgres".to_string(),
+            );
+            with_env.insert(
+                pop_service
+                    .postgres
+                    .as_ref()
+                    .unwrap()
+                    .user_var
+                    .clone()
+                    .unwrap_or("POSTGRES_USER".to_string()),
+                "postgres".to_string(),
+            );
+            with_env.insert(
+                pop_service
+                    .postgres
+                    .as_ref()
+                    .unwrap()
+                    .pass_var
+                    .clone()
+                    .unwrap_or("POSTGRES_PASSWORD".to_string()),
+                "postgres".to_string(),
+            );
+            with_env.insert(
+                pop_service
+                    .postgres
+                    .as_ref()
+                    .unwrap()
+                    .port_var
+                    .clone()
+                    .unwrap_or("POSTGRES_PORT".to_string()),
+                port.to_string(),
+            );
+            with_env.insert(
+                pop_service
+                    .postgres
+                    .as_ref()
+                    .unwrap()
+                    .host_var
+                    .clone()
+                    .unwrap_or("POSTGRES_HOST".to_string()),
+                host,
+            );
         }
     }
 }

@@ -18,6 +18,7 @@
 use crate::checks::perform_checks;
 use crate::health_check::start_health_check;
 use crate::kafka::{maybe_start_kafka, setup_kafka_env};
+use crate::keycloak::{maybe_start_keycloak, setup_keycloak_env};
 use crate::pop_model::{PopScenarioFile, PopService};
 use crate::pop_server::{maybe_start_pop_server, setup_pop_server_env};
 use crate::postgres::{maybe_start_postgres, setup_postgres_env};
@@ -40,6 +41,7 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
     let postgres_container = maybe_start_postgres(&scenario_file).await?;
     let pop_server_container = maybe_start_pop_server(&scenario_file).await?;
     let kafka_container = maybe_start_kafka(&scenario_file).await?;
+    let keycloak_container = maybe_start_keycloak(&scenario_file).await?;
 
     for pop_service in scenario_file.pop_test.pop_services.clone() {
         info!("registering service: {}", pop_service.id);
@@ -50,13 +52,14 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
             &pop_service,
             &postgres_container,
             &kafka_container,
+            &keycloak_container,
             &pop_server_container,
         )
         .await;
 
         let p = start_service(pop_service, with_env)
             .await
-            .map_err(|_| "Failed to start process")?;
+            .map_err(|_| "failed to start process")?;
         children.push(p);
     }
 
@@ -77,6 +80,7 @@ async fn setup_environment(
     pop_service: &PopService,
     postgres_container: &Option<ContainerAsync<Postgres>>,
     kafka_container: &Option<ContainerAsync<Kafka>>,
+    keycloak_container: &Option<ContainerAsync<GenericImage>>,
     pop_server_container: &Option<ContainerAsync<GenericImage>>,
 ) -> HashMap<String, String> {
     let mut with_env = HashMap::new();
@@ -89,6 +93,13 @@ async fn setup_environment(
     )
     .await;
     setup_kafka_env(scenario_file, pop_service, kafka_container, &mut with_env).await;
+    setup_keycloak_env(
+        scenario_file,
+        pop_service,
+        keycloak_container,
+        &mut with_env,
+    )
+    .await;
     setup_pop_server_env(
         scenario_file,
         pop_service,
