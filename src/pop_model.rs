@@ -72,9 +72,10 @@ pub struct BodyPattern {
 #[serde(untagged)]
 pub enum PopCheck {
     Http {
-        expected_code: Option<i32>,
+        expected_code: Option<u16>,
         check_url: String,
         service_id: String,
+        delay_seconds: Option<u64>,
         json_body_patterns: Option<Vec<BodyPattern>>,
     },
 }

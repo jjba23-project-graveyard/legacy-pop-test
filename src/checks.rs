@@ -15,10 +15,13 @@
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
+use std::time::Duration;
+
 use crate::pop_model::{BodyPattern, PopCheck, PopScenarioFile};
 
 use crate::condition_dsl::eval_condition;
 use paris::{error, info, success};
+use tokio::time::sleep;
 
 pub async fn perform_checks(scenario_file: &PopScenarioFile) {
     let services = &scenario_file.pop_test.pop_services;
@@ -34,8 +37,13 @@ pub async fn perform_checks(scenario_file: &PopScenarioFile) {
                 expected_code,
                 check_url,
                 service_id,
+                delay_seconds,
                 json_body_patterns,
             } => {
+                if let Some(delay) = delay_seconds {
+                    sleep(Duration::from_secs(*delay)).await;
+                }
+
                 if let Some(service) = services.iter().find(|s| s.id == *service_id) {
                     info!("found service to check: {:?}", service);
                     info!("running check: {:?}", check);
@@ -58,7 +66,7 @@ pub async fn perform_checks(scenario_file: &PopScenarioFile) {
 }
 
 pub async fn do_with_http_check(
-    expected_code: Option<i32>,
+    expected_code: Option<u16>,
     check_url: String,
     service_url: String,
     json_body_patterns: Option<Vec<BodyPattern>>,
@@ -72,7 +80,7 @@ pub async fn do_with_http_check(
     match maybe_response {
         Err(e) => error!("{}", e),
         Ok(resp) => {
-            if (resp.status().as_u16() as i32) != wanted_status_code {
+            if resp.status().as_u16() != wanted_status_code {
                 return Err("the HTTP status did not match the expectation".to_string());
             } else {
                 success!(

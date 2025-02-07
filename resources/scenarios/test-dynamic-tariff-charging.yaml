@@ -26,7 +26,7 @@ pop_test:
         SOME_TOKEN: "a"
       health_check:
         path: "/health"
-        patience_seconds: 120
+        patience_seconds: 180
       postgres:
         enabled: true
       kafka:
@@ -37,6 +37,15 @@ pop_test:
           - "OCPP_FACADE_URL"
           - "DYNAMIC_TARIFF_SERVICE_URL"
           - "KEYCLOAK_AUTH_SERVER_URL"
+
+  pop_checks:
+    - check_url: "/api/v1/vehicles/3514fbab-9a15-4869-9a7d-895e9dfb3560/session-history"
+      service_id: "dynamic-tariff-charging"
+      delay_seconds: 9000
+      json_body_patterns:
+        - pattern: '"data""vehicleId"'
+          condition: '!= ""'
+          
 
   pop_postgres:
     enabled: true

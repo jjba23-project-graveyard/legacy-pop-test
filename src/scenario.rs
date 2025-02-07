@@ -46,18 +46,6 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
             _ => None,
         };
 
-    let kafka_container: Option<ContainerAsync<Kafka>> = match &scenario_file.pop_test.pop_kafka {
-        Some(kafka) => {
-            if kafka.enabled == Some(true) {
-                info!("start setting up kafka");
-                Some(start_kafka_container(kafka.clone()).await.unwrap())
-            } else {
-                None
-            }
-        }
-        _ => None,
-    };
-
     let pop_server_container: Option<ContainerAsync<GenericImage>> =
         match &scenario_file.pop_test.pop_server {
             Some(pop_server) => {
@@ -74,6 +62,18 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
             }
             _ => None,
         };
+
+    let kafka_container: Option<ContainerAsync<Kafka>> = match &scenario_file.pop_test.pop_kafka {
+        Some(kafka) => {
+            if kafka.enabled == Some(true) {
+                info!("start setting up kafka");
+                Some(start_kafka_container(kafka.clone()).await.unwrap())
+            } else {
+                None
+            }
+        }
+        _ => None,
+    };
 
     for pop_service in scenario_file.pop_test.pop_services.clone() {
         info!("registering service: {}", pop_service.id);
@@ -100,13 +100,12 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
                 None
             };
 
-            let postgres_port: i32 = if let Some(p) = &postgres_container {
+            let postgres_port: u16 = if let Some(p) = &postgres_container {
                 p.ports()
                     .await
                     .unwrap()
                     .map_to_host_port_ipv4(5432)
                     .unwrap_or(5432)
-                    .into()
             } else {
                 5432
             };
@@ -169,13 +168,12 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
                 None
             };
 
-            let kafka_port: i32 = if let Some(k) = &kafka_container {
+            let kafka_port: u16 = if let Some(k) = &kafka_container {
                 k.ports()
                     .await
                     .unwrap()
                     .map_to_host_port_ipv4(9092)
                     .unwrap_or(9092)
-                    .into()
             } else {
                 9092
             };
@@ -207,13 +205,12 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
                 None
             };
 
-            let pop_server_port: i32 = if let Some(p) = &pop_server_container {
+            let pop_server_port: u16 = if let Some(p) = &pop_server_container {
                 p.ports()
                     .await
                     .unwrap()
                     .map_to_host_port_ipv4(50088)
                     .unwrap_or(50088)
-                    .into()
             } else {
                 50088
             };
