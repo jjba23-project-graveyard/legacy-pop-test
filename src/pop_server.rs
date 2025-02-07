@@ -29,7 +29,7 @@ pub async fn start_pop_server_container(
         pop_server
             .image_name
             .unwrap_or("jjba23/pop-server".to_string()),
-        pop_server.image_tag.unwrap_or("0.2.2".to_string()),
+        pop_server.image_tag.unwrap_or("0.2.3".to_string()),
     )
     .with_exposed_port(ContainerPort::Tcp(50088))
     .start()
