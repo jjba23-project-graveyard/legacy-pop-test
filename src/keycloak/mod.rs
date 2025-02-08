@@ -15,18 +15,18 @@
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
-use std::collections::HashMap;
-use std::time::Duration;
-
 use crate::pop_model::{PopKeycloak, PopScenarioFile, PopService};
 use paris::info;
-use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use std::time::Duration;
 use testcontainers::core::ContainerPort;
 use testcontainers::runners::AsyncRunner;
 use testcontainers::{ContainerAsync, GenericImage, ImageExt};
 
+use serde::{Deserialize, Serialize};
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
-struct CreateClientRequest {
+pub struct CreateClientRequest {
     pub protocol: String,
     pub clientId: String,
     pub enabled: bool,
@@ -39,31 +39,31 @@ struct CreateClientRequest {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-struct CreateRealmRequest {
+pub struct CreateRealmRequest {
     pub enabled: bool,
     pub realm: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-struct LoginResponse {
-    access_token: String,
+pub struct LoginResponse {
+    pub access_token: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-struct CreateUserRequestCredentials {
-    r#type: String,
-    value: String,
-    temporary: bool,
+pub struct CreateUserRequestCredentials {
+    pub r#type: String,
+    pub value: String,
+    pub temporary: bool,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-struct CreateUserRequest {
-    username: String,
-    enabled: bool,
-    credentials: Vec<CreateUserRequestCredentials>,
-    firstName: String,
-    lastName: String,
-    emailVerified: bool,
+pub struct CreateUserRequest {
+    pub username: String,
+    pub enabled: bool,
+    pub credentials: Vec<CreateUserRequestCredentials>,
+    pub firstName: String,
+    pub lastName: String,
+    pub emailVerified: bool,
 }
 
 pub async fn run_keycloak_container(
@@ -153,7 +153,7 @@ pub async fn setup_keycloak_env(
             let realm = "vandebron".to_string();
 
             // todo health check on keycloak container
-            tokio::time::sleep(Duration::from_secs(10)).await;
+            tokio::time::sleep(Duration::from_secs(20)).await;
 
             //
             //

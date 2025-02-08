@@ -23,12 +23,10 @@ use crate::pop_model::{PopScenarioFile, PopService};
 use crate::pop_server::{maybe_start_pop_server, setup_pop_server_env};
 use crate::postgres::{maybe_start_postgres, setup_postgres_env};
 use crate::proc::{start_service, terminate_services};
-
 use paris::{info, success};
 use std::collections::HashMap;
 use testcontainers::{ContainerAsync, GenericImage};
 use testcontainers_modules::kafka::Kafka;
-
 use testcontainers_modules::postgres::Postgres;
 use tokio::task::JoinSet;
 
