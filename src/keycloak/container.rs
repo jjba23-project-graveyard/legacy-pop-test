@@ -259,7 +259,6 @@ pub async fn maybe_start_keycloak(
         _ => Ok(None),
     }
 }
-
 pub async fn setup_keycloak_env(
     scenario_file: &PopScenarioFile,
     pop_service: &PopService,
@@ -269,44 +268,35 @@ pub async fn setup_keycloak_env(
     if scenario_file
         .pop_test
         .pop_keycloak
-        .as_ref()
+        .clone()
         .and_then(|k| k.enabled)
-        .unwrap_or(false)
-        && pop_service
-            .keycloak
-            .as_ref()
-            .and_then(|k| k.enabled)
-            .unwrap_or(false)
+        == Some(true)
+        && pop_service.keycloak.clone().and_then(|k| k.enabled) == Some(true)
     {
-        if let Some(k) = keycloak_container {
-            let host = k.get_host().await.unwrap().to_string();
-
-            let http_port = k
+        if let Some(container) = keycloak_container {
+            let host = container.get_host().await.unwrap();
+            let http_port = container
                 .ports()
                 .await
                 .unwrap()
                 .map_to_host_port_ipv4(8080)
                 .unwrap_or(8080);
-
             let keycloak_url = format!("http://{}:{}", host, http_port);
 
-            let k: String = pop_service
-                .keycloak
-                .as_ref()
-                .unwrap()
-                .url_var
-                .clone()
-                .unwrap_or("KEYCLOAK_AUTH_SERVER_URL".to_string());
-            with_env.insert(k, keycloak_url.clone());
-            let k: String = pop_service
-                .keycloak
-                .as_ref()
-                .unwrap()
-                .realm_var
-                .clone()
-                .unwrap_or("KEYCLOAK_REALM".to_string());
+            let keycloak = pop_service.keycloak.as_ref().unwrap();
+
             with_env.insert(
-                k,
+                keycloak
+                    .url_var
+                    .clone()
+                    .unwrap_or_else(|| "KEYCLOAK_AUTH_SERVER_URL".to_string()),
+                keycloak_url,
+            );
+            with_env.insert(
+                keycloak
+                    .realm_var
+                    .clone()
+                    .unwrap_or_else(|| "KEYCLOAK_REALM".to_string()),
                 scenario_file
                     .pop_test
                     .pop_keycloak
