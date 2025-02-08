@@ -23,11 +23,10 @@ use crate::pop_model::{PopKeycloak, PopScenarioFile, PopService};
 use paris::info;
 
 use std::collections::HashMap;
-use std::time::Duration;
 
 use testcontainers::{ContainerAsync, GenericImage, ImageExt};
 
-use testcontainers::core::ContainerPort;
+use testcontainers::core::{ContainerPort, WaitFor};
 use testcontainers::runners::AsyncRunner;
 
 pub async fn run_keycloak_container(
@@ -39,6 +38,9 @@ pub async fn run_keycloak_container(
             .unwrap_or("keycloak/keycloak".to_string()),
         pop_keycloak.image_tag.unwrap_or("26.1".to_string()),
     )
+    .with_wait_for(WaitFor::message_on_stdout(
+        "Listening on: http://0.0.0.0:8080",
+    ))
     .with_exposed_port(ContainerPort::Tcp(8080))
     .with_exposed_port(ContainerPort::Tcp(9000))
     .with_env_var("KC_BOOTSTRAP_ADMIN_USERNAME", "admin")
@@ -115,9 +117,6 @@ pub async fn setup_keycloak_env(
             let keycloak_url = format!("http://{}:{}", host, http_port);
             let _keycloak_mgmt_url = format!("http://{}:{}", host, admin_port);
             let realm = "vandebron".to_string();
-
-            // todo health check on keycloak container
-            tokio::time::sleep(Duration::from_secs(20)).await;
 
             //
             //
