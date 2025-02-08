@@ -18,10 +18,10 @@
 use crate::checks::perform_checks;
 use crate::health_check::start_health_check;
 use crate::kafka::{maybe_start_kafka, setup_kafka_env};
-use crate::keycloak::{maybe_start_keycloak, setup_keycloak_env};
+use crate::keycloak::container::{maybe_start_keycloak, setup_keycloak_env};
 use crate::pop_model::{PopScenarioFile, PopService};
 use crate::pop_server::{maybe_start_pop_server, setup_pop_server_env};
-use crate::postgres::{maybe_start_postgres, setup_postgres_env};
+use crate::postgres::container::{maybe_start_postgres, setup_postgres_env};
 use crate::proc::{start_service, terminate_services};
 use paris::{info, success};
 use std::collections::HashMap;
