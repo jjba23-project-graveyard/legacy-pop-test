@@ -152,6 +152,7 @@ pub async fn setup_keycloak_env(
             let create_realm_request = CreateRealmRequest {
                 enabled: true,
                 realm: realm.clone(),
+                verifyEmail: false,
             };
 
             let create_realm_response = reqwest::Client::new()
@@ -221,6 +222,7 @@ pub async fn setup_keycloak_env(
                 enabled: true,
                 firstName: "battery".to_string(),
                 lastName: "pack".to_string(),
+                email: "battery@pack.com".to_string(),
                 emailVerified: true,
                 credentials: vec![CreateUserRequestCredentials {
                     r#type: "password".to_string(),

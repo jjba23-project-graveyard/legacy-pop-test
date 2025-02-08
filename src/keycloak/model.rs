@@ -40,6 +40,8 @@ pub struct CreateClientRequest {
 pub struct CreateRealmRequest {
     pub enabled: bool,
     pub realm: String,
+    #[allow(non_snake_case)]
+    pub verifyEmail: bool,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -63,6 +65,7 @@ pub struct CreateUserRequest {
     pub firstName: String,
     #[allow(non_snake_case)]
     pub lastName: String,
+    pub email: String,
     #[allow(non_snake_case)]
     pub emailVerified: bool,
 }
