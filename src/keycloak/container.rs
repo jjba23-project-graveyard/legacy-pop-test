@@ -71,55 +71,20 @@ pub async fn maybe_start_keycloak(
     match &scenario_file.pop_test.pop_keycloak {
         Some(keycloak) if keycloak.enabled == Some(true) => {
             info!("start setting up keycloak");
-            Ok(Some(
-                run_keycloak_container(keycloak.clone()).await.unwrap(),
-            ))
-        }
-        _ => Ok(None),
-    }
-}
+            let keycloak_container = run_keycloak_container(keycloak.clone()).await.unwrap();
 
-pub async fn setup_keycloak_env(
-    scenario_file: &PopScenarioFile,
-    pop_service: &PopService,
-    keycloak_container: &Option<ContainerAsync<GenericImage>>,
-    with_env: &mut HashMap<String, String>,
-) {
-    if scenario_file
-        .pop_test
-        .pop_keycloak
-        .as_ref()
-        .and_then(|k| k.enabled)
-        .unwrap_or(false)
-        && pop_service
-            .keycloak
-            .as_ref()
-            .and_then(|k| k.enabled)
-            .unwrap_or(false)
-    {
-        if let Some(k) = keycloak_container {
-            let host = k.get_host().await.unwrap().to_string();
+            //
+            //
+            let host = keycloak_container.get_host().await.unwrap().to_string();
 
-            let http_port = k
+            let http_port = keycloak_container
                 .ports()
                 .await
                 .unwrap()
                 .map_to_host_port_ipv4(8080)
                 .unwrap_or(8080);
 
-            let admin_port = k
-                .ports()
-                .await
-                .unwrap()
-                .map_to_host_port_ipv4(9000)
-                .unwrap_or(9000);
-
             let keycloak_url = format!("http://{}:{}", host, http_port);
-            let _keycloak_mgmt_url = format!("http://{}:{}", host, admin_port);
-            let realm = "vandebron".to_string();
-
-            //
-            //
 
             let params = HashMap::from([
                 ("username", "admin"),
@@ -143,10 +108,12 @@ pub async fn setup_keycloak_env(
                 .unwrap();
 
             let tok = get_admin_token_response.access_token;
-            info!("{}", tok);
+            info!("admin token: {}", tok);
 
             //
             //
+
+            let realm = keycloak.realm.clone();
 
             let create_realm_request = CreateRealmRequest {
                 enabled: true,
@@ -287,6 +254,42 @@ pub async fn setup_keycloak_env(
             //
             //
 
+            Ok(Some(keycloak_container))
+        }
+        _ => Ok(None),
+    }
+}
+
+pub async fn setup_keycloak_env(
+    scenario_file: &PopScenarioFile,
+    pop_service: &PopService,
+    keycloak_container: &Option<ContainerAsync<GenericImage>>,
+    with_env: &mut HashMap<String, String>,
+) {
+    if scenario_file
+        .pop_test
+        .pop_keycloak
+        .as_ref()
+        .and_then(|k| k.enabled)
+        .unwrap_or(false)
+        && pop_service
+            .keycloak
+            .as_ref()
+            .and_then(|k| k.enabled)
+            .unwrap_or(false)
+    {
+        if let Some(k) = keycloak_container {
+            let host = k.get_host().await.unwrap().to_string();
+
+            let http_port = k
+                .ports()
+                .await
+                .unwrap()
+                .map_to_host_port_ipv4(8080)
+                .unwrap_or(8080);
+
+            let keycloak_url = format!("http://{}:{}", host, http_port);
+
             let k: String = pop_service
                 .keycloak
                 .as_ref()
@@ -302,7 +305,16 @@ pub async fn setup_keycloak_env(
                 .realm_var
                 .clone()
                 .unwrap_or("KEYCLOAK_REALM".to_string());
-            with_env.insert(k, realm);
+            with_env.insert(
+                k,
+                scenario_file
+                    .pop_test
+                    .pop_keycloak
+                    .as_ref()
+                    .unwrap()
+                    .realm
+                    .clone(),
+            );
         }
     }
 }

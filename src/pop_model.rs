@@ -107,6 +107,12 @@ pub struct PopKeycloak {
     pub enabled: Option<bool>,
     pub image_name: Option<String>,
     pub image_tag: Option<String>,
+    pub realm: String,
+    pub client_id: String,
+    pub client_secret: String,
+    pub email: String,
+    pub username: String,
+    pub password: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

@@ -50,6 +50,12 @@ pop_test:
 
   pop_keycloak:
     enabled: true
+    realm: "vandebron"
+    client_id: "batterypack-services"
+    client_secret: "test"
+    email: "battery@pack.com"
+    username: "batterpack-services"
+    password: "test"
 
   pop_postgres:
     enabled: true
