@@ -1,20 +1,20 @@
 
 # Table of Contents
 
-1.  [Why pop-test?](#orgd6353ac)
-2.  [Motivation](#org6c75e07)
-3.  [The Scenario DSL (Domain Specific Language)](#org6c4b617)
-    1.  [pop services](#orga7a3d17)
-        1.  [service health check](#org19a5e0c)
-        2.  [service postgres](#orgdf75b30)
-        3.  [service kafka](#org5e70e94)
-    2.  [pop actions](#orgd4f8372)
-    3.  [a kafka produce action](#orgfd31567)
-    4.  [a check](#orga60598a)
-    5.  [Condition DSL](#orgd52674e)
-    6.  [pop postgres](#org429452b)
-    7.  [pop kafka](#org3823b48)
-4.  [Example tests, using the DSL](#orgdd9ea76)
+1.  [Why pop-test?](#orga2510d4)
+2.  [Motivation](#org7d552d7)
+3.  [The Scenario DSL (Domain Specific Language)](#org83061fb)
+    1.  [pop services](#orgb32ae2c)
+        1.  [service health check](#orgb861efc)
+        2.  [service postgres](#orgdf0cc1b)
+        3.  [service kafka](#org61cff88)
+    2.  [pop actions](#org56a20ba)
+    3.  [a kafka produce action](#org6183146)
+    4.  [an http assertion](#orgdd5e0c1)
+    5.  [Condition DSL](#orga20d1ce)
+    6.  [pop postgres](#org1adf59d)
+    7.  [pop kafka](#org3008e43)
+4.  [Example tests, using the DSL](#org0d48a4a)
 
 In Dutch 🇳🇱, *pop* means puppet or doll. But pop-test is not about dolls! It’s a tool that helps test computer programs in an easy and future-proof manner that improves reliability and engineering freedom.
 
@@ -31,7 +31,7 @@ pop-tests as we affectionately call them, can range from small scope integration
 ---
 
 
-<a id="orgd6353ac"></a>
+<a id="orga2510d4"></a>
 
 # Why pop-test?
 
@@ -43,7 +43,7 @@ pop-tests as we affectionately call them, can range from small scope integration
 -   Fast and reliable – Built with Rust, a programming language known for speed and safety.
 
 
-<a id="org6c75e07"></a>
+<a id="org7d552d7"></a>
 
 # Motivation
 
@@ -70,7 +70,7 @@ In short, pop-tests make engineers happier, business people more certain of what
 ---
 
 
-<a id="org6c4b617"></a>
+<a id="org83061fb"></a>
 
 # The Scenario DSL (Domain Specific Language)
 
@@ -83,7 +83,7 @@ Here follows an explanation of every individual field and parameter possible, in
 ---
 
 
-<a id="orga7a3d17"></a>
+<a id="orgb32ae2c"></a>
 
 ## pop services
 
@@ -104,7 +104,7 @@ A service is defined by:
 `env_vars` (optional, map of string to string) – A set of environment variables to be defined for the service.  
 
 
-<a id="org19a5e0c"></a>
+<a id="orgb861efc"></a>
 
 ### service health check
 
@@ -123,7 +123,7 @@ HTTP health check:
 `patience_seconds` (required, integer) – The maximum time allowed for the service to become healthy. If the service is healthy before this deadline, the scenario setup continues without waiting.
 
 
-<a id="orgdf75b30"></a>
+<a id="orgdf0cc1b"></a>
 
 ### service postgres
 
@@ -142,7 +142,7 @@ Defines how PostgreSQL is used in the service. Field is `postgres`, an optional 
 `pass_var` (optional, string) - Container DB password will be injected on services, via environment variable, by default `POSTGRESQL_PASSWORD`
 
 
-<a id="org5e70e94"></a>
+<a id="org61cff88"></a>
 
 ### service kafka
 
@@ -155,7 +155,7 @@ Defines how Kafka is used in the service. Field is `kafka`, an optional object.
 ---
 
 
-<a id="orgd4f8372"></a>
+<a id="org56a20ba"></a>
 
 ## pop actions
 
@@ -166,7 +166,7 @@ there are many types of pop action, see the following sections.
 ---
 
 
-<a id="orgfd31567"></a>
+<a id="org6183146"></a>
 
 ## a kafka produce action
 
@@ -177,9 +177,11 @@ A kafka produce action is defined by:
 ---
 
 
-<a id="orga60598a"></a>
+<a id="orgdd5e0c1"></a>
 
-## a check
+## an http assertion
+
+`expected_code` (optional, u16 number) - expected HTTP status code
 
 `check_url` (required, string) – The endpoint path to be tested within the service. This should be a relative path, such as `/api/v1/forecast`, which will be appended to the base<sub>url</sub> of the service.
 
@@ -196,7 +198,7 @@ Each JSON body pattern entry includes:
 ---
 
 
-<a id="orgd52674e"></a>
+<a id="orga20d1ce"></a>
 
 ## Condition DSL
 
@@ -217,7 +219,7 @@ Supported conditions include:
 ---
 
 
-<a id="org429452b"></a>
+<a id="org1adf59d"></a>
 
 ## pop postgres
 
@@ -232,7 +234,7 @@ You can use PostgreSQL in pop-tests easily.
 ---
 
 
-<a id="org3823b48"></a>
+<a id="org3008e43"></a>
 
 ## pop kafka
 
@@ -247,7 +249,7 @@ You can use Kafka in pop-tests easily.
 ---
 
 
-<a id="orgdd9ea76"></a>
+<a id="org0d48a4a"></a>
 
 # Example tests, using the DSL
 

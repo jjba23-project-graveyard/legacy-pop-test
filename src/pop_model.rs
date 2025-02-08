@@ -79,12 +79,15 @@ pub struct BodyPattern {
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 #[serde(untagged)]
 pub enum PopAction {
-    Http {
+    HttpAssertion {
         expected_code: Option<u16>,
         check_url: String,
         service_id: String,
         delay_seconds: Option<u64>,
         json_body_patterns: Option<Vec<BodyPattern>>,
+    },
+    KafkaProduceAction {
+        json_from_file: Option<String>,
     },
 }
 

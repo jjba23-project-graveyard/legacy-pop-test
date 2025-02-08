@@ -136,7 +136,9 @@ A kafka produce action is defined by:
 
 -----
 
-** a check 
+** an http assertion
+
+~expected_code~ (optional, u16 number) - expected HTTP status code
 
 ~check_url~ (required, string) – The endpoint path to be tested within the service. This should be a relative path, such as ~/api/v1/forecast~, which will be appended to the base_url of the service.
 

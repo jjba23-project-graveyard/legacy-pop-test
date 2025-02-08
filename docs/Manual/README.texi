@@ -46,7 +46,7 @@ The Scenario DSL (Domain Specific Language)
 * pop services::
 * pop actions::
 * a kafka produce action::
-* a check::
+* an http assertion::
 * Condition DSL::
 * pop postgres::
 * pop kafka::
@@ -114,7 +114,7 @@ Here follows an explanation of every individual field and parameter possible, in
 * pop services::
 * pop actions::
 * a kafka produce action::
-* a check::
+* an http assertion::
 * Condition DSL::
 * pop postgres::
 * pop kafka::
@@ -202,8 +202,10 @@ A kafka produce action is defined by:
 
 @code{json_from_file} (optional, string)
 
-@node a check
-@section a check
+@node an http assertion
+@section an http assertion
+
+@code{expected_code} (optional, u16 number) - expected HTTP status code
 
 @code{check_url} (required, string) – The endpoint path to be tested within the service. This should be a relative path, such as @code{/api/v1/forecast}, which will be appended to the base@math{_url} of the service.
 
