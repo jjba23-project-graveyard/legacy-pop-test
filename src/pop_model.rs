@@ -20,7 +20,7 @@ use std::collections::HashMap;
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 #[serde(untagged)]
-pub enum PopServiceHealthCheck {
+pub enum PopServiceHealthAction {
     Http { path: String, patience_seconds: i32 },
     Dummy { always_healthy: bool },
 }
@@ -63,7 +63,7 @@ pub struct PopService {
     pub shell_path: Option<String>,
     pub start_cmd_args: Vec<String>,
     pub env_vars: HashMap<String, String>,
-    pub health_check: PopServiceHealthCheck,
+    pub health_check: PopServiceHealthAction,
     pub postgres: Option<PopServicePostgres>,
     pub kafka: Option<PopServiceKafka>,
     pub pop_server: Option<PopServicePopServer>,
@@ -78,7 +78,7 @@ pub struct BodyPattern {
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 #[serde(untagged)]
-pub enum PopCheck {
+pub enum PopAction {
     Http {
         expected_code: Option<u16>,
         check_url: String,
@@ -135,7 +135,7 @@ pub struct PopServer {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct PopScenario {
     pub pop_services: Vec<PopService>,
-    pub pop_checks: Option<Vec<PopCheck>>,
+    pub pop_actions: Option<Vec<PopAction>>,
     pub pop_postgres: Option<PopPostgres>,
     pub pop_kafka: Option<PopKafka>,
     pub pop_server: Option<PopServer>,

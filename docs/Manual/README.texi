@@ -9,7 +9,7 @@
 @finalout
 @titlepage
 @title pop-test manual
-@author Music Player Daemon (MPD) user
+@author Josep Bigorra
 @end titlepage
 
 @contents
@@ -29,6 +29,7 @@ pop-test is built with Rust, enhancing safety, performance and reliability, with
 pop-tests as we affectionately call them, can range from small scope integration tests to all encompassing end-to-end or black box tests.
 
 @image{../../resources/img/wp10992149,,,,jpg}
+
 @end ifnottex
 
 @menu
@@ -43,7 +44,9 @@ pop-tests as we affectionately call them, can range from small scope integration
 The Scenario DSL (Domain Specific Language)
 
 * pop services::
-* pop checks::
+* pop actions::
+* a kafka produce action::
+* a check::
 * Condition DSL::
 * pop postgres::
 * pop kafka::
@@ -109,7 +112,9 @@ Here follows an explanation of every individual field and parameter possible, in
 
 @menu
 * pop services::
-* pop checks::
+* pop actions::
+* a kafka produce action::
+* a check::
 * Condition DSL::
 * pop postgres::
 * pop kafka::
@@ -183,12 +188,22 @@ Defines how Kafka is used in the service. Field is @code{kafka}, an optional obj
 
 @code{bootstrap_server_var} (optional, string) - Container HTTP connection string for Kafka will be injected on services, via environment variable, by default @code{KAFKA_BOOTSTRAP_SERVER}
 
-@node pop checks
-@section pop checks
+@node pop actions
+@section pop actions
 
-@code{pop_checks} is a list of checks that validate expected responses and behaviours from the services in the scenario. These checks help verify that the services return valid and expected data before proceeding with the scenario execution.
+@code{pop_actions} is a list of actions that setup state for a test and validate expected responses and behaviours from the services in the scenario. These actions help verify that the services return valid and expected data before proceeding with the scenario execution.
 
-A check is defined by:
+there are many types of pop action, see the following sections.
+
+@node a kafka produce action
+@section a kafka produce action
+
+A kafka produce action is defined by:
+
+@code{json_from_file} (optional, string)
+
+@node a check
+@section a check
 
 @code{check_url} (required, string) – The endpoint path to be tested within the service. This should be a relative path, such as @code{/api/v1/forecast}, which will be appended to the base@math{_url} of the service.
 

@@ -14,6 +14,8 @@ pop-tests as we affectionately call them, can range from small scope integration
 
 [[file:../../resources/img/wp10992149.jpg]]
 
+------
+
 
 * Why pop-test?
 
@@ -118,11 +120,23 @@ Defines how Kafka is used in the service. Field is ~kafka~, an optional object.
 
 -----
 
-** pop checks
+** pop actions
 
-~pop_checks~ is a list of checks that validate expected responses and behaviours from the services in the scenario. These checks help verify that the services return valid and expected data before proceeding with the scenario execution.
+~pop_actions~ is a list of actions that setup state for a test and validate expected responses and behaviours from the services in the scenario. These actions help verify that the services return valid and expected data before proceeding with the scenario execution.
 
-A check is defined by:
+there are many types of pop action, see the following sections.
+
+-----
+
+** a kafka produce action 
+A kafka produce action is defined by:
+
+~json_from_file~ (optional, string)
+
+
+-----
+
+** a check 
 
 ~check_url~ (required, string) – The endpoint path to be tested within the service. This should be a relative path, such as ~/api/v1/forecast~, which will be appended to the base_url of the service.
 
@@ -135,6 +149,8 @@ Each JSON body pattern entry includes:
 ~pattern~ (required, string) – A JSON path-like expression that identifies the field in the response body. This uses the Rust ~jql~ library.
 
 ~condition~ (required, string) – A logical condition to be checked.
+
+------
 
 ** Condition DSL
 

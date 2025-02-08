@@ -17,7 +17,7 @@
 
 use std::time::Duration;
 
-use crate::pop_model::{PopService, PopServiceHealthCheck};
+use crate::pop_model::{PopService, PopServiceHealthAction};
 use paris::{error, info, success};
 use tokio::time::sleep;
 
@@ -33,11 +33,11 @@ pub async fn start_health_check(pop_service: PopService) {
 async fn health_check(
     id: &String,
     base_url: &String,
-    health_check: &PopServiceHealthCheck,
+    health_check: &PopServiceHealthAction,
 ) -> Result<(), String> {
     info!("starting health check for service: {}", id);
     match health_check {
-        crate::pop_model::PopServiceHealthCheck::Http {
+        crate::pop_model::PopServiceHealthAction::Http {
             path,
             patience_seconds,
         } => {
@@ -67,7 +67,7 @@ async fn health_check(
 
             Ok(())
         }
-        crate::pop_model::PopServiceHealthCheck::Dummy { always_healthy } => {
+        crate::pop_model::PopServiceHealthAction::Dummy { always_healthy } => {
             if always_healthy.to_owned() {
                 Ok(())
             } else {

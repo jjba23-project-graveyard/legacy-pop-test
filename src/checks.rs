@@ -17,7 +17,7 @@
 
 use std::time::Duration;
 
-use crate::pop_model::{BodyPattern, PopCheck, PopScenarioFile};
+use crate::pop_model::{BodyPattern, PopAction, PopScenarioFile};
 
 use crate::condition_dsl::eval_condition;
 use paris::{error, info, success};
@@ -33,7 +33,7 @@ pub async fn perform_checks(scenario_file: &PopScenarioFile) {
         .unwrap_or_default()
     {
         match check {
-            PopCheck::Http {
+            PopAction::Http {
                 expected_code,
                 check_url,
                 service_id,

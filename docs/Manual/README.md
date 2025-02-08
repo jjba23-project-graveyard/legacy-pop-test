@@ -1,18 +1,20 @@
 
 # Table of Contents
 
-1.  [Why pop-test?](#org41e8e2b)
-2.  [Motivation](#org8db5bcc)
-3.  [The Scenario DSL (Domain Specific Language)](#org3b3c343)
-    1.  [pop services](#org67d0dda)
-        1.  [service health check](#org2f79c13)
-        2.  [service postgres](#org70b5754)
-        3.  [service kafka](#org03289d0)
-    2.  [pop checks](#org67ed03f)
-    3.  [Condition DSL](#org11c2c8d)
-    4.  [pop postgres](#org7f3681f)
-    5.  [pop kafka](#org5486dd9)
-4.  [Example tests, using the DSL](#orgf22495f)
+1.  [Why pop-test?](#orgd6353ac)
+2.  [Motivation](#org6c75e07)
+3.  [The Scenario DSL (Domain Specific Language)](#org6c4b617)
+    1.  [pop services](#orga7a3d17)
+        1.  [service health check](#org19a5e0c)
+        2.  [service postgres](#orgdf75b30)
+        3.  [service kafka](#org5e70e94)
+    2.  [pop actions](#orgd4f8372)
+    3.  [a kafka produce action](#orgfd31567)
+    4.  [a check](#orga60598a)
+    5.  [Condition DSL](#orgd52674e)
+    6.  [pop postgres](#org429452b)
+    7.  [pop kafka](#org3823b48)
+4.  [Example tests, using the DSL](#orgdd9ea76)
 
 In Dutch 🇳🇱, *pop* means puppet or doll. But pop-test is not about dolls! It’s a tool that helps test computer programs in an easy and future-proof manner that improves reliability and engineering freedom.
 
@@ -26,8 +28,10 @@ pop-tests as we affectionately call them, can range from small scope integration
 
 ![img](../../resources/img/wp10992149.jpg)
 
+---
 
-<a id="org41e8e2b"></a>
+
+<a id="orgd6353ac"></a>
 
 # Why pop-test?
 
@@ -39,7 +43,7 @@ pop-tests as we affectionately call them, can range from small scope integration
 -   Fast and reliable – Built with Rust, a programming language known for speed and safety.
 
 
-<a id="org8db5bcc"></a>
+<a id="org6c75e07"></a>
 
 # Motivation
 
@@ -66,7 +70,7 @@ In short, pop-tests make engineers happier, business people more certain of what
 ---
 
 
-<a id="org3b3c343"></a>
+<a id="org6c4b617"></a>
 
 # The Scenario DSL (Domain Specific Language)
 
@@ -79,7 +83,7 @@ Here follows an explanation of every individual field and parameter possible, in
 ---
 
 
-<a id="org67d0dda"></a>
+<a id="orga7a3d17"></a>
 
 ## pop services
 
@@ -100,7 +104,7 @@ A service is defined by:
 `env_vars` (optional, map of string to string) – A set of environment variables to be defined for the service.  
 
 
-<a id="org2f79c13"></a>
+<a id="org19a5e0c"></a>
 
 ### service health check
 
@@ -119,7 +123,7 @@ HTTP health check:
 `patience_seconds` (required, integer) – The maximum time allowed for the service to become healthy. If the service is healthy before this deadline, the scenario setup continues without waiting.
 
 
-<a id="org70b5754"></a>
+<a id="orgdf75b30"></a>
 
 ### service postgres
 
@@ -138,7 +142,7 @@ Defines how PostgreSQL is used in the service. Field is `postgres`, an optional 
 `pass_var` (optional, string) - Container DB password will be injected on services, via environment variable, by default `POSTGRESQL_PASSWORD`
 
 
-<a id="org03289d0"></a>
+<a id="org5e70e94"></a>
 
 ### service kafka
 
@@ -151,13 +155,31 @@ Defines how Kafka is used in the service. Field is `kafka`, an optional object.
 ---
 
 
-<a id="org67ed03f"></a>
+<a id="orgd4f8372"></a>
 
-## pop checks
+## pop actions
 
-`pop_checks` is a list of checks that validate expected responses and behaviours from the services in the scenario. These checks help verify that the services return valid and expected data before proceeding with the scenario execution.
+`pop_actions` is a list of actions that setup state for a test and validate expected responses and behaviours from the services in the scenario. These actions help verify that the services return valid and expected data before proceeding with the scenario execution.
 
-A check is defined by:
+there are many types of pop action, see the following sections.
+
+---
+
+
+<a id="orgfd31567"></a>
+
+## a kafka produce action
+
+A kafka produce action is defined by:
+
+`json_from_file` (optional, string)
+
+---
+
+
+<a id="orga60598a"></a>
+
+## a check
 
 `check_url` (required, string) – The endpoint path to be tested within the service. This should be a relative path, such as `/api/v1/forecast`, which will be appended to the base<sub>url</sub> of the service.
 
@@ -171,8 +193,10 @@ Each JSON body pattern entry includes:
 
 `condition` (required, string) – A logical condition to be checked.
 
+---
 
-<a id="org11c2c8d"></a>
+
+<a id="orgd52674e"></a>
 
 ## Condition DSL
 
@@ -193,7 +217,7 @@ Supported conditions include:
 ---
 
 
-<a id="org7f3681f"></a>
+<a id="org429452b"></a>
 
 ## pop postgres
 
@@ -208,7 +232,7 @@ You can use PostgreSQL in pop-tests easily.
 ---
 
 
-<a id="org5486dd9"></a>
+<a id="org3823b48"></a>
 
 ## pop kafka
 
@@ -223,7 +247,7 @@ You can use Kafka in pop-tests easily.
 ---
 
 
-<a id="orgf22495f"></a>
+<a id="orgdd9ea76"></a>
 
 # Example tests, using the DSL
 

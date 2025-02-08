@@ -1,0 +1,11 @@
+{
+  "vehicleId": "1607dc97-53a1-4e16-821d-b16b76daa903",
+  "stateOfCharge": 9999,
+  "rangeInKm": 4500,
+  "batteryCapacityInKwh": 8.0,
+  "chargeLimit": 0,
+  "customerId": "afa8dd00-5f92-4d92-a554-b09f014c34bb",
+  "customerReference": "9c813b0e-4d91-40f7-a0ee-0e93bc3e471c",
+  "organizationId": "b4e7f61d-bcdc-436d-be4d-5384b503162b",
+  "timestamp": "2025-02-08T23:32:08+01:00Z"
+}
