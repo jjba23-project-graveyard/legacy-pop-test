@@ -27,8 +27,12 @@ pop_test:
       health_check:
         path: "/health"
         patience_seconds: 90
+      kafka:
+        enabled: true
 
   pop_actions:
+    - kafka_topic: "vehicle.latest-state"
+      message_file_path: "/home/joe/Ontwikkeling/Persoonlijk/pop-test/resources/kafka-messages/dynamic-tariff-charging-send-vehicle-latest-state.json"
     - assert_url: "/api/v1/forecast"
       service_id: "green-energy-mix"
       json_body_patterns:
@@ -38,3 +42,6 @@ pop_test:
           condition: "> 0"
         - pattern: '"data"[0]"solar"'
           condition: ">= 0"
+
+  pop_kafka:
+    enabled: true

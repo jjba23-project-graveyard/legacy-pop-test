@@ -200,7 +200,9 @@ there are many types of pop action, see the following sections.
 
 A kafka produce action is defined by:
 
-@code{json_from_file} (optional, string)
+@code{message_file_path} (optional, string)
+
+@code{kafka-topic} (required, string)
 
 @node an http assertion
 @section an http assertion
