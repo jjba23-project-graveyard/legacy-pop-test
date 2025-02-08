@@ -270,7 +270,7 @@ In this example we spin up a REST API written in Scala, with SBT, and poll its `
             path: "/health"
             patience_seconds: 90
     
-      pop_checks:
+      pop_actions:
         - check_url: "/api/v1/forecast"
           service_id: "green-energy-mix"
           json_body_patterns:

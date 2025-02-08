@@ -28,7 +28,7 @@ pub async fn perform_checks(scenario_file: &PopScenarioFile) {
 
     for check in &scenario_file
         .pop_test
-        .pop_checks
+        .pop_actions
         .clone()
         .unwrap_or_default()
     {

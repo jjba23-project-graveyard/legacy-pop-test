@@ -27,6 +27,6 @@ pop_test:
         path: "/"
         patience_seconds: 60
 
-  pop_checks:
+  pop_actions:
     - check_url: "/"
       service_id: "byggsteg"
