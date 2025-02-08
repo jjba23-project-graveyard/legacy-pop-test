@@ -15,13 +15,31 @@
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
-use std::collections::HashMap;
-
 use crate::pop_model::{PopKafka, PopScenarioFile, PopService};
+use kafka::producer::{Producer, Record, RequiredAcks};
 use paris::info;
+use std::collections::HashMap;
+use std::time::Duration;
 use testcontainers::ContainerAsync;
 use testcontainers::{runners::AsyncRunner, ImageExt};
 use testcontainers_modules::kafka::{Kafka, KAFKA_PORT};
+use tokio::fs;
+
+pub async fn produce_kafka_message(bootstrap_server: String, file_path: String, topic: String) {
+    let mut producer = Producer::from_hosts(vec![bootstrap_server])
+        .with_ack_timeout(Duration::from_secs(1))
+        .with_required_acks(RequiredAcks::One)
+        .create()
+        .unwrap();
+
+    let d = fs::read_to_string(file_path)
+        .await
+        .unwrap_or("".to_string());
+
+    producer
+        .send(&Record::from_value(topic.as_str(), d.as_bytes()))
+        .unwrap();
+}
 
 async fn run_kafka_container(pop_kafka: PopKafka) -> Result<ContainerAsync<Kafka>, String> {
     Kafka::default()

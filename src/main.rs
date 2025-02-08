@@ -21,7 +21,7 @@ use scenario::play_scenario;
 use std::env;
 use std::fs;
 
-mod checks;
+mod actions;
 mod condition_dsl;
 mod health_check;
 mod kafka;

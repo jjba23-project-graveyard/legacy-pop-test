@@ -493,7 +493,7 @@ A kafka produce action is defined by:
 </p>
 
 <p>
-<code>check_url</code> (required, string) – The endpoint path to be tested within the service. This should be a relative path, such as <code>/api/v1/forecast</code>, which will be appended to the base<sub>url</sub> of the service.
+<code>assert_url</code> (required, string) – The endpoint path to be tested within the service. This should be a relative path, such as <code>/api/v1/forecast</code>, which will be appended to the base<sub>url</sub> of the service.
 </p>
 
 <p>
@@ -633,7 +633,7 @@ In this example we spin up a REST API written in Scala, with SBT, and poll its <
         patience_seconds: 90
 
   pop_actions:
-    - check_url: "/api/v1/forecast"
+    - assert_url: "/api/v1/forecast"
       service_id: "green-energy-mix"
       json_body_patterns:
         - pattern: '"meta""forecastDate"'

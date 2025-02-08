@@ -28,5 +28,5 @@ pop_test:
         patience_seconds: 60
 
   pop_actions:
-    - check_url: "/"
+    - assert_url: "/"
       service_id: "byggsteg"

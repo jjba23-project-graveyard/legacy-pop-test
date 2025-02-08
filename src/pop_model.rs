@@ -80,14 +80,16 @@ pub struct BodyPattern {
 #[serde(untagged)]
 pub enum PopAction {
     HttpAssertion {
-        expected_code: Option<u16>,
-        check_url: String,
+        assert_code: Option<u16>,
+        assert_url: String,
         service_id: String,
         delay_seconds: Option<u64>,
         json_body_patterns: Option<Vec<BodyPattern>>,
     },
-    KafkaProduceAction {
-        json_from_file: Option<String>,
+    KafkaProduceFromFileAction {
+        delay_seconds: Option<u64>,
+        message_file_path: String,
+        kafka_topic: String,
     },
 }
 
@@ -148,4 +150,9 @@ pub struct PopScenario {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct PopScenarioFile {
     pub pop_test: PopScenario,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct PopEnv {
+    pub kafka_bootstrap_server: String,
 }

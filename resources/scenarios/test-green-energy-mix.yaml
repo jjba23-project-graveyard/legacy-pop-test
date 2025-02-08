@@ -29,7 +29,7 @@ pop_test:
         patience_seconds: 90
 
   pop_actions:
-    - check_url: "/api/v1/forecast"
+    - assert_url: "/api/v1/forecast"
       service_id: "green-energy-mix"
       json_body_patterns:
         - pattern: '"meta""forecastDate"'

@@ -15,7 +15,7 @@
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
-use crate::checks::perform_checks;
+use crate::actions::perform_checks;
 use crate::health_check::start_health_check;
 use crate::kafka::{maybe_start_kafka, setup_kafka_env};
 use crate::keycloak::container::{maybe_start_keycloak, setup_keycloak_env};
@@ -26,7 +26,7 @@ use crate::proc::{start_service, terminate_services};
 use paris::{info, success};
 use std::collections::HashMap;
 use testcontainers::{ContainerAsync, GenericImage};
-use testcontainers_modules::kafka::Kafka;
+use testcontainers_modules::kafka::{Kafka, KAFKA_PORT};
 use testcontainers_modules::postgres::Postgres;
 use tokio::task::JoinSet;
 
@@ -64,8 +64,29 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
     info!("awaiting for all services to be healthy");
     h_set.join_all().await;
 
+    info!("gathering env");
+    let mut kafka_bootstrap_server = "".to_string();
+    if let Some(k) = kafka_container {
+        let host = k.get_host().await.unwrap().to_string();
+        let port = k
+            .ports()
+            .await
+            .unwrap()
+            .map_to_host_port_ipv4(KAFKA_PORT)
+            .unwrap_or(KAFKA_PORT.as_u16());
+
+        let fmt = format!("{}:{}", host, port);
+        kafka_bootstrap_server = fmt;
+    }
+
+    let pop_env = crate::pop_model::PopEnv {
+        kafka_bootstrap_server: kafka_bootstrap_server.to_string(),
+    };
+
+    info!("{:?}", pop_env);
+
     info!("performing tests and assertions");
-    perform_checks(&scenario_file).await;
+    perform_checks(&scenario_file, &pop_env).await;
 
     terminate_services(children).await;
 

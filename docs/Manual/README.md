@@ -183,7 +183,7 @@ A kafka produce action is defined by:
 
 `expected_code` (optional, u16 number) - expected HTTP status code
 
-`check_url` (required, string) – The endpoint path to be tested within the service. This should be a relative path, such as `/api/v1/forecast`, which will be appended to the base<sub>url</sub> of the service.
+`assert_url` (required, string) – The endpoint path to be tested within the service. This should be a relative path, such as `/api/v1/forecast`, which will be appended to the base<sub>url</sub> of the service.
 
 `service_id` (required, string) – A reference to the id of the service being checked. This links the check to a specific service defined in `pop_services`.
 
@@ -273,7 +273,7 @@ In this example we spin up a REST API written in Scala, with SBT, and poll its `
             patience_seconds: 90
     
       pop_actions:
-        - check_url: "/api/v1/forecast"
+        - assert_url: "/api/v1/forecast"
           service_id: "green-energy-mix"
           json_body_patterns:
             - pattern: '"meta""forecastDate"'
