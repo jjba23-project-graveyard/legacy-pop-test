@@ -27,7 +27,7 @@ use paris::{error, info, success};
 use std::collections::HashMap;
 use std::time::Duration;
 use testcontainers::{ContainerAsync, GenericImage};
-use testcontainers_modules::kafka::{Kafka, KAFKA_PORT};
+use testcontainers_modules::kafka::Kafka;
 use testcontainers_modules::postgres::Postgres;
 use tokio::task::JoinSet;
 use tokio::time::sleep;
@@ -69,15 +69,15 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
     info!("gathering env");
     let mut kafka_bootstrap_server = "".to_string();
     if let Some(k) = kafka_container {
-        let host = k.get_host().await.unwrap().to_string();
+        //let host = k.get_host().await.unwrap().to_string();
         let port = k
             .ports()
             .await
             .unwrap()
-            .map_to_host_port_ipv4(KAFKA_PORT)
-            .unwrap_or(KAFKA_PORT.as_u16());
+            .map_to_host_port_ipv4(9093)
+            .unwrap_or(9093);
 
-        let fmt = format!("{}:{}", host, port);
+        let fmt = format!("127.0.0.1:{}", port);
         kafka_bootstrap_server = fmt;
     }
 
@@ -108,12 +108,13 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
                 }
 
                 info!("producing kafka message");
-                produce_kafka_message(
+                let r = produce_kafka_message(
                     pop_env.kafka_bootstrap_server.clone(),
                     message_file_path.to_owned(),
                     kafka_topic.to_owned(),
                 )
                 .await;
+                let _ = r.inspect_err(|e| error!("{}", e));
             }
             PopAction::HttpAssertion {
                 assert_code,

@@ -22,7 +22,7 @@ use std::collections::HashMap;
 use std::time::Duration;
 use testcontainers::ContainerAsync;
 use testcontainers::{runners::AsyncRunner, ImageExt};
-use testcontainers_modules::kafka::{Kafka, KAFKA_PORT};
+use testcontainers_modules::kafka::Kafka;
 use tokio::fs;
 
 pub async fn produce_kafka_message(
@@ -94,8 +94,8 @@ pub async fn setup_kafka_env(
                 .ports()
                 .await
                 .unwrap()
-                .map_to_host_port_ipv4(KAFKA_PORT)
-                .unwrap_or(KAFKA_PORT.as_u16());
+                .map_to_host_port_ipv4(9093)
+                .unwrap_or(9093);
             let k: String = pop_service
                 .kafka
                 .as_ref()
