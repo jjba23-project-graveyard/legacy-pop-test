@@ -25,20 +25,24 @@ use testcontainers::{runners::AsyncRunner, ImageExt};
 use testcontainers_modules::kafka::{Kafka, KAFKA_PORT};
 use tokio::fs;
 
-pub async fn produce_kafka_message(bootstrap_server: String, file_path: String, topic: String) {
+pub async fn produce_kafka_message(
+    bootstrap_server: String,
+    file_path: String,
+    topic: String,
+) -> Result<(), String> {
     let mut producer = Producer::from_hosts(vec![bootstrap_server])
         .with_ack_timeout(Duration::from_secs(1))
         .with_required_acks(RequiredAcks::One)
         .create()
-        .unwrap();
+        .map_err(|e| e.to_string())?;
 
     let d = fs::read_to_string(file_path)
         .await
-        .unwrap_or("".to_string());
+        .map_err(|e| e.to_string())?;
 
     producer
         .send(&Record::from_value(topic.as_str(), d.as_bytes()))
-        .unwrap();
+        .map_err(|e| e.to_string())
 }
 
 async fn run_kafka_container(pop_kafka: PopKafka) -> Result<ContainerAsync<Kafka>, String> {

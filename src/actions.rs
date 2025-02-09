@@ -15,74 +15,12 @@
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
-use std::time::Duration;
-
-use crate::kafka::produce_kafka_message;
-use crate::pop_model::{BodyPattern, PopAction, PopEnv, PopScenarioFile};
+use crate::pop_model::BodyPattern;
 
 use crate::condition_dsl::eval_condition;
-use paris::{error, info, success};
-use tokio::time::sleep;
+use paris::{error, success};
 
-pub async fn perform_checks(scenario_file: &PopScenarioFile, env: &PopEnv) {
-    let services = &scenario_file.pop_test.pop_services;
-
-    for check in &scenario_file
-        .pop_test
-        .pop_actions
-        .clone()
-        .unwrap_or_default()
-    {
-        match check {
-            PopAction::KafkaProduceFromFileAction {
-                message_file_path,
-                delay_seconds,
-                kafka_topic,
-            } => {
-                if let Some(delay) = delay_seconds {
-                    sleep(Duration::from_secs(*delay)).await;
-                }
-
-                produce_kafka_message(
-                    env.kafka_bootstrap_server.clone(),
-                    message_file_path.to_owned(),
-                    kafka_topic.to_owned(),
-                )
-                .await;
-            }
-            PopAction::HttpAssertion {
-                assert_code,
-                assert_url,
-                service_id,
-                delay_seconds,
-                json_body_patterns,
-            } => {
-                if let Some(delay) = delay_seconds {
-                    sleep(Duration::from_secs(*delay)).await;
-                }
-
-                if let Some(service) = services.iter().find(|s| s.id == *service_id) {
-                    info!("found service to check: {:?}", service);
-                    info!("running check: {:?}", check);
-                    if let Err(e) = do_with_http_check(
-                        *assert_code,
-                        assert_url.clone(),
-                        service.base_url.clone(),
-                        json_body_patterns.clone(),
-                    )
-                    .await
-                    {
-                        error!("HTTP check failed: {:?}", e);
-                    }
-                } else {
-                    error!("could not find service details for check");
-                }
-            }
-        }
-    }
-}
-
-pub async fn do_with_http_check(
+pub async fn run_http_assertion(
     expected_code: Option<u16>,
     assert_url: String,
     service_url: String,

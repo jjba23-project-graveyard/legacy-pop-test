@@ -15,20 +15,22 @@
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
-use crate::actions::perform_checks;
+use crate::actions::run_http_assertion;
 use crate::health_check::start_health_check;
-use crate::kafka::{maybe_start_kafka, setup_kafka_env};
+use crate::kafka::{maybe_start_kafka, produce_kafka_message, setup_kafka_env};
 use crate::keycloak::container::{maybe_start_keycloak, setup_keycloak_env};
-use crate::pop_model::{PopScenarioFile, PopService};
+use crate::pop_model::{PopAction, PopScenarioFile, PopService};
 use crate::pop_server::{maybe_start_pop_server, setup_pop_server_env};
 use crate::postgres::container::{maybe_start_postgres, setup_postgres_env};
 use crate::proc::{start_service, terminate_services};
-use paris::{info, success};
+use paris::{error, info, success};
 use std::collections::HashMap;
+use std::time::Duration;
 use testcontainers::{ContainerAsync, GenericImage};
 use testcontainers_modules::kafka::{Kafka, KAFKA_PORT};
 use testcontainers_modules::postgres::Postgres;
 use tokio::task::JoinSet;
+use tokio::time::sleep;
 
 pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String> {
     let mut h_set = JoinSet::new();
@@ -86,7 +88,63 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
     info!("{:?}", pop_env);
 
     info!("performing tests and assertions");
-    perform_checks(&scenario_file, &pop_env).await;
+    let services = &scenario_file.pop_test.pop_services;
+
+    for action in &scenario_file
+        .pop_test
+        .pop_actions
+        .clone()
+        .unwrap_or_default()
+    {
+        info!("executing action: {:?}", action);
+        match action {
+            PopAction::KafkaProduceFromFileAction {
+                message_file_path,
+                delay_seconds,
+                kafka_topic,
+            } => {
+                if let Some(delay) = delay_seconds {
+                    sleep(Duration::from_secs(*delay)).await;
+                }
+
+                info!("producing kafka message");
+                produce_kafka_message(
+                    pop_env.kafka_bootstrap_server.clone(),
+                    message_file_path.to_owned(),
+                    kafka_topic.to_owned(),
+                )
+                .await;
+            }
+            PopAction::HttpAssertion {
+                assert_code,
+                assert_url,
+                service_id,
+                delay_seconds,
+                json_body_patterns,
+            } => {
+                if let Some(delay) = delay_seconds {
+                    sleep(Duration::from_secs(*delay)).await;
+                }
+
+                if let Some(service) = services.iter().find(|s| s.id == *service_id) {
+                    info!("found service to check: {:?}", service);
+                    info!("running http assertion: {:?}", action);
+                    if let Err(e) = run_http_assertion(
+                        *assert_code,
+                        assert_url.clone(),
+                        service.base_url.clone(),
+                        json_body_patterns.clone(),
+                    )
+                    .await
+                    {
+                        error!("HTTP check failed: {:?}", e);
+                    }
+                } else {
+                    error!("could not find service details for check");
+                }
+            }
+        }
+    }
 
     terminate_services(children).await;
 

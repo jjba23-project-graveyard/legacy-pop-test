@@ -29,48 +29,14 @@ fmt:
 	nix develop -c cargo fix --allow-dirty --bin "pop-test"
 	nix develop -c cargo clippy --fix --allow-dirty
 	nix develop -c find . -maxdepth 8 -name "*.rs" -type f -exec rustfmt --edition 2021 {} \;
+
+# test: run unit and integration tests for pop-test's implementation itself
 test: fmt
 	nix develop -c cargo test
+
 # publish-manual: Generates and publishes the manual from Org files using Emacs.
 publish-manual:
 	cd docs/Manual/ && emacs -Q --batch \
 		-l $(shell realpath ./src/manual/pop-test-manual.el) \
 		--funcall pop-test/publish-manual && cd ../../	
 
-# username = "alice"
-# password = "wonderland"
-
-# user_settings = {
-#     "username": username,
-#     "enabled": True,
-#     "credentials": [{
-#         "type": "password",
-#         "value": password,
-#         "temporary": False,
-#     }]
-# }
-
-
-# resp = requests.post(
-#     f"{keycloak_root}/admin/realms/{realm}/users",
-#     json=user_settings,
-#     headers=auth_headers,
-# )
-# resp.raise_for_status()
-# location = resp.headers["Location"]
-# print(location)
-
-# http://localhost:8642/realms/keldor/protocol/openid-connect/token
-# Do the token request (here using the password grant for simplicity):
-
-# resp = requests.post(
-#     token_endpoint,
-#     data={
-#         "client_id": client_id,
-#         "username": username,
-#         "password": password,
-#         "grant_type": "password",
-#     }
-# )
-# resp.raise_for_status()
-# resp.json()
