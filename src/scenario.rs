@@ -93,24 +93,40 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
     info!("start setting up dependencies");
 
     let maybe_postgres_container = maybe_start_postgres(&scenario_file).await?;
-    if let Some(ref postgres_container) = maybe_postgres_container {
-        setup_container_logging(postgres_container).await;
-    }
+    let postgres_logs = match maybe_postgres_container {
+        Some(ref postgres_container) => {
+            let o = setup_container_logging(postgres_container).await;
+            Some(o)
+        }
+        None => None,
+    };
 
     let maybe_pop_server_container = maybe_start_pop_server(&scenario_file).await?;
-    if let Some(ref pop_server_container) = maybe_pop_server_container {
-        setup_container_logging(pop_server_container).await;
-    }
+    let pop_server_logs = match maybe_pop_server_container {
+        Some(ref pop_server_container) => {
+            let o = setup_container_logging(pop_server_container).await;
+            Some(o)
+        }
+        None => None,
+    };
 
     let maybe_kafka_container = maybe_start_kafka(&scenario_file).await?;
-    if let Some(ref kafka_container) = maybe_kafka_container {
-        setup_container_logging(kafka_container).await;
-    }
+    let kafka_logs = match maybe_kafka_container {
+        Some(ref kafka_container) => {
+            let o = setup_container_logging(kafka_container).await;
+            Some(o)
+        }
+        None => None,
+    };
 
     let maybe_keycloak_container = maybe_start_keycloak(&scenario_file).await?;
-    if let Some(ref keycloak_container) = maybe_keycloak_container {
-        setup_container_logging(keycloak_container).await;
-    }
+    let keycloak_logs = match maybe_keycloak_container {
+        Some(ref keycloak_container) => {
+            let o = setup_container_logging(keycloak_container).await;
+            Some(o)
+        }
+        None => None,
+    };
 
     for pop_service in scenario_file.pop_test.pop_services.clone() {
         info!("registering service: {}", pop_service.id);
@@ -174,9 +190,28 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
 
     terminate_services(children).await;
 
-    maybe_terminate_container(maybe_kafka_container).await;
-    maybe_terminate_container(maybe_postgres_container).await;
+    if let Some((keycloak_out, keycloak_err)) = keycloak_logs {
+        let _ = keycloak_out.await;
+        let _ = keycloak_err.await;
+    }
     maybe_terminate_container(maybe_keycloak_container).await;
+
+    if let Some((kafka_out, kafka_err)) = kafka_logs {
+        let _ = kafka_out.await;
+        let _ = kafka_err.await;
+    }
+    maybe_terminate_container(maybe_kafka_container).await;
+
+    if let Some((postgres_out, postgres_err)) = postgres_logs {
+        let _ = postgres_out.await;
+        let _ = postgres_err.await;
+    }
+    maybe_terminate_container(maybe_postgres_container).await;
+
+    if let Some((pop_server_out, pop_server_err)) = pop_server_logs {
+        let _ = pop_server_out.await;
+        let _ = pop_server_err.await;
+    }
     maybe_terminate_container(maybe_pop_server_container).await;
 
     info!("finished playing scenario");

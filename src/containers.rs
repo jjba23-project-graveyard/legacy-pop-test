@@ -17,7 +17,7 @@
 
 use log::{debug, info};
 use testcontainers::{ContainerAsync, Image};
-use tokio::io::AsyncBufReadExt;
+use tokio::{io::AsyncBufReadExt, task::JoinHandle};
 
 pub async fn maybe_terminate_container<T>(container: Option<ContainerAsync<T>>)
 where
@@ -31,7 +31,9 @@ where
     }
 }
 
-pub async fn setup_container_logging<T>(container: &ContainerAsync<T>)
+pub async fn setup_container_logging<T>(
+    container: &ContainerAsync<T>,
+) -> (JoinHandle<()>, JoinHandle<()>)
 where
     T: Image,
 {
@@ -40,7 +42,7 @@ where
     let stderr = container.stderr(true);
     let mut stderr_lines = stderr.lines();
 
-    let _logger_task = tokio::spawn(async move {
+    let stdout_task = tokio::spawn(async move {
         while let Ok(result) = stdout_lines.next_line().await {
             if let Some(r) = result {
                 debug!("{}", r);
@@ -48,11 +50,13 @@ where
         }
     });
 
-    let _err_task = tokio::spawn(async move {
+    let stderr_task = tokio::spawn(async move {
         while let Ok(result) = stderr_lines.next_line().await {
             if let Some(r) = result {
                 debug!("{}", r);
             }
         }
     });
+
+    (stdout_task, stderr_task)
 }
