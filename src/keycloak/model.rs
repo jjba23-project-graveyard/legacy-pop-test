@@ -19,29 +19,25 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct CreateClientRequest {
     pub protocol: String,
-    #[allow(non_snake_case)]
-    pub clientId: String,
+    pub client_id: String,
     pub enabled: bool,
-    #[allow(non_snake_case)]
-    pub publicClient: bool,
+    pub public_client: bool,
     pub secret: String,
-    #[allow(non_snake_case)]
-    pub standardFlowEnabled: bool,
-    #[allow(non_snake_case)]
-    pub serviceAccountsEnabled: bool,
-    #[allow(non_snake_case)]
-    pub directAccessGrantsEnabled: bool,
+    pub standard_flow_enabled: bool,
+    pub service_accounts_enabled: bool,
+    pub direct_access_grants_enabled: bool,
     pub attributes: HashMap<String, String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct CreateRealmRequest {
     pub enabled: bool,
     pub realm: String,
-    #[allow(non_snake_case)]
-    pub verifyEmail: bool,
+    pub verify_email: bool,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -57,15 +53,13 @@ pub struct CreateUserRequestCredentials {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct CreateUserRequest {
     pub username: String,
     pub enabled: bool,
     pub credentials: Vec<CreateUserRequestCredentials>,
-    #[allow(non_snake_case)]
-    pub firstName: String,
-    #[allow(non_snake_case)]
-    pub lastName: String,
+    pub first_name: String,
+    pub last_name: String,
     pub email: String,
-    #[allow(non_snake_case)]
-    pub emailVerified: bool,
+    pub email_verified: bool,
 }

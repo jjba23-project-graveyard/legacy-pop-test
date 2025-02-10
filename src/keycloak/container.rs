@@ -118,7 +118,7 @@ pub async fn maybe_start_keycloak(
             let create_realm_request = CreateRealmRequest {
                 enabled: true,
                 realm: realm.clone(),
-                verifyEmail: false,
+                verify_email: false,
             };
 
             let create_realm_response = reqwest::Client::new()
@@ -144,13 +144,13 @@ pub async fn maybe_start_keycloak(
 
             let create_client_request = CreateClientRequest {
                 protocol: "openid-connect".to_string(),
-                clientId: "batterypack-services".to_string(),
+                client_id: "batterypack-services".to_string(),
                 enabled: true,
                 secret: "test".to_string(),
-                publicClient: false,
-                standardFlowEnabled: true,
-                serviceAccountsEnabled: true,
-                directAccessGrantsEnabled: true,
+                public_client: false,
+                standard_flow_enabled: true,
+                service_accounts_enabled: true,
+                direct_access_grants_enabled: true,
                 attributes: HashMap::new(),
                 // attributes: HashMap::from([(
                 //     "oauth2.device.authorization.grant.enabled".to_string(),
@@ -186,10 +186,10 @@ pub async fn maybe_start_keycloak(
             let create_user_request = CreateUserRequest {
                 username: "batterypack-services".to_string(),
                 enabled: true,
-                firstName: "battery".to_string(),
-                lastName: "pack".to_string(),
+                first_name: "battery".to_string(),
+                last_name: "pack".to_string(),
                 email: "battery@pack.com".to_string(),
-                emailVerified: true,
+                email_verified: true,
                 credentials: vec![CreateUserRequestCredentials {
                     r#type: "password".to_string(),
                     value: "password".to_string(),
