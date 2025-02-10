@@ -15,12 +15,11 @@
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
-use std::collections::HashMap;
-
-use crate::keycloak::model::CreateClientRequest;
-
 use super::model::CreateRealmRequest;
+use crate::keycloak::model::CreateClientRequest;
 use paris::info;
+use reqwest::Client;
+use std::collections::HashMap;
 
 pub struct KeycloakAdminToken(pub String);
 pub struct KeycloakRealm(pub String);
@@ -28,37 +27,45 @@ pub struct KeycloakUrl(pub String);
 pub struct KeycloakClientSecret(pub String);
 pub struct KeycloakClientId(pub String);
 
+/// Sends an authenticated request to Keycloak and logs the response.
+async fn send_keycloak_request(
+    url: String,
+    admin_token: &KeycloakAdminToken,
+    body: impl serde::Serialize,
+) -> Result<(), String> {
+    let response = Client::new()
+        .post(url)
+        .header("content-type", "application/json")
+        .header("authorization", format!("Bearer {}", admin_token.0))
+        .json(&body)
+        .send()
+        .await
+        .map_err(|e| e.to_string())?;
+
+    let body_bytes = response.bytes().await.map_err(|e| e.to_string())?.to_vec();
+    let body_str = String::from_utf8_lossy(&body_bytes).to_string();
+
+    info!("Response: {}", body_str);
+    Ok(())
+}
+
 pub async fn keycloak_create_realm(
     admin_token: KeycloakAdminToken,
     realm: KeycloakRealm,
     url: KeycloakUrl,
 ) -> Result<(), String> {
-    let create_realm_request = CreateRealmRequest {
+    let request_body = CreateRealmRequest {
         enabled: true,
         realm: realm.0,
         verify_email: false,
     };
 
-    let create_realm_response = reqwest::Client::new()
-        .post(format!("{}/admin/realms", url.0))
-        .header("content-type", "application/json")
-        .header("authorization", format!("Bearer {}", admin_token.0))
-        .json(&create_realm_request)
-        .send()
-        .await
-        .map_err(|e| e.to_string())?;
-
-    let byt = create_realm_response
-        .bytes()
-        .await
-        .map_err(|e| e.to_string())?
-        .to_vec();
-
-    let bod = String::from_utf8_lossy(&byt).to_string();
-
-    info!("create_realm_response: {}", bod);
-
-    Ok(())
+    send_keycloak_request(
+        format!("{}/admin/realms", url.0),
+        &admin_token,
+        request_body,
+    )
+    .await
 }
 
 pub async fn keycloak_create_client(
@@ -68,7 +75,7 @@ pub async fn keycloak_create_client(
     client_id: KeycloakClientId,
     client_secret: KeycloakClientSecret,
 ) -> Result<(), String> {
-    let create_client_request = CreateClientRequest {
+    let request_body = CreateClientRequest {
         protocol: "openid-connect".to_string(),
         client_id: client_id.0,
         enabled: true,
@@ -80,23 +87,10 @@ pub async fn keycloak_create_client(
         attributes: HashMap::new(),
     };
 
-    let create_client_response = reqwest::Client::new()
-        .post(format!("{}/admin/realms/{}/clients", url.0, realm.0))
-        .header("content-type", "application/json")
-        .header("authorization", format!("Bearer {}", admin_token.0))
-        .json(&create_client_request)
-        .send()
-        .await
-        .map_err(|e| e.to_string())?;
-
-    let byt = create_client_response
-        .bytes()
-        .await
-        .map_err(|e| e.to_string())?
-        .to_vec();
-
-    let bod = String::from_utf8_lossy(&byt).to_string();
-    info!("create_client_response: {}", bod);
-
-    Ok(())
+    send_keycloak_request(
+        format!("{}/admin/realms/{}/clients", url.0, realm.0),
+        &admin_token,
+        request_body,
+    )
+    .await
 }
