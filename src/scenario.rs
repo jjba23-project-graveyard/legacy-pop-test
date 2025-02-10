@@ -160,7 +160,11 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
         .clone()
         .unwrap_or_default()
     {
-        run_action(&pop_env, services, action).await?
+        let action_result = run_action(&pop_env, services, action).await;
+        match action_result {
+            Ok(_) => success!("ran action successfully: {:?}", action),
+            Err(e) => error!("{}", e),
+        }
     }
 
     terminate_services(children).await;
