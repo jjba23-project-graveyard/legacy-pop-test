@@ -150,21 +150,25 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
     terminate_services(children).await;
 
     if let Some(k) = kafka_container {
+        info!("removing kafka container");
         let _ = k.stop().await;
         let _ = k.rm().await;
     }
 
     if let Some(p) = postgres_container {
+        info!("removing postgres container");
         let _ = p.stop().await;
         let _ = p.rm().await;
     }
 
     if let Some(kc) = keycloak_container {
+        info!("removing keycloak container");
         let _ = kc.stop().await;
         let _ = kc.rm().await;
     }
 
     if let Some(ps) = pop_server_container {
+        info!("removing pop server container");
         let _ = ps.stop().await;
         let _ = ps.rm().await;
     }
