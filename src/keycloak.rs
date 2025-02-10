@@ -15,5 +15,6 @@
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
+pub mod client;
 pub mod container;
 pub mod model;

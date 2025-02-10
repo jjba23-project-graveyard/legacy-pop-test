@@ -15,12 +15,13 @@
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
-use super::model::{
-    CreateClientRequest, CreateRealmRequest, CreateUserRequest, CreateUserRequestCredentials,
-    LoginResponse,
+use super::model::{CreateUserRequest, CreateUserRequestCredentials, LoginResponse};
+use crate::keycloak::client::{
+    keycloak_create_client, keycloak_create_realm, KeycloakAdminToken, KeycloakClientId,
+    KeycloakClientSecret, KeycloakRealm, KeycloakUrl,
 };
 use crate::pop_model::{PopKeycloak, PopScenarioFile, PopService};
-use paris::info;
+use paris::{error, info};
 
 use std::collections::HashMap;
 
@@ -113,72 +114,26 @@ pub async fn maybe_start_keycloak(
             //
             //
 
-            let realm = keycloak.realm.clone();
-
-            let create_realm_request = CreateRealmRequest {
-                enabled: true,
-                realm: realm.clone(),
-                verify_email: false,
-            };
-
-            let create_realm_response = reqwest::Client::new()
-                .post(format!("{}/admin/realms", keycloak_url))
-                .header("content-type", "application/json")
-                .header("authorization", format!("Bearer {}", tok))
-                .json(&create_realm_request)
-                .send()
-                .await;
-            info!("{:?}", create_realm_response);
-
-            let byt = create_realm_response
-                .unwrap()
-                .bytes()
-                .await
-                .unwrap()
-                .to_vec();
-            let bod = String::from_utf8_lossy(&byt).to_string();
-            info!("create_realm_response: {}", bod);
+            let _ = keycloak_create_realm(
+                KeycloakAdminToken(tok.clone()),
+                KeycloakRealm(keycloak.realm.clone()),
+                KeycloakUrl(keycloak_url.clone()),
+            )
+            .await
+            .inspect_err(|e| error!("{}", e));
 
             //
             //
 
-            let create_client_request = CreateClientRequest {
-                protocol: "openid-connect".to_string(),
-                client_id: "batterypack-services".to_string(),
-                enabled: true,
-                secret: "test".to_string(),
-                public_client: false,
-                standard_flow_enabled: true,
-                service_accounts_enabled: true,
-                direct_access_grants_enabled: true,
-                attributes: HashMap::new(),
-                // attributes: HashMap::from([(
-                //     "oauth2.device.authorization.grant.enabled".to_string(),
-                //     "true".to_string(),
-                // )]),
-            };
-
-            let create_client_response = reqwest::Client::new()
-                .post(format!(
-                    "{}/admin/realms/{}/clients",
-                    keycloak_url,
-                    realm.clone()
-                ))
-                .header("content-type", "application/json")
-                .header("authorization", format!("Bearer {}", tok))
-                .json(&create_client_request)
-                .send()
-                .await;
-            info!("{:?}", create_client_response);
-
-            let byt = create_client_response
-                .unwrap()
-                .bytes()
-                .await
-                .unwrap()
-                .to_vec();
-            let bod = String::from_utf8_lossy(&byt).to_string();
-            info!("create_client_response: {}", bod);
+            let _ = keycloak_create_client(
+                KeycloakAdminToken(tok.clone()),
+                KeycloakRealm(keycloak.realm.clone()),
+                KeycloakUrl(keycloak_url.clone()),
+                KeycloakClientId(keycloak.client_id.clone()),
+                KeycloakClientSecret(keycloak.client_secret.clone()),
+            )
+            .await
+            .inspect_err(|e| error!("{}", e));
 
             //
             //
@@ -201,7 +156,7 @@ pub async fn maybe_start_keycloak(
                 .post(format!(
                     "{}/admin/realms/{}/users",
                     keycloak_url,
-                    realm.clone()
+                    keycloak.realm.clone()
                 ))
                 .header("content-type", "application/json")
                 .header("authorization", format!("Bearer {}", tok))
@@ -233,7 +188,8 @@ pub async fn maybe_start_keycloak(
             let get_user_token_response = reqwest::Client::new()
                 .post(format!(
                     "{}/realms/{}/protocol/openid-connect/token",
-                    keycloak_url, realm
+                    keycloak_url,
+                    keycloak.realm.clone()
                 ))
                 .header("content-type", "application/x-www-form-urlencoded")
                 .form(&params)
