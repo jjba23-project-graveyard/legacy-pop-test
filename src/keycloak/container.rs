@@ -17,8 +17,9 @@
 
 use super::model::{CreateUserRequest, CreateUserRequestCredentials, LoginResponse};
 use crate::keycloak::client::{
-    keycloak_create_client, keycloak_create_realm, KeycloakAdminToken, KeycloakClientId,
-    KeycloakClientSecret, KeycloakRealm, KeycloakUrl,
+    keycloak_create_client, keycloak_create_realm, keycloak_get_user_token, KeycloakAdminToken,
+    KeycloakClientId, KeycloakClientSecret, KeycloakPassword, KeycloakRealm, KeycloakUrl,
+    KeycloakUsername,
 };
 use crate::pop_model::{PopKeycloak, PopScenarioFile, PopService};
 use paris::{error, info};
@@ -43,27 +44,12 @@ pub async fn run_keycloak_container(
         "Listening on: http://0.0.0.0:8080",
     ))
     .with_exposed_port(ContainerPort::Tcp(8080))
-    .with_exposed_port(ContainerPort::Tcp(9000))
     .with_env_var("KC_BOOTSTRAP_ADMIN_USERNAME", "admin")
     .with_env_var("KC_BOOTSTRAP_ADMIN_PASSWORD", "admin")
-    .with_env_var("DEBUG", "true")
-    .with_cmd([
-        "--verbose",
-        "start-dev",
-        "--spi-theme-static-max-age=-1",
-        "--spi-theme-cache-themes=false",
-        "--spi-theme-cache-templates=false",
-        //        "--import-realm",
-    ])
-    // .with_copy_to(
-    //     "/opt/keycloak/data/import/my-realm.json",
-    //     PathBuf::from(
-    //         "/home/joe/Ontwikkeling/Persoonlijk/pop-test/resources/realms/vandebron.json",
-    //     ),
-    // )
+    .with_cmd(["--verbose", "start-dev"])
     .start()
     .await
-    .map_err(|e| format!("{}", e))
+    .map_err(|e| e.to_string())
 }
 
 pub async fn maybe_start_keycloak(
@@ -177,38 +163,16 @@ pub async fn maybe_start_keycloak(
             //
             //
 
-            let params = HashMap::from([
-                ("username", "batterypack-services"),
-                ("password", "password"),
-                ("grant_type", "password"),
-                ("client_id", "batterypack-services"),
-                ("client_secret", "test"),
-            ]);
-
-            let get_user_token_response = reqwest::Client::new()
-                .post(format!(
-                    "{}/realms/{}/protocol/openid-connect/token",
-                    keycloak_url,
-                    keycloak.realm.clone()
-                ))
-                .header("content-type", "application/x-www-form-urlencoded")
-                .form(&params)
-                .send()
-                .await;
-
-            let byt = get_user_token_response
-                .unwrap()
-                .bytes()
-                .await
-                .unwrap()
-                .to_vec();
-            let bod = String::from_utf8_lossy(&byt).to_string();
-            info!("get_user_token_response: {}", bod);
-            // let tok = get_user_token_response.access_token;
-            // info!("get_user_token_response: {}", tok);
-
-            //
-            //
+            let _ = keycloak_get_user_token(
+                KeycloakRealm(keycloak.realm.clone()),
+                KeycloakUrl(keycloak_url.clone()),
+                KeycloakClientId(keycloak.client_id.clone()),
+                KeycloakClientSecret(keycloak.client_secret.clone()),
+                KeycloakUsername(keycloak.username.clone()),
+                KeycloakPassword(keycloak.password.clone()),
+            )
+            .await
+            .inspect_err(|e| error!("{}", e));
 
             Ok(Some(keycloak_container))
         }

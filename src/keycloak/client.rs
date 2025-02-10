@@ -26,8 +26,9 @@ pub struct KeycloakRealm(pub String);
 pub struct KeycloakUrl(pub String);
 pub struct KeycloakClientSecret(pub String);
 pub struct KeycloakClientId(pub String);
+pub struct KeycloakUsername(pub String);
+pub struct KeycloakPassword(pub String);
 
-/// Sends an authenticated request to Keycloak and logs the response.
 async fn send_keycloak_request(
     url: String,
     admin_token: &KeycloakAdminToken,
@@ -93,4 +94,44 @@ pub async fn keycloak_create_client(
         request_body,
     )
     .await
+}
+
+pub async fn keycloak_get_user_token(
+    realm: KeycloakRealm,
+    url: KeycloakUrl,
+    client_id: KeycloakClientId,
+    client_secret: KeycloakClientSecret,
+    username: KeycloakUsername,
+    password: KeycloakPassword,
+) -> Result<(), String> {
+    let params = HashMap::from([
+        ("username", username.0.as_str()),
+        ("password", password.0.as_str()),
+        ("grant_type", "password"),
+        ("client_id", client_id.0.as_str()),
+        ("client_secret", client_secret.0.as_str()),
+    ]);
+
+    let get_user_token_response = reqwest::Client::new()
+        .post(format!(
+            "{}/realms/{}/protocol/openid-connect/token",
+            url.0, realm.0
+        ))
+        .header("content-type", "application/x-www-form-urlencoded")
+        .form(&params)
+        .send()
+        .await
+        .map_err(|e| e.to_string())?;
+
+    let byt = get_user_token_response
+        .bytes()
+        .await
+        .map_err(|e| e.to_string())?
+        .to_vec();
+
+    let bod = String::from_utf8_lossy(&byt).to_string();
+
+    info!("get_user_token_response: {}", bod);
+
+    Ok(())
 }
