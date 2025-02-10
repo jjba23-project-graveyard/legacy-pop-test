@@ -17,8 +17,6 @@ pop-test is built with Rust, enhancing safety, performance and reliability, with
 
 pop-tests as we affectionately call them, can range from small scope integration tests to all encompassing end-to-end or black box tests.
 
-use TESTCONTAINERS_COMMAND=keep for the timebeing when running pop-tests, this will soon be fixed
-
 I strive to provide proper and extensive documentation on pop-test, in several formats, available at your convenience.
 
 - Org format [[file:docs/Manual/README.org]]

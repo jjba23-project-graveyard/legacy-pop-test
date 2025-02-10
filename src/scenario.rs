@@ -68,8 +68,8 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
 
     info!("gathering env");
     let mut kafka_bootstrap_server = "".to_string();
-    if let Some(k) = kafka_container {
-        //let host = k.get_host().await.unwrap().to_string();
+    if let Some(k) = &kafka_container {
+        let host = k.get_host().await.unwrap().to_string();
         let port = k
             .ports()
             .await
@@ -77,7 +77,7 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
             .map_to_host_port_ipv4(KAFKA_PORT)
             .unwrap_or(KAFKA_PORT.as_u16());
 
-        let fmt = format!("127.0.0.1:{}", port);
+        let fmt = format!("{}:{}", host, port);
         kafka_bootstrap_server = fmt;
     }
 
@@ -148,6 +148,26 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
     }
 
     terminate_services(children).await;
+
+    if let Some(k) = kafka_container {
+        let _ = k.stop().await;
+        let _ = k.rm().await;
+    }
+
+    if let Some(p) = postgres_container {
+        let _ = p.stop().await;
+        let _ = p.rm().await;
+    }
+
+    if let Some(kc) = keycloak_container {
+        let _ = kc.stop().await;
+        let _ = kc.rm().await;
+    }
+
+    if let Some(ps) = pop_server_container {
+        let _ = ps.stop().await;
+        let _ = ps.rm().await;
+    }
 
     success!("finished playing scenario");
     Ok(())
