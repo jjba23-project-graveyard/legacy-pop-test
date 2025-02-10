@@ -24,11 +24,19 @@ use std::fs;
 mod actions;
 mod condition_dsl;
 mod health_check;
+
+#[path = "kafka/mod.rs"]
 mod kafka;
+
+#[path = "keycloak/mod.rs"]
 mod keycloak;
+
 mod pop_model;
 mod pop_server;
+
+#[path = "postgres/mod.rs"]
 mod postgres;
+
 mod proc;
 mod scenario;
 
