@@ -45,7 +45,7 @@ where
 
 pub async fn run_action(
     pop_env: &PopEnv,
-    services: &Vec<PopService>,
+    services: &[PopService],
     action: &PopAction,
 ) -> Result<(), String> {
     info!("executing action: {:?}", action);
