@@ -20,15 +20,81 @@ use crate::health_check::start_health_check;
 use crate::http::run_http_assertion;
 use crate::kafka::container::{maybe_start_kafka, produce_kafka_message};
 use crate::keycloak::container::maybe_start_keycloak;
-use crate::pop_model::{PopAction, PopScenarioFile};
+use crate::pop_model::{PopAction, PopEnv, PopScenarioFile, PopService};
 use crate::pop_server::maybe_start_pop_server;
 use crate::postgres::container::maybe_start_postgres;
 use crate::proc::{start_service, terminate_services};
 use paris::{error, info, success};
 use std::time::Duration;
+use testcontainers::{ContainerAsync, Image};
 use testcontainers_modules::kafka::KAFKA_PORT;
 use tokio::task::JoinSet;
 use tokio::time::sleep;
+
+async fn maybe_terminate_container<T>(container: Option<ContainerAsync<T>>)
+where
+    T: Image,
+{
+    if let Some(c) = container {
+        let id = c.id();
+        info!("terminating and removing container: {}", id);
+        let _ = c.stop().await;
+        let _ = c.rm().await;
+    }
+}
+
+pub async fn run_action(
+    pop_env: &PopEnv,
+    services: &Vec<PopService>,
+    action: &PopAction,
+) -> Result<(), String> {
+    info!("executing action: {:?}", action);
+    match action {
+        PopAction::KafkaProduceFromFileAction {
+            message_file_path,
+            delay_seconds,
+            kafka_topic,
+        } => {
+            if let Some(delay) = delay_seconds {
+                sleep(Duration::from_secs(*delay)).await;
+            }
+
+            info!("producing kafka message");
+            let r = produce_kafka_message(
+                pop_env.kafka_bootstrap_server.clone(),
+                message_file_path.to_owned(),
+                kafka_topic.to_owned(),
+            )
+            .await;
+            r.inspect_err(|e| error!("{}", e))
+        }
+        PopAction::HttpAssertion {
+            assert_code,
+            assert_url,
+            service_id,
+            delay_seconds,
+            json_body_patterns,
+        } => {
+            if let Some(delay) = delay_seconds {
+                sleep(Duration::from_secs(*delay)).await;
+            }
+
+            if let Some(service) = services.iter().find(|s| s.id == *service_id) {
+                info!("found service to check: {:?}", service);
+                info!("running http assertion: {:?}", action);
+                run_http_assertion(
+                    *assert_code,
+                    assert_url.clone(),
+                    service.base_url.clone(),
+                    json_body_patterns.clone(),
+                )
+                .await
+            } else {
+                Err("could not find service details for check".to_string())
+            }
+        }
+    }
+}
 
 pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String> {
     let mut h_set = JoinSet::new();
@@ -36,10 +102,10 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
 
     info!("start setting up dependencies");
 
-    let postgres_container = maybe_start_postgres(&scenario_file).await?;
-    let pop_server_container = maybe_start_pop_server(&scenario_file).await?;
-    let kafka_container = maybe_start_kafka(&scenario_file).await?;
-    let keycloak_container = maybe_start_keycloak(&scenario_file).await?;
+    let maybe_postgres_container = maybe_start_postgres(&scenario_file).await?;
+    let maybe_pop_server_container = maybe_start_pop_server(&scenario_file).await?;
+    let maybe_kafka_container = maybe_start_kafka(&scenario_file).await?;
+    let maybe_keycloak_container = maybe_start_keycloak(&scenario_file).await?;
 
     for pop_service in scenario_file.pop_test.pop_services.clone() {
         info!("registering service: {}", pop_service.id);
@@ -48,10 +114,10 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
         let with_env = setup_environment(
             &scenario_file,
             &pop_service,
-            &postgres_container,
-            &kafka_container,
-            &keycloak_container,
-            &pop_server_container,
+            &maybe_postgres_container,
+            &maybe_kafka_container,
+            &maybe_keycloak_container,
+            &maybe_pop_server_container,
         )
         .await;
 
@@ -66,7 +132,7 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
 
     info!("gathering env");
     let mut kafka_bootstrap_server = "".to_string();
-    if let Some(k) = &kafka_container {
+    if let Some(k) = &maybe_kafka_container {
         let host = k.get_host().await.unwrap().to_string();
         let port = k
             .ports()
@@ -94,82 +160,15 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
         .clone()
         .unwrap_or_default()
     {
-        info!("executing action: {:?}", action);
-        match action {
-            PopAction::KafkaProduceFromFileAction {
-                message_file_path,
-                delay_seconds,
-                kafka_topic,
-            } => {
-                if let Some(delay) = delay_seconds {
-                    sleep(Duration::from_secs(*delay)).await;
-                }
-
-                info!("producing kafka message");
-                let r = produce_kafka_message(
-                    pop_env.kafka_bootstrap_server.clone(),
-                    message_file_path.to_owned(),
-                    kafka_topic.to_owned(),
-                )
-                .await;
-                let _ = r.inspect_err(|e| error!("{}", e));
-            }
-            PopAction::HttpAssertion {
-                assert_code,
-                assert_url,
-                service_id,
-                delay_seconds,
-                json_body_patterns,
-            } => {
-                if let Some(delay) = delay_seconds {
-                    sleep(Duration::from_secs(*delay)).await;
-                }
-
-                if let Some(service) = services.iter().find(|s| s.id == *service_id) {
-                    info!("found service to check: {:?}", service);
-                    info!("running http assertion: {:?}", action);
-                    if let Err(e) = run_http_assertion(
-                        *assert_code,
-                        assert_url.clone(),
-                        service.base_url.clone(),
-                        json_body_patterns.clone(),
-                    )
-                    .await
-                    {
-                        error!("HTTP check failed: {:?}", e);
-                    }
-                } else {
-                    error!("could not find service details for check");
-                }
-            }
-        }
+        run_action(&pop_env, services, action).await?
     }
 
     terminate_services(children).await;
 
-    if let Some(k) = kafka_container {
-        info!("removing kafka container");
-        let _ = k.stop().await;
-        let _ = k.rm().await;
-    }
-
-    if let Some(p) = postgres_container {
-        info!("removing postgres container");
-        let _ = p.stop().await;
-        let _ = p.rm().await;
-    }
-
-    if let Some(kc) = keycloak_container {
-        info!("removing keycloak container");
-        let _ = kc.stop().await;
-        let _ = kc.rm().await;
-    }
-
-    if let Some(ps) = pop_server_container {
-        info!("removing pop server container");
-        let _ = ps.stop().await;
-        let _ = ps.rm().await;
-    }
+    maybe_terminate_container(maybe_kafka_container).await;
+    maybe_terminate_container(maybe_postgres_container).await;
+    maybe_terminate_container(maybe_keycloak_container).await;
+    maybe_terminate_container(maybe_pop_server_container).await;
 
     success!("finished playing scenario");
     Ok(())
