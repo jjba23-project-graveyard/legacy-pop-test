@@ -15,6 +15,7 @@
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
+use crate::containers::{maybe_terminate_container, setup_container_logging};
 use crate::environment::setup_environment;
 use crate::health_check::start_health_check;
 use crate::http::run_http_assertion;
@@ -24,26 +25,13 @@ use crate::pop_model::{PopAction, PopEnv, PopScenarioFile, PopService};
 use crate::pop_server::maybe_start_pop_server;
 use crate::postgres::container::maybe_start_postgres;
 use crate::proc::{start_service, terminate_services};
-use log::debug;
 use log::{error, info};
 use std::time::Duration;
-use testcontainers::{ContainerAsync, Image};
+
 use testcontainers_modules::kafka::KAFKA_PORT;
-use tokio::io::AsyncBufReadExt;
+
 use tokio::task::JoinSet;
 use tokio::time::sleep;
-
-async fn maybe_terminate_container<T>(container: Option<ContainerAsync<T>>)
-where
-    T: Image,
-{
-    if let Some(c) = container {
-        let id = c.id();
-        info!("terminating and removing container: {}", id);
-        let _ = c.stop().await;
-        let _ = c.rm().await;
-    }
-}
 
 pub async fn run_action(
     pop_env: &PopEnv,
@@ -96,32 +84,6 @@ pub async fn run_action(
             }
         }
     }
-}
-
-pub async fn setup_container_logging<T>(container: &ContainerAsync<T>)
-where
-    T: Image,
-{
-    let stdout = container.stdout(true);
-    let mut stdout_lines = stdout.lines();
-    let stderr = container.stderr(true);
-    let mut stderr_lines = stderr.lines();
-
-    let _logger_task = tokio::spawn(async move {
-        while let Ok(result) = stdout_lines.next_line().await {
-            if let Some(r) = result {
-                debug!("{}", r);
-            }
-        }
-    });
-
-    let _err_task = tokio::spawn(async move {
-        while let Ok(result) = stderr_lines.next_line().await {
-            if let Some(r) = result {
-                debug!("{}", r);
-            }
-        }
-    });
 }
 
 pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String> {
