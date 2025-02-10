@@ -17,15 +17,15 @@
 
 test-green-energy-mix: fmt
 	TESTCONTAINERS_COMMAND=keep \
-	RUST_LOG=trace \
+	RUST_LOG=debug \
 	nix develop -c cargo run -- play-scenario ./resources/scenarios/test-green-energy-mix.yaml
 test-byggsteg: fmt
 	TESTCONTAINERS_COMMAND=keep \
-	RUST_LOG=trace \
+	RUST_LOG=debug \
 	nix develop -c cargo run -- play-scenario ./resources/scenarios/test-byggsteg.yaml
 test-dynamic-tariff-charging: fmt
 	TESTCONTAINERS_COMMAND=keep \
-	RUST_LOG=trace \
+	RUST_LOG=debug \
 	nix develop -c cargo run -- play-scenario ./resources/scenarios/test-dynamic-tariff-charging.yaml
 
 test-dynamic-tariff-charging-call:

@@ -24,10 +24,12 @@ use crate::pop_model::{PopAction, PopEnv, PopScenarioFile, PopService};
 use crate::pop_server::maybe_start_pop_server;
 use crate::postgres::container::maybe_start_postgres;
 use crate::proc::{start_service, terminate_services};
+use log::debug;
 use log::{error, info};
 use std::time::Duration;
 use testcontainers::{ContainerAsync, Image};
 use testcontainers_modules::kafka::KAFKA_PORT;
+use tokio::io::AsyncBufReadExt;
 use tokio::task::JoinSet;
 use tokio::time::sleep;
 
@@ -96,6 +98,32 @@ pub async fn run_action(
     }
 }
 
+pub async fn setup_container_logging<T>(container: &ContainerAsync<T>)
+where
+    T: Image,
+{
+    let stdout = container.stdout(true);
+    let mut stdout_lines = stdout.lines();
+    let stderr = container.stderr(true);
+    let mut stderr_lines = stderr.lines();
+
+    let _logger_task = tokio::spawn(async move {
+        while let Ok(result) = stdout_lines.next_line().await {
+            if let Some(r) = result {
+                debug!("{}", r);
+            }
+        }
+    });
+
+    let _err_task = tokio::spawn(async move {
+        while let Ok(result) = stderr_lines.next_line().await {
+            if let Some(r) = result {
+                debug!("{}", r);
+            }
+        }
+    });
+}
+
 pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String> {
     let mut h_set = JoinSet::new();
     let mut children = Vec::new();
@@ -103,9 +131,24 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
     info!("start setting up dependencies");
 
     let maybe_postgres_container = maybe_start_postgres(&scenario_file).await?;
+    if let Some(ref postgres_container) = maybe_postgres_container {
+        setup_container_logging(postgres_container).await;
+    }
+
     let maybe_pop_server_container = maybe_start_pop_server(&scenario_file).await?;
+    if let Some(ref pop_server_container) = maybe_pop_server_container {
+        setup_container_logging(pop_server_container).await;
+    }
+
     let maybe_kafka_container = maybe_start_kafka(&scenario_file).await?;
+    if let Some(ref kafka_container) = maybe_kafka_container {
+        setup_container_logging(kafka_container).await;
+    }
+
     let maybe_keycloak_container = maybe_start_keycloak(&scenario_file).await?;
+    if let Some(ref keycloak_container) = maybe_keycloak_container {
+        setup_container_logging(keycloak_container).await;
+    }
 
     for pop_service in scenario_file.pop_test.pop_services.clone() {
         info!("registering service: {}", pop_service.id);
