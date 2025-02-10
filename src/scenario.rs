@@ -27,7 +27,7 @@ use paris::{error, info, success};
 use std::collections::HashMap;
 use std::time::Duration;
 use testcontainers::{ContainerAsync, GenericImage};
-use testcontainers_modules::kafka::Kafka;
+use testcontainers_modules::kafka::{Kafka, KAFKA_PORT};
 use testcontainers_modules::postgres::Postgres;
 use tokio::task::JoinSet;
 use tokio::time::sleep;
@@ -74,8 +74,8 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
             .ports()
             .await
             .unwrap()
-            .map_to_host_port_ipv4(9093)
-            .unwrap_or(9093);
+            .map_to_host_port_ipv4(KAFKA_PORT)
+            .unwrap_or(KAFKA_PORT.as_u16());
 
         let fmt = format!("127.0.0.1:{}", port);
         kafka_bootstrap_server = fmt;
