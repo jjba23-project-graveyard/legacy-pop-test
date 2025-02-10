@@ -18,7 +18,7 @@
 use crate::pop_model::BodyPattern;
 
 use crate::condition_dsl::eval_condition;
-use paris::{error, success};
+use log::{error, info};
 
 pub async fn run_http_assertion(
     expected_code: Option<u16>,
@@ -38,7 +38,7 @@ pub async fn run_http_assertion(
             if resp.status().as_u16() != wanted_status_code {
                 return Err("the HTTP status did not match the expectation".to_string());
             } else {
-                success!(
+                info!(
                     "the HTTP response contained the expected status: {:?}",
                     wanted_status_code
                 )

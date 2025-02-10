@@ -18,7 +18,7 @@
 use std::collections::HashMap;
 
 use crate::pop_model::{PopScenarioFile, PopServer, PopServerBehavior, PopService};
-use paris::{error, info, success};
+use log::{error, info};
 use reqwest::Response;
 use testcontainers::core::ContainerPort;
 use testcontainers::runners::AsyncRunner;
@@ -128,7 +128,7 @@ pub async fn setup_pop_server_env(
                 for b in bs {
                     match register_pop_server_behavior(format!("http://{}:{}", host, port), b).await
                     {
-                        Ok(r) => success!("done registering behavior in pop-server: {:?}", r),
+                        Ok(r) => info!("done registering behavior in pop-server: {:?}", r),
                         Err(e) => error!("error registering behavior in pop-server: {:?}", e),
                     }
                 }

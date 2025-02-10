@@ -24,7 +24,7 @@ use crate::pop_model::{PopAction, PopEnv, PopScenarioFile, PopService};
 use crate::pop_server::maybe_start_pop_server;
 use crate::postgres::container::maybe_start_postgres;
 use crate::proc::{start_service, terminate_services};
-use paris::{error, info, success};
+use log::{error, info};
 use std::time::Duration;
 use testcontainers::{ContainerAsync, Image};
 use testcontainers_modules::kafka::KAFKA_PORT;
@@ -162,7 +162,7 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
     {
         let action_result = run_action(&pop_env, services, action).await;
         match action_result {
-            Ok(_) => success!("ran action successfully: {:?}", action),
+            Ok(_) => info!("ran action successfully: {:?}", action),
             Err(e) => error!("{}", e),
         }
     }
@@ -174,6 +174,6 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
     maybe_terminate_container(maybe_keycloak_container).await;
     maybe_terminate_container(maybe_pop_server_container).await;
 
-    success!("finished playing scenario");
+    info!("finished playing scenario");
     Ok(())
 }

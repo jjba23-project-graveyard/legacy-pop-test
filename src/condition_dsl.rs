@@ -18,13 +18,13 @@
 use crate::pop_model::BodyPattern;
 
 use jql_runner::runner::raw;
-use paris::success;
+use log::info;
 use serde_json::Value;
 
 pub fn eval_condition(body: &Value, patterns: Vec<BodyPattern>) -> Result<(), String> {
     for pat in patterns {
         let good_match = raw(&pat.pattern, body).map_err(|e| e.to_string())?;
-        success!("{:?}", good_match);
+        info!("{:?}", good_match);
 
         match pat.condition.as_str() {
             // match should not be empty
@@ -79,7 +79,7 @@ pub fn eval_condition(body: &Value, patterns: Vec<BodyPattern>) -> Result<(), St
             }
         }
 
-        success!("{} {}", good_match, pat.condition);
+        info!("{} {}", good_match, pat.condition);
     }
     Ok(())
 }
@@ -91,7 +91,7 @@ mod tests {
     use core::assert_ne;
 
     use super::*;
-    use paris::error;
+    use log::error;
     use serde_json::json;
 
     fn run_check_pat_test(

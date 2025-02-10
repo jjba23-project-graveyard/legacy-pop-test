@@ -22,7 +22,7 @@ use crate::keycloak::client::{
     KeycloakUsername,
 };
 use crate::pop_model::{PopKeycloak, PopScenarioFile, PopService};
-use paris::{error, info};
+use log::{error, info};
 
 use std::collections::HashMap;
 

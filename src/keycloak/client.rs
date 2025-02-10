@@ -17,7 +17,7 @@
 
 use super::model::CreateRealmRequest;
 use crate::keycloak::model::CreateClientRequest;
-use paris::info;
+use log::info;
 use reqwest::Client;
 use std::collections::HashMap;
 

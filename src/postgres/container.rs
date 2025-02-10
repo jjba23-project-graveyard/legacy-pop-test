@@ -18,7 +18,7 @@
 use std::collections::HashMap;
 
 use crate::pop_model::{PopPostgres, PopScenarioFile, PopService};
-use paris::info;
+use log::info;
 use testcontainers::ContainerAsync;
 use testcontainers::{runners::AsyncRunner, ImageExt};
 use testcontainers_modules::postgres::Postgres;

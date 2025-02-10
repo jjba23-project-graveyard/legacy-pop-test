@@ -17,7 +17,7 @@
 
 use crate::pop_model::{PopKafka, PopScenarioFile, PopService};
 use kafka::producer::{Producer, Record, RequiredAcks};
-use paris::info;
+use log::info;
 use std::collections::HashMap;
 use std::time::Duration;
 use testcontainers::ContainerAsync;

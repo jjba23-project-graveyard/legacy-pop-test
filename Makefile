@@ -16,11 +16,17 @@
 # along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
 test-green-energy-mix: fmt
-	TESTCONTAINERS_COMMAND=keep nix develop -c cargo run -- play-scenario ./resources/scenarios/test-green-energy-mix.yaml
+	TESTCONTAINERS_COMMAND=keep \
+	RUST_LOG=trace \
+	nix develop -c cargo run -- play-scenario ./resources/scenarios/test-green-energy-mix.yaml
 test-byggsteg: fmt
-	TESTCONTAINERS_COMMAND=keep nix develop -c cargo run -- play-scenario ./resources/scenarios/test-byggsteg.yaml
+	TESTCONTAINERS_COMMAND=keep \
+	RUST_LOG=trace \
+	nix develop -c cargo run -- play-scenario ./resources/scenarios/test-byggsteg.yaml
 test-dynamic-tariff-charging: fmt
-	TESTCONTAINERS_COMMAND=keep nix develop -c cargo run -- play-scenario ./resources/scenarios/test-dynamic-tariff-charging.yaml
+	TESTCONTAINERS_COMMAND=keep \
+	RUST_LOG=trace \
+	nix develop -c cargo run -- play-scenario ./resources/scenarios/test-dynamic-tariff-charging.yaml
 
 test-dynamic-tariff-charging-call:
 	curl -v -X GET --header "Authorization: Bearer $(ADMIN_TOKEN)" http://localhost:8222/api/v1/registeredChargepoints/3514fbab-9a15-4869-9a7d-895e9dfb3560

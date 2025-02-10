@@ -15,7 +15,7 @@
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
-use paris::{error, info, success};
+use log::{error, info};
 use pop_model::PopScenarioFile;
 use scenario::play_scenario;
 use std::env;
@@ -45,6 +45,8 @@ mod postgres;
 
 #[tokio::main]
 async fn main() -> Result<(), String> {
+    env_logger::init();
+
     info!("\n`pop-test` starting up\n");
 
     let args: Vec<String> = env::args().collect();
@@ -64,16 +66,16 @@ async fn main() -> Result<(), String> {
     })?;
 
     async {
-        success!("scenario file read successfully to string");
+        info!("scenario file read successfully to string");
 
         do_with_file_data(user_cmd.clone(), file_data)
             .await
             .map_err(|e| {
                 error!("{}", e);
-                "scenario failed to run successfully"
+                "scenario failed to run"
             })?;
 
-        success!("ran scenario successfully");
+        info!("✅ ran scenario successfully");
         Ok(())
     }
     .await
@@ -83,7 +85,7 @@ pub async fn do_with_file_data(user_cmd: String, file_data: String) -> Result<()
     info!("parsing YAML from file");
     let scenario_file: PopScenarioFile = serde_yml::from_str(&file_data).unwrap();
 
-    success!("parsed pop scenario properly from YAML file");
+    info!("✅ parsed pop scenario properly from YAML file");
     if user_cmd == "play-scenario" {
         play_scenario(scenario_file).await
     } else {

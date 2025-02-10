@@ -15,7 +15,7 @@
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
-use paris::info;
+use log::info;
 use std::collections::HashMap;
 use std::{env, process::Stdio};
 use tokio::process::{Child, Command};

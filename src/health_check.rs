@@ -18,7 +18,7 @@
 use std::time::Duration;
 
 use crate::pop_model::{PopService, PopServiceHealthAction};
-use paris::{error, info, success};
+use log::{error, info};
 use tokio::time::sleep;
 
 pub async fn start_health_check(pop_service: PopService) {
@@ -59,7 +59,7 @@ async fn health_check(
                         continue;
                     }
                     Ok(v) => {
-                        success!("{:?}", v);
+                        info!("{:?}", v);
                         break;
                     }
                 }
