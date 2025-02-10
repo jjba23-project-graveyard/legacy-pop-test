@@ -15,20 +15,18 @@
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
+use crate::environment::setup_environment;
 use crate::health_check::start_health_check;
 use crate::http::run_http_assertion;
-use crate::kafka::container::{maybe_start_kafka, produce_kafka_message, setup_kafka_env};
-use crate::keycloak::container::{maybe_start_keycloak, setup_keycloak_env};
-use crate::pop_model::{PopAction, PopScenarioFile, PopService};
-use crate::pop_server::{maybe_start_pop_server, setup_pop_server_env};
-use crate::postgres::container::{maybe_start_postgres, setup_postgres_env};
+use crate::kafka::container::{maybe_start_kafka, produce_kafka_message};
+use crate::keycloak::container::maybe_start_keycloak;
+use crate::pop_model::{PopAction, PopScenarioFile};
+use crate::pop_server::maybe_start_pop_server;
+use crate::postgres::container::maybe_start_postgres;
 use crate::proc::{start_service, terminate_services};
 use paris::{error, info, success};
-use std::collections::HashMap;
 use std::time::Duration;
-use testcontainers::{ContainerAsync, GenericImage};
-use testcontainers_modules::kafka::{Kafka, KAFKA_PORT};
-use testcontainers_modules::postgres::Postgres;
+use testcontainers_modules::kafka::KAFKA_PORT;
 use tokio::task::JoinSet;
 use tokio::time::sleep;
 
@@ -175,40 +173,4 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
 
     success!("finished playing scenario");
     Ok(())
-}
-
-async fn setup_environment(
-    scenario_file: &PopScenarioFile,
-    pop_service: &PopService,
-    postgres_container: &Option<ContainerAsync<Postgres>>,
-    kafka_container: &Option<ContainerAsync<Kafka>>,
-    keycloak_container: &Option<ContainerAsync<GenericImage>>,
-    pop_server_container: &Option<ContainerAsync<GenericImage>>,
-) -> HashMap<String, String> {
-    let mut with_env = HashMap::new();
-
-    setup_postgres_env(
-        scenario_file,
-        pop_service,
-        postgres_container,
-        &mut with_env,
-    )
-    .await;
-    setup_kafka_env(scenario_file, pop_service, kafka_container, &mut with_env).await;
-    setup_keycloak_env(
-        scenario_file,
-        pop_service,
-        keycloak_container,
-        &mut with_env,
-    )
-    .await;
-    setup_pop_server_env(
-        scenario_file,
-        pop_service,
-        pop_server_container,
-        &mut with_env,
-    )
-    .await;
-
-    with_env
 }

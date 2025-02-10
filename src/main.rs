@@ -22,6 +22,7 @@ use std::env;
 use std::fs;
 
 mod condition_dsl;
+mod environment;
 mod health_check;
 mod pop_model;
 mod proc;
