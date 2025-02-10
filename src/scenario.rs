@@ -17,7 +17,7 @@
 
 use crate::actions::run_http_assertion;
 use crate::health_check::start_health_check;
-use crate::kafka::{maybe_start_kafka, produce_kafka_message, setup_kafka_env};
+use crate::kafka::container::{maybe_start_kafka, produce_kafka_message, setup_kafka_env};
 use crate::keycloak::container::{maybe_start_keycloak, setup_keycloak_env};
 use crate::pop_model::{PopAction, PopScenarioFile, PopService};
 use crate::pop_server::{maybe_start_pop_server, setup_pop_server_env};
