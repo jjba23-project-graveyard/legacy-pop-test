@@ -15,8 +15,8 @@
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
-use crate::actions::run_http_assertion;
 use crate::health_check::start_health_check;
+use crate::http::run_http_assertion;
 use crate::kafka::container::{maybe_start_kafka, produce_kafka_message, setup_kafka_env};
 use crate::keycloak::container::{maybe_start_keycloak, setup_keycloak_env};
 use crate::pop_model::{PopAction, PopScenarioFile, PopService};

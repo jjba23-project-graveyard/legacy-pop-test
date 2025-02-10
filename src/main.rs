@@ -21,9 +21,14 @@ use scenario::play_scenario;
 use std::env;
 use std::fs;
 
-mod actions;
 mod condition_dsl;
 mod health_check;
+mod pop_model;
+mod proc;
+mod scenario;
+
+#[path = "http/mod.rs"]
+mod http;
 
 #[path = "kafka/mod.rs"]
 mod kafka;
@@ -31,14 +36,11 @@ mod kafka;
 #[path = "keycloak/mod.rs"]
 mod keycloak;
 
-mod pop_model;
+#[path = "pop_server/mod.rs"]
 mod pop_server;
 
 #[path = "postgres/mod.rs"]
 mod postgres;
-
-mod proc;
-mod scenario;
 
 #[tokio::main]
 async fn main() -> Result<(), String> {
