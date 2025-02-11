@@ -34,6 +34,14 @@ pub struct CreateClientRequest {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct CreateRoleRequest {
+    pub name: String,
+    pub scope_param_required: bool,
+    pub composite: bool,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct CreateRealmRequest {
     pub enabled: bool,
     pub realm: String,

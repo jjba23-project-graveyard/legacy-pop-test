@@ -121,6 +121,7 @@ pub struct PopKeycloak {
     pub email: String,
     pub username: String,
     pub password: String,
+    pub roles: Option<Vec<String>>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

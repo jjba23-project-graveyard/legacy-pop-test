@@ -61,7 +61,10 @@ pop_test:
     email: "battery@pack.com"
     username: "batterpack-services"
     password: "test"
-    
+    roles:
+      - "FLEXIOT-READONLY"
+      - "FLEXIOT_UPDATE"
+      - "FLEXIOT-ADMIN"
 
   pop_postgres:
     enabled: true

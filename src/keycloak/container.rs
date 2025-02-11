@@ -17,7 +17,7 @@
 
 use crate::keycloak::client::{
     KeycloakClient, KeycloakClientId, KeycloakClientSecret, KeycloakPassword, KeycloakRealm,
-    KeycloakUrl, KeycloakUsername,
+    KeycloakRoleName, KeycloakUrl, KeycloakUsername,
 };
 use crate::pop_model::{PopKeycloak, PopScenarioFile, PopService};
 use log::{error, info};
@@ -82,6 +82,17 @@ pub async fn maybe_start_keycloak(
                 .create_realm(admin_token.clone(), KeycloakRealm(keycloak.realm.clone()))
                 .await
                 .inspect_err(|e| error!("{}", e));
+
+            for role in keycloak.roles.clone().unwrap_or(Vec::new()) {
+                let _ = &keycloak_client
+                    .create_role(
+                        admin_token.clone(),
+                        KeycloakRealm(keycloak.realm.clone()),
+                        KeycloakRoleName(role.to_string()),
+                    )
+                    .await
+                    .inspect_err(|e| error!("{}", e));
+            }
 
             //
             //

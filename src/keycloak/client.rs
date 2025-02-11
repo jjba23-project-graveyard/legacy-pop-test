@@ -15,7 +15,7 @@
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
-use super::model::CreateRealmRequest;
+use super::model::{CreateRealmRequest, CreateRoleRequest};
 use crate::keycloak::model::{
     CreateClientRequest, CreateUserRequest, CreateUserRequestCredentials, LoginResponse,
 };
@@ -46,6 +46,9 @@ pub struct KeycloakUserToken(pub String);
 
 #[derive(Debug, Clone)]
 pub struct KeycloakPassword(pub String);
+
+#[derive(Debug, Clone)]
+pub struct KeycloakRoleName(pub String);
 
 #[derive(Debug, Clone)]
 pub struct KeycloakClient {
@@ -212,5 +215,25 @@ impl KeycloakClient {
         debug!("got response from keycloak: {:?}", response);
 
         Ok(KeycloakUserToken(response.access_token))
+    }
+
+    pub async fn create_role(
+        &mut self,
+        admin_token: KeycloakAdminToken,
+        realm: KeycloakRealm,
+        role_name: KeycloakRoleName,
+    ) -> Result<(), String> {
+        let request_body = CreateRoleRequest {
+            name: role_name.0,
+            scope_param_required: false,
+            composite: false,
+        };
+
+        Self::send_request(
+            format!("{}/admin/realms/{}/roles", self.url.0, realm.0),
+            &admin_token,
+            request_body,
+        )
+        .await
     }
 }
