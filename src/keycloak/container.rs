@@ -17,9 +17,8 @@
 
 use super::model::{CreateUserRequest, CreateUserRequestCredentials, LoginResponse};
 use crate::keycloak::client::{
-    keycloak_create_client, keycloak_create_realm, keycloak_get_user_token, KeycloakAdminToken,
-    KeycloakClientId, KeycloakClientSecret, KeycloakPassword, KeycloakRealm, KeycloakUrl,
-    KeycloakUsername,
+    KeycloakAdminToken, KeycloakClient, KeycloakClientId, KeycloakClientSecret, KeycloakPassword,
+    KeycloakRealm, KeycloakUrl, KeycloakUsername,
 };
 use crate::pop_model::{PopKeycloak, PopScenarioFile, PopService};
 use log::{error, info};
@@ -60,119 +59,70 @@ pub async fn maybe_start_keycloak(
             info!("start setting up keycloak");
             let keycloak_container = run_keycloak_container(keycloak.clone()).await.unwrap();
 
-            //
-            //
             let host = keycloak_container.get_host().await.unwrap().to_string();
-
-            let http_port = keycloak_container
+            let port = keycloak_container
                 .ports()
                 .await
                 .unwrap()
                 .map_to_host_port_ipv4(8080)
                 .unwrap_or(8080);
 
-            let keycloak_url = format!("http://{}:{}", host, http_port);
-
-            let params = HashMap::from([
-                ("username", "admin"),
-                ("password", "admin"),
-                ("grant_type", "password"),
-                ("client_id", "admin-cli"),
-            ]);
-
-            let get_admin_token_response = reqwest::Client::new()
-                .post(format!(
-                    "{}/realms/{}/protocol/openid-connect/token",
-                    keycloak_url, "master"
-                ))
-                .header("content-type", "application/x-www-form-urlencoded")
-                .form(&params)
-                .send()
-                .await
-                .unwrap()
-                .json::<LoginResponse>()
-                .await
-                .unwrap();
-
-            let tok = get_admin_token_response.access_token;
-            info!("admin token: {}", tok);
-
-            //
-            //
-
-            let _ = keycloak_create_realm(
-                KeycloakAdminToken(tok.clone()),
-                KeycloakRealm(keycloak.realm.clone()),
-                KeycloakUrl(keycloak_url.clone()),
-            )
-            .await
-            .inspect_err(|e| error!("{}", e));
-
-            //
-            //
-
-            let _ = keycloak_create_client(
-                KeycloakAdminToken(tok.clone()),
-                KeycloakRealm(keycloak.realm.clone()),
-                KeycloakUrl(keycloak_url.clone()),
-                KeycloakClientId(keycloak.client_id.clone()),
-                KeycloakClientSecret(keycloak.client_secret.clone()),
-            )
-            .await
-            .inspect_err(|e| error!("{}", e));
-
-            //
-            //
-
-            let create_user_request = CreateUserRequest {
-                username: "batterypack-services".to_string(),
-                enabled: true,
-                first_name: "battery".to_string(),
-                last_name: "pack".to_string(),
-                email: "battery@pack.com".to_string(),
-                email_verified: true,
-                credentials: vec![CreateUserRequestCredentials {
-                    r#type: "password".to_string(),
-                    value: "password".to_string(),
-                    temporary: false,
-                }],
+            let mut keycloak_client = KeycloakClient {
+                url: KeycloakUrl(format!("http://{}:{}", host, port)),
             };
 
-            let create_user_response = reqwest::Client::new()
-                .post(format!(
-                    "{}/admin/realms/{}/users",
-                    keycloak_url,
-                    keycloak.realm.clone()
-                ))
-                .header("content-type", "application/json")
-                .header("authorization", format!("Bearer {}", tok))
-                .json(&create_user_request)
-                .send()
-                .await;
-            info!("{:?}", create_user_response);
-
-            let byt = create_user_response
-                .unwrap()
-                .bytes()
+            let admin_token = &keycloak_client
+                .admin_token()
                 .await
-                .unwrap()
-                .to_vec();
-            let bod = String::from_utf8_lossy(&byt).to_string();
-            info!("create_user_response: {}", bod);
+                .inspect_err(|e| error!("{}", e))?;
 
             //
             //
 
-            let _ = keycloak_get_user_token(
-                KeycloakRealm(keycloak.realm.clone()),
-                KeycloakUrl(keycloak_url.clone()),
-                KeycloakClientId(keycloak.client_id.clone()),
-                KeycloakClientSecret(keycloak.client_secret.clone()),
-                KeycloakUsername(keycloak.username.clone()),
-                KeycloakPassword(keycloak.password.clone()),
-            )
-            .await
-            .inspect_err(|e| error!("{}", e));
+            let _ = &keycloak_client
+                .create_realm(admin_token.clone(), KeycloakRealm(keycloak.realm.clone()))
+                .await
+                .inspect_err(|e| error!("{}", e));
+
+            //
+            //
+
+            let _ = keycloak_client
+                .create_client(
+                    admin_token.clone(),
+                    KeycloakRealm(keycloak.realm.clone()),
+                    KeycloakClientId(keycloak.client_id.clone()),
+                    KeycloakClientSecret(keycloak.client_secret.clone()),
+                )
+                .await
+                .inspect_err(|e| error!("{}", e));
+
+            //
+            //
+
+            let _ = keycloak_client
+                .create_user(
+                    admin_token.clone(),
+                    KeycloakRealm(keycloak.realm.clone()),
+                    KeycloakUsername(keycloak.username.clone()),
+                    KeycloakPassword(keycloak.password.clone()),
+                )
+                .await
+                .inspect_err(|e| error!("{}", e));
+
+            //
+            //
+
+            let _ = keycloak_client
+                .get_user_token(
+                    KeycloakRealm(keycloak.realm.clone()),
+                    KeycloakClientId(keycloak.client_id.clone()),
+                    KeycloakClientSecret(keycloak.client_secret.clone()),
+                    KeycloakUsername(keycloak.username.clone()),
+                    KeycloakPassword(keycloak.password.clone()),
+                )
+                .await
+                .inspect_err(|e| error!("{}", e));
 
             Ok(Some(keycloak_container))
         }

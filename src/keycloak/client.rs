@@ -16,122 +16,201 @@
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
 use super::model::CreateRealmRequest;
-use crate::keycloak::model::CreateClientRequest;
-use log::info;
+use crate::keycloak::model::{
+    CreateClientRequest, CreateUserRequest, CreateUserRequestCredentials, LoginResponse,
+};
+use log::{debug, info};
 use reqwest::Client;
-use std::collections::HashMap;
+use std::{collections::HashMap, ops::DerefMut};
 
+#[derive(Debug, Clone)]
 pub struct KeycloakAdminToken(pub String);
+
+#[derive(Debug, Clone)]
 pub struct KeycloakRealm(pub String);
+
+#[derive(Debug, Clone)]
 pub struct KeycloakUrl(pub String);
+
+#[derive(Debug, Clone)]
 pub struct KeycloakClientSecret(pub String);
+
+#[derive(Debug, Clone)]
 pub struct KeycloakClientId(pub String);
+
+#[derive(Debug, Clone)]
 pub struct KeycloakUsername(pub String);
+
+#[derive(Debug, Clone)]
+pub struct KeycloakUserToken(pub String);
+
+#[derive(Debug, Clone)]
 pub struct KeycloakPassword(pub String);
 
-async fn send_keycloak_request(
-    url: String,
-    admin_token: &KeycloakAdminToken,
-    body: impl serde::Serialize,
-) -> Result<(), String> {
-    let response = Client::new()
-        .post(url)
-        .header("content-type", "application/json")
-        .header("authorization", format!("Bearer {}", admin_token.0))
-        .json(&body)
-        .send()
-        .await
-        .map_err(|e| e.to_string())?;
-
-    let body_bytes = response.bytes().await.map_err(|e| e.to_string())?.to_vec();
-    let body_str = String::from_utf8_lossy(&body_bytes).to_string();
-
-    info!("Response: {}", body_str);
-    Ok(())
+#[derive(Debug, Clone)]
+pub struct KeycloakClient {
+    pub url: KeycloakUrl,
 }
 
-pub async fn keycloak_create_realm(
-    admin_token: KeycloakAdminToken,
-    realm: KeycloakRealm,
-    url: KeycloakUrl,
-) -> Result<(), String> {
-    let request_body = CreateRealmRequest {
-        enabled: true,
-        realm: realm.0,
-        verify_email: false,
-    };
+impl KeycloakClient {
+    pub async fn send_request(
+        url: String,
+        admin_token: &KeycloakAdminToken,
+        body: impl serde::Serialize,
+    ) -> Result<(), String> {
+        let response = Client::new()
+            .post(url)
+            .header("content-type", "application/json")
+            .header("authorization", format!("Bearer {}", admin_token.0))
+            .json(&body)
+            .send()
+            .await
+            .map_err(|e| e.to_string())?;
 
-    send_keycloak_request(
-        format!("{}/admin/realms", url.0),
-        &admin_token,
-        request_body,
-    )
-    .await
-}
+        debug!("got response from keycloak: {:?}", response);
 
-pub async fn keycloak_create_client(
-    admin_token: KeycloakAdminToken,
-    realm: KeycloakRealm,
-    url: KeycloakUrl,
-    client_id: KeycloakClientId,
-    client_secret: KeycloakClientSecret,
-) -> Result<(), String> {
-    let request_body = CreateClientRequest {
-        protocol: "openid-connect".to_string(),
-        client_id: client_id.0,
-        enabled: true,
-        secret: client_secret.0,
-        public_client: false,
-        standard_flow_enabled: true,
-        service_accounts_enabled: true,
-        direct_access_grants_enabled: true,
-        attributes: HashMap::new(),
-    };
+        let body_bytes = response.bytes().await.map_err(|e| e.to_string())?.to_vec();
+        let body_str = String::from_utf8_lossy(&body_bytes).to_string();
 
-    send_keycloak_request(
-        format!("{}/admin/realms/{}/clients", url.0, realm.0),
-        &admin_token,
-        request_body,
-    )
-    .await
-}
+        debug!("response body from keycloak: {}", body_str);
+        Ok(())
+    }
 
-pub async fn keycloak_get_user_token(
-    realm: KeycloakRealm,
-    url: KeycloakUrl,
-    client_id: KeycloakClientId,
-    client_secret: KeycloakClientSecret,
-    username: KeycloakUsername,
-    password: KeycloakPassword,
-) -> Result<(), String> {
-    let params = HashMap::from([
-        ("username", username.0.as_str()),
-        ("password", password.0.as_str()),
-        ("grant_type", "password"),
-        ("client_id", client_id.0.as_str()),
-        ("client_secret", client_secret.0.as_str()),
-    ]);
+    pub async fn create_realm(
+        &mut self,
+        admin_token: KeycloakAdminToken,
+        realm: KeycloakRealm,
+    ) -> Result<(), String> {
+        let request_body = CreateRealmRequest {
+            enabled: true,
+            realm: realm.0,
+            verify_email: false,
+        };
 
-    let get_user_token_response = reqwest::Client::new()
-        .post(format!(
-            "{}/realms/{}/protocol/openid-connect/token",
-            url.0, realm.0
-        ))
-        .header("content-type", "application/x-www-form-urlencoded")
-        .form(&params)
-        .send()
+        Self::send_request(
+            format!("{}/admin/realms", self.url.0),
+            &admin_token,
+            request_body,
+        )
         .await
-        .map_err(|e| e.to_string())?;
+    }
 
-    let byt = get_user_token_response
-        .bytes()
+    pub async fn create_client(
+        &mut self,
+        admin_token: KeycloakAdminToken,
+        realm: KeycloakRealm,
+        client_id: KeycloakClientId,
+        client_secret: KeycloakClientSecret,
+    ) -> Result<(), String> {
+        let request_body = CreateClientRequest {
+            protocol: "openid-connect".to_string(),
+            client_id: client_id.0,
+            enabled: true,
+            secret: client_secret.0,
+            public_client: false,
+            standard_flow_enabled: true,
+            service_accounts_enabled: true,
+            direct_access_grants_enabled: true,
+            attributes: HashMap::new(),
+        };
+
+        Self::send_request(
+            format!("{}/admin/realms/{}/clients", self.url.0, realm.0),
+            &admin_token,
+            request_body,
+        )
         .await
-        .map_err(|e| e.to_string())?
-        .to_vec();
+    }
 
-    let bod = String::from_utf8_lossy(&byt).to_string();
+    pub async fn admin_token(&mut self) -> Result<KeycloakAdminToken, String> {
+        let params = HashMap::from([
+            ("username", "admin"),
+            ("password", "admin"),
+            ("grant_type", "password"),
+            ("client_id", "admin-cli"),
+        ]);
 
-    info!("get_user_token_response: {}", bod);
+        let master_realm = "master";
+        let response = reqwest::Client::new()
+            .post(format!(
+                "{}/realms/{}/protocol/openid-connect/token",
+                self.url.0, master_realm
+            ))
+            .header("content-type", "application/x-www-form-urlencoded")
+            .form(&params)
+            .send()
+            .await
+            .map_err(|e| e.to_string())?
+            .json::<LoginResponse>()
+            .await
+            .map_err(|e| e.to_string())?;
 
-    Ok(())
+        debug!("got response from keycloak: {:?}", response);
+
+        Ok(KeycloakAdminToken(response.access_token))
+    }
+
+    pub async fn create_user(
+        &mut self,
+        admin_token: KeycloakAdminToken,
+        realm: KeycloakRealm,
+        username: KeycloakUsername,
+        password: KeycloakPassword,
+    ) -> Result<(), String> {
+        let create_user_request = CreateUserRequest {
+            username: username.0,
+            enabled: true,
+            first_name: "test".to_string(),
+            last_name: "test".to_string(),
+            email: "test@test.com".to_string(),
+            email_verified: true,
+            credentials: vec![CreateUserRequestCredentials {
+                r#type: "password".to_string(),
+                value: password.0,
+                temporary: false,
+            }],
+        };
+
+        Self::send_request(
+            format!("{}/admin/realms/{}/users", self.url.0, realm.0),
+            &admin_token,
+            &create_user_request,
+        )
+        .await
+    }
+
+    pub async fn get_user_token(
+        &mut self,
+        realm: KeycloakRealm,
+        client_id: KeycloakClientId,
+        client_secret: KeycloakClientSecret,
+        username: KeycloakUsername,
+        password: KeycloakPassword,
+    ) -> Result<KeycloakUserToken, String> {
+        let params = HashMap::from([
+            ("username", username.0.as_str()),
+            ("password", password.0.as_str()),
+            ("grant_type", "password"),
+            ("client_id", client_id.0.as_str()),
+            ("client_secret", client_secret.0.as_str()),
+        ]);
+
+        let response = reqwest::Client::new()
+            .post(format!(
+                "{}/realms/{}/protocol/openid-connect/token",
+                self.url.0, realm.0
+            ))
+            .header("content-type", "application/x-www-form-urlencoded")
+            .form(&params)
+            .send()
+            .await
+            .map_err(|e| e.to_string())?
+            .json::<LoginResponse>()
+            .await
+            .map_err(|e| e.to_string())?;
+
+        debug!("got response from keycloak: {:?}", response);
+
+        Ok(KeycloakUserToken(response.access_token))
+    }
 }
