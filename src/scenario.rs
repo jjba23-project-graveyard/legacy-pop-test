@@ -18,7 +18,7 @@
 use crate::containers::{maybe_terminate_container, setup_container_logging};
 use crate::environment::setup_environment;
 use crate::health_check::start_health_check;
-use crate::http::run_http_assertion;
+use crate::http::{run_http_action, run_http_assertion};
 use crate::kafka::container::{maybe_start_kafka, produce_kafka_message};
 use crate::keycloak::client::{
     KeycloakClient, KeycloakClientId, KeycloakClientSecret, KeycloakPassword, KeycloakRealm,
@@ -64,6 +64,53 @@ pub async fn run_action(
             )
             .await;
             r.inspect_err(|e| error!("{}", e))
+        }
+        PopAction::HttpAction {
+            name,
+            action_url,
+            service_id,
+            delay_seconds,
+            with_keycloak_user_token,
+            method,
+            message_file_path,
+        } => {
+            name.clone().inspect(|n| info!("starting action: {}", n));
+            if let Some(delay) = delay_seconds {
+                sleep(Duration::from_secs(*delay)).await;
+            }
+
+            let mut tok = None;
+            if *with_keycloak_user_token == Some(true) {
+                if let Some(mut kclient) = pop_env.keycloak_client.clone() {
+                    if let Some(kk) = keycloak {
+                        let maybe_tok = kclient
+                            .get_user_token(
+                                KeycloakRealm(kk.realm),
+                                KeycloakClientId(kk.client_id),
+                                KeycloakClientSecret(kk.client_secret),
+                                KeycloakUsername(kk.username),
+                                KeycloakPassword(kk.password),
+                            )
+                            .await;
+                        let _ = maybe_tok.inspect(|t| tok = Some(t.clone().0));
+                    }
+                }
+            }
+
+            if let Some(service) = services.iter().find(|s| s.id == *service_id) {
+                info!("found service to check: {:?}", service);
+                info!("running http assertion: {:?}", action);
+                run_http_action(
+                    action_url.clone(),
+                    service.base_url.clone(),
+                    tok,
+                    method.to_string(),
+                    message_file_path.clone(),
+                )
+                .await
+            } else {
+                Err("could not find service details for check".to_string())
+            }
         }
         PopAction::HttpAssertion {
             name,

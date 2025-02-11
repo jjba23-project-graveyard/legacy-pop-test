@@ -90,6 +90,15 @@ pub enum PopAction {
         json_body_patterns: Option<Vec<BodyPattern>>,
         with_keycloak_user_token: Option<bool>,
     },
+    HttpAction {
+        name: Option<String>,
+        action_url: String,
+        service_id: String,
+        delay_seconds: Option<u64>,
+        with_keycloak_user_token: Option<bool>,
+        method: String,
+        message_file_path: String,
+    },
     KafkaProduceFromFileAction {
         name: Option<String>,
         delay_seconds: Option<u64>,

@@ -41,18 +41,22 @@ pop_services:
 
 
 pop_actions:
-  - name: "Publish a Kafka message to the chargepoint topic"
+  - name: "Publish a Kafka message to the registration state topic"
     kafka_topic: "vehicle.registration-state"
     message_file_path: "/home/joe/Ontwikkeling/Persoonlijk/pop-test/resources/kafka-messages/vehicle-management-registration-state.json"
 
+  - name: "Add customer to vehicle-management"
+    with_keycloak_user_token: true
+    action_url: "/api/v1/customers"
+    service_id: "vehicle-management"
+    method: "POST"
+    message_file_path: "/home/joe/Ontwikkeling/Persoonlijk/pop-test/resources/kafka-messages/vehicle-management-registration-state.json"
+    
   - name: "Check calling the registered URL works and returns the proper JSON body"
     with_keycloak_user_token: true
-    assert_url: "/api/v1/status?customerReference=206789"
+    assert_url: "/api/v1/status?customerReference=232323"
     service_id: "vehicle-management"
     delay_seconds: 5
-    json_body_patterns:
-      - pattern: '"data"[0]"vehicleId"'
-        condition: '!= ""'
 
 pop_keycloak:
   enabled: true

@@ -15,13 +15,15 @@
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
+use std::{fs, str::FromStr};
+
 use crate::pop_model::BodyPattern;
 
 use crate::condition_dsl::eval_condition;
 use log::{debug, error, info};
 use reqwest::{
     header::{self, HeaderValue},
-    Client,
+    Client, Method,
 };
 
 pub async fn run_http_assertion(
@@ -72,6 +74,49 @@ pub async fn run_http_assertion(
             if let Ok(body) = &j {
                 eval_condition(body, json_body_patterns.unwrap_or_default())?
             }
+        }
+    }
+
+    Ok(())
+}
+
+pub async fn run_http_action(
+    assert_url: String,
+    service_url: String,
+    bearer_token: Option<String>,
+    method: String,
+    message_file_path: String,
+) -> Result<(), String> {
+    let url = format!("{}{}", service_url, assert_url);
+
+    let mut headers = header::HeaderMap::new();
+    if let Some(tok) = bearer_token {
+        headers.insert(
+            "Authorization",
+            HeaderValue::from_str(format!("Bearer {}", tok).as_str()).map_err(|e| e.to_string())?,
+        );
+    }
+    let d = fs::read_to_string(message_file_path).unwrap_or("".to_string());
+    let c = Client::builder()
+        .default_headers(headers)
+        .build()
+        .map_err(|e| e.to_string())?
+        .request(
+            Method::from_str(method.as_str()).unwrap_or(Method::POST),
+            url,
+        )
+        .body(d);
+
+    let maybe_response = c.send().await;
+
+    println!("{maybe_response:#?}");
+
+    match maybe_response {
+        Err(e) => error!("{}", e),
+        Ok(resp) => {
+            let body_bytes = &resp.bytes().await.map_err(|e| e.to_string())?.to_vec();
+            let body_str = String::from_utf8_lossy(body_bytes).to_string();
+            debug!("response body from assertion: {}", body_str);
         }
     }
 
