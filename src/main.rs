@@ -48,11 +48,8 @@ use clap::Parser;
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct Args {
-    #[arg(short('f'), long("path"))]
+    #[arg(short('p'), long("path"))]
     path: String,
-
-    #[arg(short('t'), long("type"))]
-    file_type: String,
 }
 
 #[tokio::main]
@@ -64,28 +61,22 @@ async fn main() -> Result<(), String> {
     let args = Args::parse();
 
     info!("gathering scenario files in desired path");
-    let p = Path::new(&args.path);
-
-    let mut file_paths = Vec::new();
-
-    if p.is_dir() {
-        fs::read_dir(args.path)
-            .unwrap()
-            .for_each(|fp| file_paths.push(fp.unwrap().path().to_string_lossy().to_string()));
-    } else {
-        file_paths.push(p.to_string_lossy().to_string())
-    }
+    let file_paths = gather_file_paths(args.path.clone());
+    info!("gathered files: {:?}", file_paths);
 
     async {
         for f in file_paths {
             info!("scenario file read successfully to string");
 
-            do_with_file_data(args.file_type.clone(), f.to_string())
-                .await
-                .map_err(|e| {
-                    error!("{}", e);
-                    "scenario failed to run"
-                })?;
+            do_with_file_data(
+                f.split(".").last().unwrap_or("yaml").to_string(),
+                f.to_string(),
+            )
+            .await
+            .map_err(|e| {
+                error!("{}", e);
+                "scenario failed to run"
+            })?;
 
             info!("✅ ran scenario successfully");
         }
@@ -108,6 +99,21 @@ pub async fn do_with_file_data(file_type: String, scenario_path: String) -> Resu
             info!("parsing YAML from file");
             serde_yml::from_str(&file_data)
                 .inspect_err(|e| error!("{}", e))
+                .inspect(|_| info!("parsed YAML successfully"))
+                .ok()
+        }
+        "toml" => {
+            info!("parsing TOML from file");
+            toml::from_str(&file_data)
+                .inspect_err(|e| error!("{}", e))
+                .inspect(|_| info!("parsed TOML successfully"))
+                .ok()
+        }
+        "json" => {
+            info!("parsing JSON from file");
+            serde_json::from_str(&file_data)
+                .inspect_err(|e| error!("{}", e))
+                .inspect(|_| info!("parsed JSON successfully"))
                 .ok()
         }
         _ => None,
@@ -116,5 +122,18 @@ pub async fn do_with_file_data(file_type: String, scenario_path: String) -> Resu
     match maybe_scenario {
         Some(scenario) => play_scenario(scenario).await,
         None => Err("could not find a valid scenario to play".to_string()),
+    }
+}
+
+pub fn gather_file_paths(path: String) -> Vec<String> {
+    let p = Path::new(&path);
+
+    if p.is_dir() {
+        fs::read_dir(path)
+            .unwrap()
+            .flat_map(|fp| gather_file_paths(fp.unwrap().path().to_string_lossy().to_string()))
+            .collect()
+    } else {
+        vec![p.to_string_lossy().to_string()]
     }
 }

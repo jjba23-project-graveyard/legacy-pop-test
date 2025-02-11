@@ -18,17 +18,17 @@
 test-green-energy-mix: fmt
 	TESTCONTAINERS_COMMAND=keep \
 	RUST_LOG=debug \
-	nix develop -c cargo run -- -t yaml -f ./resources/scenarios/test-green-energy-mix.yaml
+	nix develop -c cargo run -- -p ./resources/scenarios/green-energy-mix/check-forecast-endpoint.yaml
 
 test-dynamic-tariff-charging: fmt
 	TESTCONTAINERS_COMMAND=keep \
 	RUST_LOG=debug \
-	nix develop -c cargo run -- -t yaml -f ./resources/scenarios/test-dynamic-tariff-charging.yaml
+	nix develop -c cargo run -- -p ./resources/scenarios/test-dynamic-tariff-charging.yaml
 
-test-all-yaml: fmt
+test-all: fmt
 	TESTCONTAINERS_COMMAND=keep \
 	RUST_LOG=debug \
-	nix develop -c cargo run -- -t yaml -f ./resources/scenarios
+	nix develop -c cargo run -- -p ./resources/scenarios
 
 test-dynamic-tariff-charging-call:
 	curl -v -X GET --header "Authorization: Bearer $(ADMIN_TOKEN)" http://localhost:8222/api/v1/registeredChargepoints/3514fbab-9a15-4869-9a7d-895e9dfb3560
