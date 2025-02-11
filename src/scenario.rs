@@ -25,7 +25,7 @@ use crate::keycloak::client::{
     KeycloakUrl, KeycloakUsername,
 };
 use crate::keycloak::container::maybe_start_keycloak;
-use crate::pop_model::{PopAction, PopEnv, PopKeycloak, PopScenarioFile, PopService};
+use crate::pop_model::{PopAction, PopEnv, PopKeycloak, PopScenario, PopService};
 use crate::pop_server::maybe_start_pop_server;
 use crate::postgres::container::maybe_start_postgres;
 use crate::proc::{start_service, terminate_services};
@@ -111,13 +111,13 @@ pub async fn run_action(
     }
 }
 
-pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String> {
+pub async fn play_scenario(scenario: PopScenario) -> Result<(), String> {
     let mut h_set = JoinSet::new();
     let mut children = Vec::new();
 
     info!("start setting up dependencies");
 
-    let maybe_postgres_container = maybe_start_postgres(&scenario_file).await?;
+    let maybe_postgres_container = maybe_start_postgres(&scenario).await?;
     let postgres_logs = match maybe_postgres_container {
         Some(ref postgres_container) => {
             let o = setup_container_logging(postgres_container).await;
@@ -126,7 +126,7 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
         None => None,
     };
 
-    let maybe_pop_server_container = maybe_start_pop_server(&scenario_file).await?;
+    let maybe_pop_server_container = maybe_start_pop_server(&scenario).await?;
     let pop_server_logs = match maybe_pop_server_container {
         Some(ref pop_server_container) => {
             let o = setup_container_logging(pop_server_container).await;
@@ -135,7 +135,7 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
         None => None,
     };
 
-    let maybe_kafka_container = maybe_start_kafka(&scenario_file).await?;
+    let maybe_kafka_container = maybe_start_kafka(&scenario).await?;
     let kafka_logs = match maybe_kafka_container {
         Some(ref kafka_container) => {
             let o = setup_container_logging(kafka_container).await;
@@ -144,7 +144,7 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
         None => None,
     };
 
-    let maybe_keycloak_container = maybe_start_keycloak(&scenario_file).await?;
+    let maybe_keycloak_container = maybe_start_keycloak(&scenario).await?;
     let keycloak_logs = match maybe_keycloak_container {
         Some(ref keycloak_container) => {
             let o = setup_container_logging(keycloak_container).await;
@@ -153,12 +153,12 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
         None => None,
     };
 
-    for pop_service in scenario_file.pop_test.pop_services.clone() {
+    for pop_service in scenario.pop_services.clone() {
         info!("registering service: {}", pop_service.id);
         h_set.spawn(start_health_check(pop_service.clone()));
 
         let with_env = setup_environment(
-            &scenario_file,
+            &scenario,
             &pop_service,
             &maybe_postgres_container,
             &maybe_kafka_container,
@@ -213,21 +213,11 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
     info!("{:?}", pop_env);
 
     info!("performing tests and assertions");
-    let services = &scenario_file.pop_test.pop_services;
+    let services = &scenario.pop_services;
 
-    for action in &scenario_file
-        .pop_test
-        .pop_actions
-        .clone()
-        .unwrap_or_default()
-    {
-        let action_result = run_action(
-            &pop_env,
-            services,
-            action,
-            scenario_file.pop_test.pop_keycloak.clone(),
-        )
-        .await;
+    for action in &scenario.pop_actions.clone().unwrap_or_default() {
+        let action_result =
+            run_action(&pop_env, services, action, scenario.pop_keycloak.clone()).await;
         match action_result {
             Ok(_) => info!("ran action successfully: {:?}", action),
             Err(e) => error!("{}", e),

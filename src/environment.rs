@@ -17,7 +17,7 @@
 
 use crate::kafka::container::setup_kafka_env;
 use crate::keycloak::container::setup_keycloak_env;
-use crate::pop_model::{PopScenarioFile, PopService};
+use crate::pop_model::{PopScenario, PopService};
 use crate::pop_server::setup_pop_server_env;
 use crate::postgres::container::setup_postgres_env;
 use std::collections::HashMap;
@@ -26,7 +26,7 @@ use testcontainers_modules::kafka::Kafka;
 use testcontainers_modules::postgres::Postgres;
 
 pub async fn setup_environment(
-    scenario_file: &PopScenarioFile,
+    scenario: &PopScenario,
     pop_service: &PopService,
     postgres_container: &Option<ContainerAsync<Postgres>>,
     kafka_container: &Option<ContainerAsync<Kafka>>,
@@ -35,28 +35,10 @@ pub async fn setup_environment(
 ) -> HashMap<String, String> {
     let mut with_env = HashMap::new();
 
-    setup_postgres_env(
-        scenario_file,
-        pop_service,
-        postgres_container,
-        &mut with_env,
-    )
-    .await;
-    setup_kafka_env(scenario_file, pop_service, kafka_container, &mut with_env).await;
-    setup_keycloak_env(
-        scenario_file,
-        pop_service,
-        keycloak_container,
-        &mut with_env,
-    )
-    .await;
-    setup_pop_server_env(
-        scenario_file,
-        pop_service,
-        pop_server_container,
-        &mut with_env,
-    )
-    .await;
+    setup_postgres_env(scenario, pop_service, postgres_container, &mut with_env).await;
+    setup_kafka_env(scenario, pop_service, kafka_container, &mut with_env).await;
+    setup_keycloak_env(scenario, pop_service, keycloak_container, &mut with_env).await;
+    setup_pop_server_env(scenario, pop_service, pop_server_container, &mut with_env).await;
 
     with_env
 }

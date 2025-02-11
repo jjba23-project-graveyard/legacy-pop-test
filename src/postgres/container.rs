@@ -17,7 +17,7 @@
 
 use std::collections::HashMap;
 
-use crate::pop_model::{PopPostgres, PopScenarioFile, PopService};
+use crate::pop_model::{PopPostgres, PopScenario, PopService};
 use log::info;
 use testcontainers::ContainerAsync;
 use testcontainers::{runners::AsyncRunner, ImageExt};
@@ -35,9 +35,9 @@ async fn run_postgres_container(
 }
 
 pub async fn maybe_start_postgres(
-    scenario_file: &PopScenarioFile,
+    scenario: &PopScenario,
 ) -> Result<Option<ContainerAsync<Postgres>>, String> {
-    match &scenario_file.pop_test.pop_postgres {
+    match &scenario.pop_postgres {
         Some(postgres) if postgres.enabled == Some(true) => {
             info!("start setting up postgres");
             Ok(Some(
@@ -49,13 +49,12 @@ pub async fn maybe_start_postgres(
 }
 
 pub async fn setup_postgres_env(
-    scenario_file: &PopScenarioFile,
+    scenario: &PopScenario,
     pop_service: &PopService,
     postgres_container: &Option<ContainerAsync<Postgres>>,
     with_env: &mut HashMap<String, String>,
 ) {
-    if scenario_file
-        .pop_test
+    if scenario
         .pop_postgres
         .as_ref()
         .and_then(|p| p.enabled)

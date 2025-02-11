@@ -17,7 +17,7 @@
 
 use std::collections::HashMap;
 
-use crate::pop_model::{PopScenarioFile, PopServer, PopServerBehavior, PopService};
+use crate::pop_model::{PopScenario, PopServer, PopServerBehavior, PopService};
 use log::{error, info};
 use reqwest::Response;
 use testcontainers::core::ContainerPort;
@@ -41,9 +41,9 @@ async fn run_pop_server_container(
 }
 
 pub async fn maybe_start_pop_server(
-    scenario_file: &PopScenarioFile,
+    scenario: &PopScenario,
 ) -> Result<Option<ContainerAsync<GenericImage>>, String> {
-    match &scenario_file.pop_test.pop_server {
+    match &scenario.pop_server {
         Some(pop_server) if pop_server.enabled == Some(true) => {
             info!("start setting up pop_server");
             Ok(Some(
@@ -81,13 +81,12 @@ pub async fn register_pop_server_behavior(
 }
 
 pub async fn setup_pop_server_env(
-    scenario_file: &PopScenarioFile,
+    scenario: &PopScenario,
     pop_service: &PopService,
     pop_server_container: &Option<ContainerAsync<GenericImage>>,
     with_env: &mut HashMap<String, String>,
 ) {
-    if scenario_file
-        .pop_test
+    if scenario
         .pop_server
         .as_ref()
         .and_then(|p| p.enabled)
@@ -118,8 +117,7 @@ pub async fn setup_pop_server_env(
                 with_env.insert(v.clone(), format!("http://{}:{}", host, port));
             }
 
-            if let Some(bs) = scenario_file
-                .pop_test
+            if let Some(bs) = scenario
                 .pop_server
                 .as_ref()
                 .and_then(|p| p.behaviors.clone())

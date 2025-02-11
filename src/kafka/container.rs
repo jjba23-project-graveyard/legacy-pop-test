@@ -15,7 +15,7 @@
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
-use crate::pop_model::{PopKafka, PopScenarioFile, PopService};
+use crate::pop_model::{PopKafka, PopScenario, PopService};
 use kafka::producer::{Producer, Record, RequiredAcks};
 use log::info;
 use std::collections::HashMap;
@@ -59,9 +59,9 @@ async fn run_kafka_container(pop_kafka: PopKafka) -> Result<ContainerAsync<Kafka
 }
 
 pub async fn maybe_start_kafka(
-    scenario_file: &PopScenarioFile,
+    scenario: &PopScenario,
 ) -> Result<Option<ContainerAsync<Kafka>>, String> {
-    match &scenario_file.pop_test.pop_kafka {
+    match &scenario.pop_kafka {
         Some(kafka) if kafka.enabled == Some(true) => {
             info!("start setting up kafka");
             Ok(Some(run_kafka_container(kafka.clone()).await.unwrap()))
@@ -71,13 +71,12 @@ pub async fn maybe_start_kafka(
 }
 
 pub async fn setup_kafka_env(
-    scenario_file: &PopScenarioFile,
+    scenario: &PopScenario,
     pop_service: &PopService,
     kafka_container: &Option<ContainerAsync<Kafka>>,
     with_env: &mut HashMap<String, String>,
 ) {
-    if scenario_file
-        .pop_test
+    if scenario
         .pop_kafka
         .as_ref()
         .and_then(|k| k.enabled)

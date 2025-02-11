@@ -16,7 +16,7 @@
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
 use log::{error, info};
-use pop_model::PopScenarioFile;
+use pop_model::PopScenario;
 use scenario::play_scenario;
 use std::env;
 use std::fs;
@@ -84,11 +84,11 @@ async fn main() -> Result<(), String> {
 
 pub async fn do_with_file_data(user_cmd: String, file_data: String) -> Result<(), String> {
     info!("parsing YAML from file");
-    let scenario_file: PopScenarioFile = serde_yml::from_str(&file_data).unwrap();
+    let scenario: PopScenario = serde_yml::from_str(&file_data).unwrap();
 
     info!("✅ parsed pop scenario properly from YAML file");
     if user_cmd == "play-scenario" {
-        play_scenario(scenario_file).await
+        play_scenario(scenario).await
     } else {
         let msg = "could not understand the wanted task to execute";
         error!("{}", msg);

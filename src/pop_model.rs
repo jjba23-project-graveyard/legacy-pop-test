@@ -151,11 +151,6 @@ pub struct PopScenario {
     pub pop_keycloak: Option<PopKeycloak>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct PopScenarioFile {
-    pub pop_test: PopScenario,
-}
-
 #[derive(Debug, Clone)]
 pub struct PopEnv {
     pub kafka_bootstrap_server: String,

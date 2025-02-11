@@ -15,64 +15,64 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
-pop_test:
-  pop_services:
-    - id: "dynamic-tariff-charging"
-      dir: "$HOME/Ontwikkeling/Werk/Vandebron"
-      base_url: "http://localhost:8222"
-      start_cmd_args:
-        - 'sbt "dynamicTariffCharging/run"'
-      env_vars:
-        SOME_TOKEN: "a"
-      health_check:
-        path: "/health"
-        patience_seconds: 180
-      postgres:
-        enabled: true
-      kafka:
-        enabled: true
-      keycloak:
-        enabled: true        
-      pop_server:
-        enabled: true
-        url_vars:
-          - "OCPP_FACADE_URL"
-          - "DYNAMIC_TARIFF_SERVICE_URL"
+
+pop_services:
+  - id: "dynamic-tariff-charging"
+    dir: "$HOME/Ontwikkeling/Werk/Vandebron"
+    base_url: "http://localhost:8222"
+    start_cmd_args:
+      - 'sbt "dynamicTariffCharging/run"'
+    env_vars:
+      SOME_TOKEN: "a"
+    health_check:
+      path: "/health"
+      patience_seconds: 180
+    postgres:
+      enabled: true
+    kafka:
+      enabled: true
+    keycloak:
+      enabled: true        
+    pop_server:
+      enabled: true
+      url_vars:
+        - "OCPP_FACADE_URL"
+        - "DYNAMIC_TARIFF_SERVICE_URL"
 
 
-  pop_actions:
-    - kafka_topic: "vehicle.latest-state"
-      message_file_path: "/home/joe/Ontwikkeling/Persoonlijk/pop-test/resources/kafka-messages/dynamic-tariff-charging-send-vehicle-latest-state.json"
-          
-    - with_keycloak_user_token: true
-      #assert_url: "/api/v1/vehicles/1607dc97-53a1-4e16-821d-b16b76daa903/latest-state"
-      assert_url: "/api/v1/registeredChargepoints/1607dc97-53a1-4e16-821d-b16b76daa903"
-      service_id: "dynamic-tariff-charging"
-      delay_seconds: 5
-      json_body_patterns:
-        - pattern: '"data""vehicleId"'
-          condition: '!= ""'
+pop_actions:
+  - kafka_topic: "vehicle.latest-state"
+    message_file_path: "/home/joe/Ontwikkeling/Persoonlijk/pop-test/resources/kafka-messages/dynamic-tariff-charging-send-vehicle-latest-state.json"
 
-  pop_keycloak:
-    enabled: true
-    realm: "vandebron"
-    client_id: "batterypack-services"
-    client_secret: "test"
-    email: "battery@pack.com"
-    username: "batterpack-services"
-    password: "test"
-    roles:
-      - "FLEXIOT-READONLY"
-      - "FLEXIOT_UPDATE"
-      - "FLEXIOT-ADMIN"
+  - with_keycloak_user_token: true
+    assert_url: "/api/v1/vehicles/1607dc97-53a1-4e16-821d-b16b76daa903/latest-state"
+    #assert_url: "/api/v1/registeredChargepoints/1607dc97-53a1-4e16-821d-b16b76daa903"
+    service_id: "dynamic-tariff-charging"
+    delay_seconds: 5
+    json_body_patterns:
+      - pattern: '"data""vehicleId"'
+        condition: '!= ""'
 
-  pop_postgres:
-    enabled: true
-    
-  pop_kafka:
-    enabled: true
+pop_keycloak:
+  enabled: true
+  realm: "vandebron"
+  client_id: "batterypack-services"
+  client_secret: "test"
+  email: "battery@pack.com"
+  username: "batterpack-services"
+  password: "test"
+  roles:
+    - "FLEXIOT-READONLY"
+    - "FLEXIOT_UPDATE"
+    - "FLEXIOT-ADMIN"
 
-  pop_server:
-    enabled: true
+pop_postgres:
+  enabled: true
+
+pop_kafka:
+  enabled: true
+
+pop_server:
+  enabled: true
 
         

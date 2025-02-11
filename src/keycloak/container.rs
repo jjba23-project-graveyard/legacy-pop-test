@@ -20,7 +20,7 @@ use crate::keycloak::client::{
     KeycloakRoleIdentifier, KeycloakRoleName, KeycloakUrl, KeycloakUserIdentifier,
     KeycloakUsername,
 };
-use crate::pop_model::{PopKeycloak, PopScenarioFile, PopService};
+use crate::pop_model::{PopKeycloak, PopScenario, PopService};
 use log::{error, info};
 
 use std::collections::HashMap;
@@ -52,9 +52,9 @@ pub async fn run_keycloak_container(
 }
 
 pub async fn maybe_start_keycloak(
-    scenario_file: &PopScenarioFile,
+    scenario: &PopScenario,
 ) -> Result<Option<ContainerAsync<GenericImage>>, String> {
-    match &scenario_file.pop_test.pop_keycloak {
+    match &scenario.pop_keycloak {
         Some(keycloak) if keycloak.enabled == Some(true) => {
             info!("start setting up keycloak");
             let keycloak_container = run_keycloak_container(keycloak.clone()).await.unwrap();
@@ -79,15 +79,13 @@ pub async fn maybe_start_keycloak(
             //
             //
 
-            let realm_identifier = &keycloak_client
+            let _realm_identifier = &keycloak_client
                 .create_realm(admin_token.clone(), KeycloakRealm(keycloak.realm.clone()))
                 .await
                 .inspect_err(|e| error!("{}", e));
 
-            let mut role_identifiers: Vec<String> = Vec::new();
-
             for role in keycloak.roles.clone().unwrap_or(Vec::new()) {
-                let role_identifier = &keycloak_client
+                let _ = &keycloak_client
                     .create_role(
                         admin_token.clone(),
                         KeycloakRealm(keycloak.realm.clone()),
@@ -95,14 +93,12 @@ pub async fn maybe_start_keycloak(
                     )
                     .await
                     .map_err(|e| e.to_string())?;
-
-                role_identifiers.push(role_identifier.clone());
             }
 
             //
             //
 
-            let client_identifier = keycloak_client
+            let _client_identifier = keycloak_client
                 .create_client(
                     admin_token.clone(),
                     KeycloakRealm(keycloak.realm.clone()),
@@ -128,7 +124,7 @@ pub async fn maybe_start_keycloak(
             //
             //
 
-            let user_token = keycloak_client
+            let _user_token = keycloak_client
                 .get_user_token(
                     KeycloakRealm(keycloak.realm.clone()),
                     KeycloakClientId(keycloak.client_id.clone()),
@@ -165,17 +161,12 @@ pub async fn maybe_start_keycloak(
 }
 
 pub async fn setup_keycloak_env(
-    scenario_file: &PopScenarioFile,
+    scenario: &PopScenario,
     pop_service: &PopService,
     keycloak_container: &Option<ContainerAsync<GenericImage>>,
     with_env: &mut HashMap<String, String>,
 ) {
-    if scenario_file
-        .pop_test
-        .pop_keycloak
-        .clone()
-        .and_then(|k| k.enabled)
-        == Some(true)
+    if scenario.pop_keycloak.clone().and_then(|k| k.enabled) == Some(true)
         && pop_service.keycloak.clone().and_then(|k| k.enabled) == Some(true)
     {
         if let Some(container) = keycloak_container {
@@ -202,13 +193,7 @@ pub async fn setup_keycloak_env(
                     .realm_var
                     .clone()
                     .unwrap_or_else(|| "KEYCLOAK_REALM".to_string()),
-                scenario_file
-                    .pop_test
-                    .pop_keycloak
-                    .as_ref()
-                    .unwrap()
-                    .realm
-                    .clone(),
+                scenario.pop_keycloak.as_ref().unwrap().realm.clone(),
             );
         }
     }
