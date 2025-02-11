@@ -25,8 +25,7 @@ where
 {
     if let Some(c) = container {
         let id = c.id();
-        info!("terminating and removing container: {}", id);
-        let _ = c.stop().await;
+        info!("removing container: {}", id);
         let _ = c.rm().await;
     }
 }

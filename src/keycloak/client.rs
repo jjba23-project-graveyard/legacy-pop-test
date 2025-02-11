@@ -19,9 +19,9 @@ use super::model::CreateRealmRequest;
 use crate::keycloak::model::{
     CreateClientRequest, CreateUserRequest, CreateUserRequestCredentials, LoginResponse,
 };
-use log::{debug, info};
+use log::debug;
 use reqwest::Client;
-use std::{collections::HashMap, ops::DerefMut};
+use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
 pub struct KeycloakAdminToken(pub String);

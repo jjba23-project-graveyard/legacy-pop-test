@@ -27,6 +27,7 @@ pub async fn terminate_services(children: Vec<Child>) {
     for mut child in children {
         info!("terminating pid: {:?}", child.id());
         let _ = child.kill().await;
+        info!("terminated process successfully");
     }
 }
 

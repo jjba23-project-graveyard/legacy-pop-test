@@ -15,10 +15,9 @@
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
-use super::model::{CreateUserRequest, CreateUserRequestCredentials, LoginResponse};
 use crate::keycloak::client::{
-    KeycloakAdminToken, KeycloakClient, KeycloakClientId, KeycloakClientSecret, KeycloakPassword,
-    KeycloakRealm, KeycloakUrl, KeycloakUsername,
+    KeycloakClient, KeycloakClientId, KeycloakClientSecret, KeycloakPassword, KeycloakRealm,
+    KeycloakUrl, KeycloakUsername,
 };
 use crate::pop_model::{PopKeycloak, PopScenarioFile, PopService};
 use log::{error, info};

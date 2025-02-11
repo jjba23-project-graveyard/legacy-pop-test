@@ -188,8 +188,6 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
         }
     }
 
-    terminate_services(children).await;
-
     if let Some((keycloak_out, keycloak_err)) = keycloak_logs {
         let _ = keycloak_out.await;
         let _ = keycloak_err.await;
@@ -213,6 +211,8 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
         let _ = pop_server_err.await;
     }
     maybe_terminate_container(maybe_pop_server_container).await;
+
+    terminate_services(children).await;
 
     info!("finished playing scenario");
     Ok(())
