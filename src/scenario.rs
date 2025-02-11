@@ -157,7 +157,7 @@ pub async fn play_scenario(scenario: PopScenario) -> Result<(), String> {
         None => None,
     };
 
-    for pop_service in scenario.pop_services.clone() {
+    for pop_service in scenario.pop_services.clone().unwrap_or_default() {
         info!("registering service: {}", pop_service.id);
         h_set.spawn(start_health_check(pop_service.clone()));
 
@@ -217,7 +217,7 @@ pub async fn play_scenario(scenario: PopScenario) -> Result<(), String> {
     info!("{:?}", pop_env);
 
     info!("performing tests and assertions");
-    let services = &scenario.pop_services;
+    let services = &scenario.pop_services.clone().unwrap_or_default();
 
     for action in &scenario.pop_actions.clone().unwrap_or_default() {
         let action_result =

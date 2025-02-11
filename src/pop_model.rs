@@ -124,6 +124,7 @@ pub struct PopKeycloak {
     pub username: String,
     pub password: String,
     pub roles: Option<Vec<String>>,
+    pub scopes: Option<Vec<String>>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -145,7 +146,7 @@ pub struct PopServer {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct PopScenario {
-    pub pop_services: Vec<PopService>,
+    pub pop_services: Option<Vec<PopService>>,
     pub pop_actions: Option<Vec<PopAction>>,
     pub pop_postgres: Option<PopPostgres>,
     pub pop_kafka: Option<PopKafka>,

@@ -15,7 +15,10 @@
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
-use super::model::{CreateRealmRequest, CreateRoleMappingRequest, CreateRoleRequest};
+use super::model::{
+    CreateClientScopeRequest, CreateRealmRequest, CreateRoleMappingRequest, CreateRoleRequest,
+    CreateScopeRoleMappingRequest,
+};
 use crate::keycloak::model::{
     CreateClientRequest, CreateUserRequest, CreateUserRequestCredentials, LoginResponse,
     RoleRepresentation,
@@ -59,6 +62,12 @@ pub struct KeycloakClientIdentifier(pub String);
 
 #[derive(Debug, Clone)]
 pub struct KeycloakRoleIdentifier(pub String);
+
+#[derive(Debug, Clone)]
+pub struct KeycloakClientScope(pub String);
+
+#[derive(Debug, Clone)]
+pub struct KeycloakClientScopeIdentifier(pub String);
 
 #[derive(Debug, Clone)]
 pub struct KeycloakClient {
@@ -288,6 +297,52 @@ impl KeycloakClient {
         .await
     }
 
+    pub async fn create_client_scope(
+        &mut self,
+        admin_token: KeycloakAdminToken,
+        realm: KeycloakRealm,
+        scope: KeycloakClientScope,
+    ) -> Result<String, String> {
+        let request_body = CreateClientScopeRequest {
+            name: scope.0,
+            protocol: "openid-connect".to_string(),
+        };
+
+        Self::send_create_request(
+            format!("{}/admin/realms/{}/client-scopes", self.url.0, realm.0),
+            &admin_token,
+            request_body,
+        )
+        .await
+    }
+
+    pub async fn assign_client_scope(
+        &mut self,
+        admin_token: KeycloakAdminToken,
+        realm: KeycloakRealm,
+        client_id: KeycloakClientId,
+        scope_id: KeycloakClientScopeIdentifier,
+    ) -> Result<(), String> {
+        let response = Client::new()
+            .put(format!(
+                "{}/admin/realms/{}/clients/{}/default-client-scopes/{}",
+                self.url.0, realm.0, client_id.0, scope_id.0
+            ))
+            .header("content-type", "application/json")
+            .header("authorization", format!("Bearer {}", admin_token.0))
+            .send()
+            .await
+            .map_err(|e| e.to_string())?;
+
+        debug!("got response from keycloak: {:?}", response);
+
+        let body_bytes = response.bytes().await.map_err(|e| e.to_string())?.to_vec();
+        let body_str = String::from_utf8_lossy(&body_bytes).to_string();
+
+        debug!("response body from keycloak: {}", body_str);
+        Ok(())
+    }
+
     pub async fn get_realm_roles(
         &mut self,
         admin_token: KeycloakAdminToken,
@@ -310,5 +365,25 @@ impl KeycloakClient {
         debug!("response body from keycloak: {}", body_str);
 
         serde_json::from_slice(body_bytes).map_err(|e| e.to_string())
+    }
+
+    pub async fn create_client_scope_role_mapping(
+        &mut self,
+        admin_token: KeycloakAdminToken,
+        realm: KeycloakRealm,
+        scope_id: KeycloakClientScopeIdentifier,
+        role_name: KeycloakRoleName,
+    ) -> Result<String, String> {
+        let request_body = vec![CreateScopeRoleMappingRequest { name: role_name.0 }];
+
+        Self::send_create_request(
+            format!(
+                "{}/admin/realms/{}/client-scopes/{}/scope-mappings/realm",
+                self.url.0, realm.0, scope_id.0
+            ),
+            &admin_token,
+            request_body,
+        )
+        .await
     }
 }
