@@ -16,8 +16,9 @@
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
 use crate::keycloak::client::{
-    KeycloakClient, KeycloakClientId, KeycloakClientSecret, KeycloakPassword, KeycloakRealm,
-    KeycloakRoleName, KeycloakUrl, KeycloakUsername,
+    KeycloakClient, KeycloakClientId, KeycloakClientIdentifier, KeycloakClientSecret,
+    KeycloakPassword, KeycloakRealm, KeycloakRoleIdentifier, KeycloakRoleName, KeycloakUrl,
+    KeycloakUserIdentifier, KeycloakUsername,
 };
 use crate::pop_model::{PopKeycloak, PopScenarioFile, PopService};
 use log::{error, info};
@@ -78,26 +79,30 @@ pub async fn maybe_start_keycloak(
             //
             //
 
-            let _ = &keycloak_client
+            let realm_identifier = &keycloak_client
                 .create_realm(admin_token.clone(), KeycloakRealm(keycloak.realm.clone()))
                 .await
                 .inspect_err(|e| error!("{}", e));
 
+            let mut role_identifiers: Vec<(String, String)> = Vec::new();
+
             for role in keycloak.roles.clone().unwrap_or(Vec::new()) {
-                let _ = &keycloak_client
+                let role_identifier = &keycloak_client
                     .create_role(
                         admin_token.clone(),
                         KeycloakRealm(keycloak.realm.clone()),
                         KeycloakRoleName(role.to_string()),
                     )
                     .await
-                    .inspect_err(|e| error!("{}", e));
+                    .map_err(|e| e.to_string())?;
+
+                role_identifiers.push((role_identifier.clone(), role.clone()));
             }
 
             //
             //
 
-            let _ = keycloak_client
+            let client_identifier = keycloak_client
                 .create_client(
                     admin_token.clone(),
                     KeycloakRealm(keycloak.realm.clone()),
@@ -105,12 +110,12 @@ pub async fn maybe_start_keycloak(
                     KeycloakClientSecret(keycloak.client_secret.clone()),
                 )
                 .await
-                .inspect_err(|e| error!("{}", e));
+                .map_err(|e| e.to_string())?;
 
             //
             //
 
-            let _ = keycloak_client
+            let user_identifier = keycloak_client
                 .create_user(
                     admin_token.clone(),
                     KeycloakRealm(keycloak.realm.clone()),
@@ -118,12 +123,12 @@ pub async fn maybe_start_keycloak(
                     KeycloakPassword(keycloak.password.clone()),
                 )
                 .await
-                .inspect_err(|e| error!("{}", e));
+                .map_err(|e| e.to_string())?;
 
             //
             //
 
-            let _ = keycloak_client
+            let user_token = keycloak_client
                 .get_user_token(
                     KeycloakRealm(keycloak.realm.clone()),
                     KeycloakClientId(keycloak.client_id.clone()),
@@ -132,7 +137,21 @@ pub async fn maybe_start_keycloak(
                     KeycloakPassword(keycloak.password.clone()),
                 )
                 .await
-                .inspect_err(|e| error!("{}", e));
+                .map_err(|e| e.to_string())?;
+
+            for (role_identifier, role_name) in role_identifiers {
+                let mapping_identifier = keycloak_client
+                    .create_client_role_mapping(
+                        admin_token.clone(),
+                        KeycloakRealm(keycloak.realm.clone()),
+                        KeycloakUserIdentifier(user_identifier.clone()),
+                        KeycloakClientIdentifier(client_identifier.clone()),
+                        KeycloakRoleIdentifier(role_identifier),
+                        KeycloakRoleName(role_name.clone()),
+                    )
+                    .await
+                    .map_err(|e| e.to_string());
+            }
 
             Ok(Some(keycloak_container))
         }

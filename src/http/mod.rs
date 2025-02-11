@@ -70,7 +70,7 @@ pub async fn run_http_assertion(
 
             let j = serde_json::from_slice(body_bytes).map_err(|e| e.to_string());
             if let Ok(body) = &j {
-                eval_condition(body, json_body_patterns.unwrap_or_default()).unwrap()
+                eval_condition(body, json_body_patterns.unwrap_or_default())?
             }
         }
     }

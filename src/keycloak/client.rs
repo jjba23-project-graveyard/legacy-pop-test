@@ -15,13 +15,13 @@
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
-use super::model::{CreateRealmRequest, CreateRoleRequest};
+use super::model::{CreateClientRoleMappingRequest, CreateRealmRequest, CreateRoleRequest};
 use crate::keycloak::model::{
     CreateClientRequest, CreateUserRequest, CreateUserRequestCredentials, LoginResponse,
 };
 use log::debug;
 use reqwest::Client;
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt::Debug};
 
 #[derive(Debug, Clone)]
 pub struct KeycloakAdminToken(pub String);
@@ -51,16 +51,31 @@ pub struct KeycloakPassword(pub String);
 pub struct KeycloakRoleName(pub String);
 
 #[derive(Debug, Clone)]
+pub struct KeycloakUserIdentifier(pub String);
+
+#[derive(Debug, Clone)]
+pub struct KeycloakClientIdentifier(pub String);
+
+#[derive(Debug, Clone)]
+pub struct KeycloakRoleIdentifier(pub String);
+
+#[derive(Debug, Clone)]
 pub struct KeycloakClient {
     pub url: KeycloakUrl,
 }
 
 impl KeycloakClient {
-    pub async fn send_request(
+    pub async fn send_create_request<T>(
         url: String,
         admin_token: &KeycloakAdminToken,
-        body: impl serde::Serialize,
-    ) -> Result<(), String> {
+        body: T,
+    ) -> Result<String, String>
+    where
+        T: serde::Serialize,
+        T: Debug,
+    {
+        debug!("sending request body to keycloak: {:?}", body);
+
         let response = Client::new()
             .post(url)
             .header("content-type", "application/json")
@@ -70,27 +85,37 @@ impl KeycloakClient {
             .await
             .map_err(|e| e.to_string())?;
 
+        let hs = response.headers().clone();
+
+        let created_resource_id = hs
+            .get("location")
+            .map(|h| h.to_str().unwrap())
+            .unwrap_or("")
+            .split("/")
+            .last()
+            .unwrap_or("");
+
         debug!("got response from keycloak: {:?}", response);
 
         let body_bytes = response.bytes().await.map_err(|e| e.to_string())?.to_vec();
         let body_str = String::from_utf8_lossy(&body_bytes).to_string();
 
         debug!("response body from keycloak: {}", body_str);
-        Ok(())
+        Ok(created_resource_id.to_string())
     }
 
     pub async fn create_realm(
         &mut self,
         admin_token: KeycloakAdminToken,
         realm: KeycloakRealm,
-    ) -> Result<(), String> {
+    ) -> Result<String, String> {
         let request_body = CreateRealmRequest {
             enabled: true,
             realm: realm.0,
             verify_email: false,
         };
 
-        Self::send_request(
+        Self::send_create_request(
             format!("{}/admin/realms", self.url.0),
             &admin_token,
             request_body,
@@ -104,7 +129,7 @@ impl KeycloakClient {
         realm: KeycloakRealm,
         client_id: KeycloakClientId,
         client_secret: KeycloakClientSecret,
-    ) -> Result<(), String> {
+    ) -> Result<String, String> {
         let request_body = CreateClientRequest {
             protocol: "openid-connect".to_string(),
             client_id: client_id.0,
@@ -117,7 +142,7 @@ impl KeycloakClient {
             attributes: HashMap::new(),
         };
 
-        Self::send_request(
+        Self::send_create_request(
             format!("{}/admin/realms/{}/clients", self.url.0, realm.0),
             &admin_token,
             request_body,
@@ -159,7 +184,7 @@ impl KeycloakClient {
         realm: KeycloakRealm,
         username: KeycloakUsername,
         password: KeycloakPassword,
-    ) -> Result<(), String> {
+    ) -> Result<String, String> {
         let create_user_request = CreateUserRequest {
             username: username.0,
             enabled: true,
@@ -174,7 +199,7 @@ impl KeycloakClient {
             }],
         };
 
-        Self::send_request(
+        Self::send_create_request(
             format!("{}/admin/realms/{}/users", self.url.0, realm.0),
             &admin_token,
             &create_user_request,
@@ -222,15 +247,40 @@ impl KeycloakClient {
         admin_token: KeycloakAdminToken,
         realm: KeycloakRealm,
         role_name: KeycloakRoleName,
-    ) -> Result<(), String> {
+    ) -> Result<String, String> {
         let request_body = CreateRoleRequest {
             name: role_name.0,
             scope_param_required: false,
             composite: false,
         };
 
-        Self::send_request(
+        Self::send_create_request(
             format!("{}/admin/realms/{}/roles", self.url.0, realm.0),
+            &admin_token,
+            request_body,
+        )
+        .await
+    }
+
+    pub async fn create_client_role_mapping(
+        &mut self,
+        admin_token: KeycloakAdminToken,
+        realm: KeycloakRealm,
+        user_identifier: KeycloakUserIdentifier,
+        client_identifier: KeycloakClientIdentifier,
+        role_identifier: KeycloakRoleIdentifier,
+        role_name: KeycloakRoleName,
+    ) -> Result<String, String> {
+        let request_body = CreateClientRoleMappingRequest {
+            id: role_identifier.0,
+            name: role_name.0,
+        };
+
+        Self::send_create_request(
+            format!(
+                "{}/admin/realms/{}/users/{}/role-mappings/clients/{}",
+                self.url.0, realm.0, user_identifier.0, client_identifier.0
+            ),
             &admin_token,
             request_body,
         )
