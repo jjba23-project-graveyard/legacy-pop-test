@@ -1,4 +1,4 @@
-#+title: 🍹 pop-test
+#+title: 🎶 pop-test
 #+options: num:nil
 #+language: en
 #+email: jjbigorra@gmail.com
@@ -22,3 +22,6 @@ I strive to provide proper and extensive documentation on pop-test, in several f
 
 HTML, Markdown, texi, info also available at: [[file:docs/Manual/]]
 
+-----
+
+[[file:resources/img/wp10992149-modified.png]]
