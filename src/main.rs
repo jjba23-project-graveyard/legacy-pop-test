@@ -65,7 +65,7 @@ async fn main() -> Result<(), String> {
     info!("gathered files: {:?}", file_paths);
 
     async {
-        for f in file_paths {
+        for f in &file_paths {
             info!("scenario file read successfully to string");
 
             do_with_file_data(
@@ -80,6 +80,7 @@ async fn main() -> Result<(), String> {
 
             info!("✅ ran scenario successfully");
         }
+        info!("done running {} scenarios", &file_paths.len());
         Ok(())
     }
     .await
@@ -129,11 +130,12 @@ pub fn gather_file_paths(path: String) -> Vec<String> {
     let p = Path::new(&path);
 
     if p.is_dir() {
-        fs::read_dir(path)
+        fs::read_dir(p)
             .unwrap()
-            .flat_map(|fp| gather_file_paths(fp.unwrap().path().to_string_lossy().to_string()))
+            .filter_map(Result::ok)
+            .flat_map(|entry| gather_file_paths(entry.path().to_string_lossy().to_string()))
             .collect()
     } else {
-        vec![p.to_string_lossy().to_string()]
+        vec![path.to_string()]
     }
 }
