@@ -189,26 +189,26 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
     }
 
     if let Some((keycloak_out, keycloak_err)) = keycloak_logs {
-        let _ = keycloak_out.await;
-        let _ = keycloak_err.await;
+        keycloak_out.abort();
+        keycloak_err.abort();
     }
     maybe_terminate_container(maybe_keycloak_container).await;
 
     if let Some((kafka_out, kafka_err)) = kafka_logs {
-        let _ = kafka_out.await;
-        let _ = kafka_err.await;
+        kafka_out.abort();
+        kafka_err.abort();
     }
     maybe_terminate_container(maybe_kafka_container).await;
 
     if let Some((postgres_out, postgres_err)) = postgres_logs {
-        let _ = postgres_out.await;
-        let _ = postgres_err.await;
+        postgres_out.abort();
+        postgres_err.abort();
     }
     maybe_terminate_container(maybe_postgres_container).await;
 
     if let Some((pop_server_out, pop_server_err)) = pop_server_logs {
-        let _ = pop_server_out.await;
-        let _ = pop_server_err.await;
+        pop_server_out.abort();
+        pop_server_err.abort();
     }
     maybe_terminate_container(maybe_pop_server_container).await;
 
