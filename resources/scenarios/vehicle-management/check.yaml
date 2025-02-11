@@ -66,6 +66,9 @@ pop_keycloak:
     - "FLEXIOT-READONLY"
     - "FLEXIOT_UPDATE"
     - "FLEXIOT-ADMIN"
+  scopes:
+    - "urn:vandebron:batterypack:read"
+    - "urn:vandebron:batterypack:write"
 
 pop_postgres:
   enabled: true
