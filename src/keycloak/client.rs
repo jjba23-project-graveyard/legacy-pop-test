@@ -18,6 +18,7 @@
 use super::model::{CreateClientRoleMappingRequest, CreateRealmRequest, CreateRoleRequest};
 use crate::keycloak::model::{
     CreateClientRequest, CreateUserRequest, CreateUserRequestCredentials, LoginResponse,
+    RoleRepresentation,
 };
 use log::debug;
 use reqwest::Client;
@@ -252,6 +253,7 @@ impl KeycloakClient {
             name: role_name.0,
             scope_param_required: false,
             composite: false,
+            client_role: false,
         };
 
         Self::send_create_request(
@@ -262,28 +264,45 @@ impl KeycloakClient {
         .await
     }
 
-    pub async fn create_client_role_mapping(
+    pub async fn create_role_mapping(
         &mut self,
         admin_token: KeycloakAdminToken,
         realm: KeycloakRealm,
         user_identifier: KeycloakUserIdentifier,
-        client_identifier: KeycloakClientIdentifier,
-        role_identifier: KeycloakRoleIdentifier,
         role_name: KeycloakRoleName,
     ) -> Result<String, String> {
-        let request_body = CreateClientRoleMappingRequest {
-            id: role_identifier.0,
-            name: role_name.0,
-        };
+        let request_body = vec![CreateClientRoleMappingRequest { name: role_name.0 }];
 
         Self::send_create_request(
             format!(
-                "{}/admin/realms/{}/users/{}/role-mappings/clients/{}",
-                self.url.0, realm.0, user_identifier.0, client_identifier.0
+                "{}/admin/realms/{}/users/{}/role-mappings/realm",
+                self.url.0, realm.0, user_identifier.0
             ),
             &admin_token,
             request_body,
         )
         .await
+    }
+
+    pub async fn get_roles(
+        &mut self,
+        realm: KeycloakRealm,
+        client_identifier: KeycloakClientIdentifier,
+    ) -> Result<(), String> {
+        let response = reqwest::Client::new()
+            .get(format!(
+                "{}/admin/realms/{}/clients/{}/roles",
+                self.url.0, realm.0, client_identifier.0
+            ))
+            .send()
+            .await
+            .map_err(|e| e.to_string())?
+            .json::<Vec<RoleRepresentation>>()
+            .await
+            .map_err(|e| e.to_string())?;
+
+        debug!("got response from keycloak: {:?}", response);
+
+        Ok(())
     }
 }
