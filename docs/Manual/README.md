@@ -1,20 +1,25 @@
 
 # Table of Contents
 
-1.  [Why pop-test?](#org9654215)
-2.  [Motivation](#org1adbca3)
-3.  [The Scenario DSL (Domain Specific Language)](#org260aade)
-    1.  [pop services](#org7129168)
-        1.  [service health check](#org284e2c4)
-        2.  [service postgres](#org365b13d)
-        3.  [service kafka](#orga92d7e4)
-    2.  [pop actions](#orge16c0e6)
-    3.  [a kafka produce action](#orgd55cd01)
-    4.  [an http assertion](#org6a13315)
-    5.  [Condition DSL](#org1dc3677)
-    6.  [pop postgres](#orgba95e92)
-    7.  [pop kafka](#org4bd5d08)
-4.  [Example tests, using the DSL](#org3d8cc7c)
+1.  [How to run it](#org3b7f51d)
+2.  [Why pop-test?](#org45ccefb)
+3.  [Motivation](#orgc5c5fc6)
+4.  [The Scenario DSL (Domain Specific Language)](#org3fc6f1d)
+    1.  [pop services](#org85b2a84)
+        1.  [service health check](#org86bda07)
+        2.  [service postgres](#orgd27728f)
+        3.  [service kafka](#org95baa58)
+        4.  [service keycloak](#orgba3e1a3)
+        5.  [service pop<sub>server</sub>](#orgaf8c7d4)
+    2.  [pop actions](#org2557142)
+        1.  [a kafka produce action](#orgc993e4b)
+        2.  [an http assertion](#org7fb3059)
+    3.  [Condition DSL](#org106e714)
+    4.  [pop postgres](#org17d4e76)
+    5.  [pop kafka](#org1db4433)
+    6.  [pop-server](#org712e51b)
+    7.  [pop keycloak](#org6ae79d4)
+5.  [Example tests, using the DSL](#orgb354110)
 
 In Dutch 🇳🇱, *pop* means puppet or doll. But pop-test is not about dolls! It’s a tool that helps test computer programs in an easy and future-proof manner that improves reliability and engineering freedom.
 
@@ -31,7 +36,32 @@ pop-tests as we affectionately call them, can range from small scope integration
 ---
 
 
-<a id="org9654215"></a>
+<a id="org3b7f51d"></a>
+
+# How to run it
+
+It is recommended to run with TESTCONTAINERS<sub>COMMAND</sub>=keep , since pop-test will do the resource management for you, and doesn't need to rely on Ryuk or on testcontainers-rs to do the cleanup.
+
+See the [Makefile](file:///home/joe/Ontwikkeling/Persoonlijk/pop-test/Makefile) for more examples of how to run it.
+
+When installed and available as binary, simply run:
+
+    TESTCONTAINERS_COMMAND=keep pop-test -p ./path/to/file.yaml
+
+The tool supports also to pass a directory to recursively gather YAML, TOML and JSON files from:
+
+    pop-test --path ./path/to/directory
+
+The tool supports also to pass options in long format:
+
+    pop-test --path ./path/to/file.yaml
+
+This is how I usually run in development mode:
+
+    TESTCONTAINERS_COMMAND=keep RUST_LOG=debug nix develop -c cargo run -- -p ./resources/scenarios
+
+
+<a id="org45ccefb"></a>
 
 # Why pop-test?
 
@@ -43,7 +73,7 @@ pop-tests as we affectionately call them, can range from small scope integration
 -   Fast and reliable – Built with Rust, a programming language known for speed and safety.
 
 
-<a id="org1adbca3"></a>
+<a id="orgc5c5fc6"></a>
 
 # Motivation
 
@@ -70,20 +100,22 @@ In short, pop-tests make engineers happier, business people more certain of what
 ---
 
 
-<a id="org260aade"></a>
+<a id="org3fc6f1d"></a>
 
 # The Scenario DSL (Domain Specific Language)
 
 In order to provide an expressive and powerful way to describe test scenarios, a lot of care has gone into creating a good domain-specific language, which remains flexible but concise.
 
-Here follows an explanation of every individual field and parameter possible, including default or optional ones, as well as some recommendations. Unless otherwise stated, the YAML representation of the Scenario DSL will be used.
+Here follows an explanation of every individual field and parameter possible, including default or optional ones, as well as some recommendations.
 
-`pop_test` represents the top node under which all other nodes live.
+Unless otherwise stated, the YAML representation of the Scenario DSL will be used. This is the author's preferred file format, as it can be more readable for complex testing scenarios.
+
+The tool supports YAML, TOML and JSON file formats seamlessly.
 
 ---
 
 
-<a id="org7129168"></a>
+<a id="org85b2a84"></a>
 
 ## pop services
 
@@ -104,7 +136,7 @@ A service is defined by:
 `env_vars` (optional, map of string to string) – A set of environment variables to be defined for the service.  
 
 
-<a id="org284e2c4"></a>
+<a id="org86bda07"></a>
 
 ### service health check
 
@@ -123,7 +155,7 @@ HTTP health check:
 `patience_seconds` (required, integer) – The maximum time allowed for the service to become healthy. If the service is healthy before this deadline, the scenario setup continues without waiting.
 
 
-<a id="org365b13d"></a>
+<a id="orgd27728f"></a>
 
 ### service postgres
 
@@ -142,7 +174,7 @@ Defines how PostgreSQL is used in the service. Field is `postgres`, an optional 
 `pass_var` (optional, string) - Container DB password will be injected on services, via environment variable, by default `POSTGRESQL_PASSWORD`
 
 
-<a id="orga92d7e4"></a>
+<a id="org95baa58"></a>
 
 ### service kafka
 
@@ -152,10 +184,30 @@ Defines how Kafka is used in the service. Field is `kafka`, an optional object.
 
 `bootstrap_server_var` (optional, string) - Container HTTP connection string for Kafka will be injected on services, via environment variable, by default `KAFKA_BOOTSTRAP_SERVER`
 
+
+<a id="orgba3e1a3"></a>
+
+### service keycloak
+
+`enabled` (optional, boolean) - Whether to inject environment variables with Kafka details
+
+`url_var` (optional, string) - Container HTTP connection string for Keycloak will be injected on services, via environment variable, by default `KEYCLOAK_AUTH_SERVER_URL`
+
+`realm_var` (optional, string) - Container realm name string for Keycloak will be injected on services, via environment variable, by default `KEYCLOAK_REALM`
+
+
+<a id="orgaf8c7d4"></a>
+
+### service pop<sub>server</sub>
+
+`enabled` (optional, boolean) - Whether to inject environment variables with Kafka details
+
+`url_vars` (optional, list of strings) - List of environment variable names that will be injected to the service, with pop<sub>server</sub>'s URL
+
 ---
 
 
-<a id="orge16c0e6"></a>
+<a id="org2557142"></a>
 
 ## pop actions
 
@@ -166,24 +218,24 @@ there are many types of pop action, see the following sections.
 ---
 
 
-<a id="orgd55cd01"></a>
+<a id="orgc993e4b"></a>
 
-## a kafka produce action
+### a kafka produce action
 
 A kafka produce action is defined by:
 
 `message_file_path` (optional, string)
 
-`kafka-topic` (required, string)
+`kafka_topic` (required, string)
 
 ---
 
 
-<a id="org6a13315"></a>
+<a id="org7fb3059"></a>
 
-## an http assertion
+### an http assertion
 
-`expected_code` (optional, u16 number) - expected HTTP status code
+`expected_code` (optional, u16 number) - expected HTTP status code, defaults to 200
 
 `assert_url` (required, string) – The endpoint path to be tested within the service. This should be a relative path, such as `/api/v1/forecast`, which will be appended to the base<sub>url</sub> of the service.
 
@@ -200,7 +252,7 @@ Each JSON body pattern entry includes:
 ---
 
 
-<a id="org1dc3677"></a>
+<a id="org106e714"></a>
 
 ## Condition DSL
 
@@ -221,7 +273,7 @@ Supported conditions include:
 ---
 
 
-<a id="orgba95e92"></a>
+<a id="org17d4e76"></a>
 
 ## pop postgres
 
@@ -236,7 +288,7 @@ You can use PostgreSQL in pop-tests easily.
 ---
 
 
-<a id="org4bd5d08"></a>
+<a id="org1db4433"></a>
 
 ## pop kafka
 
@@ -251,7 +303,61 @@ You can use Kafka in pop-tests easily.
 ---
 
 
-<a id="org3d8cc7c"></a>
+<a id="org712e51b"></a>
+
+## pop-server
+
+You can use `pop_server` in pop-tests easily:
+
+`enabled` (optional, boolean) - Whether to enable Kafka in a container or not
+
+`image_name` (optional, string) - Container image for Kafka, by default `jjba23/pop-server`
+
+`image_tag` (optional, string) - Container image tag for Kafka, by default `0.2.3`
+
+You can then  have it prepared with certain behaviors (under `behaviors` ):
+
+`path` (required, string) - what URL path should be called to trigger behavior
+
+`method` (required, string) - what HTTP method should be used to trigger behavior
+
+`status` (required, string) - what HTTP status should be returned
+
+`content_type` (required, string) - what content type should be returned as HTTP header
+
+`body_file` (required, string) - path to the file to load data from, that will be returned as HTTP body
+
+
+<a id="org6ae79d4"></a>
+
+## pop keycloak
+
+You can use Keycloak in pop-tests easily and have it auto-setup.
+
+`enabled` (optional, boolean) - Whether to enable Kafka in a container or not
+
+`image_name` (optional, string) - Container image for Kafka, by default `keycloak/keycloak`
+
+`image_tag` (optional, string) - Container image tag for Keycloak, by default `26.1`
+
+`realm` (required, string) – Name of the Keycloak realm to be created.
+
+`client_id` (required, string) – OAuth ID of the Keycloak client that will be created for service authentication.
+
+`client_secret` (optional, string) – OAuth secret  of the Keycloak client that will be created for service authentication.
+
+`email`  (optional, string) – Email of the Keycloak user that will be created for service authentication.
+
+`username` (required, string) - Username of the Keycloak client that will be created for service authentication.
+
+`password` (required, string) - Password  of the Keycloak client that will be created for service authentication.
+
+`roles` (optional, list of strings) - Names of roles to be created realm-wide and associated to the user
+
+---
+
+
+<a id="orgb354110"></a>
 
 # Example tests, using the DSL
 
@@ -261,27 +367,29 @@ Here follows also a trivial example of pop-tests.
 
 In this example we spin up a REST API written in Scala, with SBT, and poll its `/health` endpoint for 90 seconds or until healthy. Then we perform some checks on the response of certain HTTP endpoints. These checks are performed using `jql` and this allows us to check deeply nested attributes of the JSON response.
 
-    pop_test:
-      pop_services:
-        - id: "green-energy-mix"
-          dir: "$HOME/Ontwikkeling/Werk"
-          base_url: "http://localhost:50000"
-          start_cmd_args:
-            - 'sbt "greenEnergyMix/run"'
-          env_vars:
-            SOME_TOKEN: "0027809ce9"
-          health_check:
-            path: "/health"
-            patience_seconds: 90
+Reminder: the tool supports YAML, TOML and JSON, but YAML is as of now the preferred format.
+
+    pop_services:
+      - id: "green-energy-mix"
+        dir: "$HOME/Ontwikkeling/Werk"
+        base_url: "http://localhost:50000"
+        start_cmd_args:
+          - 'sbt "greenEnergyMix/run"'
+        env_vars:
+          SOME_TOKEN: "0027809ce9"
+        health_check:
+          path: "/health"
+          patience_seconds: 120
     
-      pop_actions:
-        - assert_url: "/api/v1/forecast"
-          service_id: "green-energy-mix"
-          json_body_patterns:
-            - pattern: '"meta""forecastDate"'
-              condition: '!= ""'
-            - pattern: '"data"[0]"load"'
-              condition: "> 0"
-            - pattern: '"data"[0]"solar"'
-              condition: ">= 0"
+    pop_actions:
+      - name: "Check that the forecast endpoint returns a 200 with a correct data, with load and solar"
+        assert_url: "/api/v1/forecast"
+        service_id: "green-energy-mix"
+        json_body_patterns:
+          - pattern: '"meta""forecastDate"'
+            condition: '!= ""'
+          - pattern: '"data"[0]"load"'
+            condition: "> 0"
+          - pattern: '"data"[0]"solar"'
+            condition: ">= 0"
 

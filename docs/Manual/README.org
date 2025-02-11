@@ -174,17 +174,17 @@ there are many types of pop action, see the following sections.
 
 -----
 
-** a kafka produce action 
+*** a kafka produce action 
 A kafka produce action is defined by:
 
 ~message_file_path~ (optional, string)
 
-~kafka-topic~ (required, string)
+~kafka_topic~ (required, string)
 
 
 -----
 
-** an http assertion
+*** an http assertion
 
 ~expected_code~ (optional, u16 number) - expected HTTP status code, defaults to 200
 

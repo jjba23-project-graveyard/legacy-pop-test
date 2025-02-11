@@ -9,7 +9,7 @@
 @finalout
 @titlepage
 @title pop-test manual
-@author Josep Bigorra
+@author Music Player Daemon (MPD) user
 @end titlepage
 
 @contents
@@ -33,6 +33,7 @@ pop-tests as we affectionately call them, can range from small scope integration
 @end ifnottex
 
 @menu
+* How to run it::
 * Why pop-test?::
 * Motivation::
 * The Scenario DSL (Domain Specific Language)::
@@ -45,20 +46,54 @@ The Scenario DSL (Domain Specific Language)
 
 * pop services::
 * pop actions::
-* a kafka produce action::
-* an http assertion::
 * Condition DSL::
 * pop postgres::
 * pop kafka::
+* pop-server::
+* pop keycloak::
 
 pop services
 
 * service health check::
 * service postgres::
 * service kafka::
+* service keycloak::
+* service pop@math{_server}::
+
+pop actions
+
+* a kafka produce action::
+* an http assertion::
 
 @end detailmenu
 @end menu
+
+@node How to run it
+@chapter How to run it
+
+It is recommended to run with TESTCONTAINERS@math{_COMMAND}=keep , since pop-test will do the resource management for you, and doesn't need to rely on Ryuk or on testcontainers-rs to do the cleanup.
+
+See the @uref{file:///home/joe/Ontwikkeling/Persoonlijk/pop-test/Makefile, Makefile} for more examples of how to run it.
+
+When installed and available as binary, simply run:
+@example
+TESTCONTAINERS_COMMAND=keep pop-test -p ./path/to/file.yaml
+@end example
+
+The tool supports also to pass a directory to recursively gather YAML, TOML and JSON files from:
+@example
+pop-test --path ./path/to/directory
+@end example
+
+The tool supports also to pass options in long format:
+@example
+pop-test --path ./path/to/file.yaml
+@end example
+
+This is how I usually run in development mode:
+@example
+TESTCONTAINERS_COMMAND=keep RUST_LOG=debug nix develop -c cargo run -- -p ./resources/scenarios
+@end example
 
 @node Why pop-test?
 @chapter Why pop-test?
@@ -106,18 +141,20 @@ In short, pop-tests make engineers happier, business people more certain of what
 
 In order to provide an expressive and powerful way to describe test scenarios, a lot of care has gone into creating a good domain-specific language, which remains flexible but concise.
 
-Here follows an explanation of every individual field and parameter possible, including default or optional ones, as well as some recommendations. Unless otherwise stated, the YAML representation of the Scenario DSL will be used.
+Here follows an explanation of every individual field and parameter possible, including default or optional ones, as well as some recommendations.
 
-@code{pop_test} represents the top node under which all other nodes live.
+Unless otherwise stated, the YAML representation of the Scenario DSL will be used. This is the author's preferred file format, as it can be more readable for complex testing scenarios.
+
+The tool supports YAML, TOML and JSON file formats seamlessly.
 
 @menu
 * pop services::
 * pop actions::
-* a kafka produce action::
-* an http assertion::
 * Condition DSL::
 * pop postgres::
 * pop kafka::
+* pop-server::
+* pop keycloak::
 @end menu
 
 @node pop services
@@ -143,6 +180,8 @@ A service is defined by:
 * service health check::
 * service postgres::
 * service kafka::
+* service keycloak::
+* service pop@math{_server}::
 @end menu
 
 @node service health check
@@ -188,6 +227,22 @@ Defines how Kafka is used in the service. Field is @code{kafka}, an optional obj
 
 @code{bootstrap_server_var} (optional, string) - Container HTTP connection string for Kafka will be injected on services, via environment variable, by default @code{KAFKA_BOOTSTRAP_SERVER}
 
+@node service keycloak
+@subsection service keycloak
+
+@code{enabled} (optional, boolean) - Whether to inject environment variables with Kafka details
+
+@code{url_var} (optional, string) - Container HTTP connection string for Keycloak will be injected on services, via environment variable, by default @code{KEYCLOAK_AUTH_SERVER_URL}
+
+@code{realm_var} (optional, string) - Container realm name string for Keycloak will be injected on services, via environment variable, by default @code{KEYCLOAK_REALM}
+
+@node service pop@math{_server}
+@subsection service pop@math{_server}
+
+@code{enabled} (optional, boolean) - Whether to inject environment variables with Kafka details
+
+@code{url_vars} (optional, list of strings) - List of environment variable names that will be injected to the service, with pop@math{_server}'s URL
+
 @node pop actions
 @section pop actions
 
@@ -195,19 +250,24 @@ Defines how Kafka is used in the service. Field is @code{kafka}, an optional obj
 
 there are many types of pop action, see the following sections.
 
+@menu
+* a kafka produce action::
+* an http assertion::
+@end menu
+
 @node a kafka produce action
-@section a kafka produce action
+@subsection a kafka produce action
 
 A kafka produce action is defined by:
 
 @code{message_file_path} (optional, string)
 
-@code{kafka-topic} (required, string)
+@code{kafka_topic} (required, string)
 
 @node an http assertion
-@section an http assertion
+@subsection an http assertion
 
-@code{expected_code} (optional, u16 number) - expected HTTP status code
+@code{expected_code} (optional, u16 number) - expected HTTP status code, defaults to 200
 
 @code{assert_url} (required, string) – The endpoint path to be tested within the service. This should be a relative path, such as @code{/api/v1/forecast}, which will be appended to the base@math{_url} of the service.
 
@@ -260,6 +320,55 @@ You can use Kafka in pop-tests easily.
 
 @code{image_tag} (optional, string) - Container image tag for Kafka, by default @code{6.1.1}
 
+@node pop-server
+@section pop-server
+
+You can use @code{pop_server} in pop-tests easily:
+
+@code{enabled} (optional, boolean) - Whether to enable Kafka in a container or not
+
+@code{image_name} (optional, string) - Container image for Kafka, by default @code{jjba23/pop-server}
+
+@code{image_tag} (optional, string) - Container image tag for Kafka, by default @code{0.2.3}
+
+
+You can then  have it prepared with certain behaviors (under @code{behaviors} ):
+
+@code{path} (required, string) - what URL path should be called to trigger behavior
+
+@code{method} (required, string) - what HTTP method should be used to trigger behavior
+
+@code{status} (required, string) - what HTTP status should be returned
+
+@code{content_type} (required, string) - what content type should be returned as HTTP header
+
+@code{body_file} (required, string) - path to the file to load data from, that will be returned as HTTP body
+
+@node pop keycloak
+@section pop keycloak
+
+You can use Keycloak in pop-tests easily and have it auto-setup.
+
+@code{enabled} (optional, boolean) - Whether to enable Kafka in a container or not
+
+@code{image_name} (optional, string) - Container image for Kafka, by default @code{keycloak/keycloak}
+
+@code{image_tag} (optional, string) - Container image tag for Keycloak, by default @code{26.1}
+
+@code{realm} (required, string) – Name of the Keycloak realm to be created.
+
+@code{client_id} (required, string) – OAuth ID of the Keycloak client that will be created for service authentication.
+
+@code{client_secret} (optional, string) – OAuth secret  of the Keycloak client that will be created for service authentication.
+
+@code{email}  (optional, string) – Email of the Keycloak user that will be created for service authentication.
+
+@code{username} (required, string) - Username of the Keycloak client that will be created for service authentication.
+
+@code{password} (required, string) - Password  of the Keycloak client that will be created for service authentication.
+
+@code{roles} (optional, list of strings) - Names of roles to be created realm-wide and associated to the user
+
 @node Example tests using the DSL
 @chapter Example tests, using the DSL
 
@@ -269,30 +378,32 @@ Here follows also a trivial example of pop-tests.
 
 In this example we spin up a REST API written in Scala, with SBT, and poll its @code{/health} endpoint for 90 seconds or until healthy. Then we perform some checks on the response of certain HTTP endpoints. These checks are performed using @code{jql} and this allows us to check deeply nested attributes of the JSON response.
 
-@example
-pop_test:
-  pop_services:
-    - id: "green-energy-mix"
-      dir: "$HOME/Ontwikkeling/Werk"
-      base_url: "http://localhost:50000"
-      start_cmd_args:
-        - 'sbt "greenEnergyMix/run"'
-      env_vars:
-        SOME_TOKEN: "0027809ce9"
-      health_check:
-        path: "/health"
-        patience_seconds: 90
+Reminder: the tool supports YAML, TOML and JSON, but YAML is as of now the preferred format.
 
-  pop_actions:
-    - assert_url: "/api/v1/forecast"
-      service_id: "green-energy-mix"
-      json_body_patterns:
-        - pattern: '"meta""forecastDate"'
-          condition: '!= ""'
-        - pattern: '"data"[0]"load"'
-          condition: "> 0"
-        - pattern: '"data"[0]"solar"'
-          condition: ">= 0"
+@example
+pop_services:
+  - id: "green-energy-mix"
+    dir: "$HOME/Ontwikkeling/Werk"
+    base_url: "http://localhost:50000"
+    start_cmd_args:
+      - 'sbt "greenEnergyMix/run"'
+    env_vars:
+      SOME_TOKEN: "0027809ce9"
+    health_check:
+      path: "/health"
+      patience_seconds: 120
+
+pop_actions:
+  - name: "Check that the forecast endpoint returns a 200 with a correct data, with load and solar"
+    assert_url: "/api/v1/forecast"
+    service_id: "green-energy-mix"
+    json_body_patterns:
+      - pattern: '"meta""forecastDate"'
+        condition: '!= ""'
+      - pattern: '"data"[0]"load"'
+        condition: "> 0"
+      - pattern: '"data"[0]"solar"'
+        condition: ">= 0"
 
 @end example
 

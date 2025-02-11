@@ -3,11 +3,11 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2025-02-09 zo 00:21 -->
+<!-- 2025-02-11 di 16:38 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>pop-test manual</title>
-<meta name="author" content="Josep Bigorra" />
+<meta name="author" content="Music Player Daemon (MPD) user" />
 <meta name="generator" content="Org Mode" />
 <style>
   #content { max-width: 60em; margin: auto; }
@@ -201,26 +201,34 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orgaed25b0">1. Why pop-test?</a></li>
-<li><a href="#org8c4b4ab">2. Motivation</a></li>
-<li><a href="#org768f160">3. The Scenario DSL (Domain Specific Language)</a>
+<li><a href="#org12701b2">1. How to run it</a></li>
+<li><a href="#org4987a48">2. Why pop-test?</a></li>
+<li><a href="#org504f327">3. Motivation</a></li>
+<li><a href="#org12f6e1b">4. The Scenario DSL (Domain Specific Language)</a>
 <ul>
-<li><a href="#org73bb262">3.1. pop services</a>
+<li><a href="#org4cf6577">4.1. pop services</a>
 <ul>
-<li><a href="#org0bb8ba5">3.1.1. service health check</a></li>
-<li><a href="#orgf99062a">3.1.2. service postgres</a></li>
-<li><a href="#org260d7aa">3.1.3. service kafka</a></li>
+<li><a href="#org29d13d1">4.1.1. service health check</a></li>
+<li><a href="#orgd91af62">4.1.2. service postgres</a></li>
+<li><a href="#org327f2cb">4.1.3. service kafka</a></li>
+<li><a href="#org64664df">4.1.4. service keycloak</a></li>
+<li><a href="#org956c129">4.1.5. service pop<sub>server</sub></a></li>
 </ul>
 </li>
-<li><a href="#org70cbc0a">3.2. pop actions</a></li>
-<li><a href="#orgd8cf93b">3.3. a kafka produce action</a></li>
-<li><a href="#orge97c3b4">3.4. an http assertion</a></li>
-<li><a href="#org3407d15">3.5. Condition DSL</a></li>
-<li><a href="#org063146b">3.6. pop postgres</a></li>
-<li><a href="#org0735384">3.7. pop kafka</a></li>
+<li><a href="#org96a7eee">4.2. pop actions</a>
+<ul>
+<li><a href="#org7e8f603">4.2.1. a kafka produce action</a></li>
+<li><a href="#orgf9b5239">4.2.2. an http assertion</a></li>
 </ul>
 </li>
-<li><a href="#org19123f4">4. Example tests, using the DSL</a></li>
+<li><a href="#org9daa9ff">4.3. Condition DSL</a></li>
+<li><a href="#org6b01ef6">4.4. pop postgres</a></li>
+<li><a href="#orgb10eff8">4.5. pop kafka</a></li>
+<li><a href="#org30b0f83">4.6. pop-server</a></li>
+<li><a href="#org1591e0c">4.7. pop keycloak</a></li>
+</ul>
+</li>
+<li><a href="#org739c4d8">5. Example tests, using the DSL</a></li>
 </ul>
 </div>
 </div>
@@ -245,7 +253,7 @@ pop-tests as we affectionately call them, can range from small scope integration
 </p>
 
 
-<div id="org0f685bf" class="figure">
+<div id="orgad6bc98" class="figure">
 <p><img src="../../resources/img/wp10992149.jpg" alt="wp10992149.jpg" />
 </p>
 </div>
@@ -253,9 +261,51 @@ pop-tests as we affectionately call them, can range from small scope integration
 <hr />
 
 
-<div id="outline-container-orgaed25b0" class="outline-2">
-<h2 id="orgaed25b0"><span class="section-number-2">1.</span> Why pop-test?</h2>
+<div id="outline-container-org12701b2" class="outline-2">
+<h2 id="org12701b2"><span class="section-number-2">1.</span> How to run it</h2>
 <div class="outline-text-2" id="text-1">
+<p>
+It is recommended to run with TESTCONTAINERS<sub>COMMAND</sub>=keep , since pop-test will do the resource management for you, and doesn't need to rely on Ryuk or on testcontainers-rs to do the cleanup.
+</p>
+
+<p>
+See the <a href="file:///home/joe/Ontwikkeling/Persoonlijk/pop-test/Makefile">Makefile</a> for more examples of how to run it.
+</p>
+
+<p>
+When installed and available as binary, simply run:
+</p>
+<pre class="example" id="org436b377">
+TESTCONTAINERS_COMMAND=keep pop-test -p ./path/to/file.yaml
+</pre>
+
+<p>
+The tool supports also to pass a directory to recursively gather YAML, TOML and JSON files from:
+</p>
+<pre class="example" id="org049a482">
+pop-test --path ./path/to/directory
+</pre>
+
+<p>
+The tool supports also to pass options in long format:
+</p>
+<pre class="example" id="org7e0d2c3">
+pop-test --path ./path/to/file.yaml
+</pre>
+
+<p>
+This is how I usually run in development mode:
+</p>
+<pre class="example" id="orgf6ce5d3">
+TESTCONTAINERS_COMMAND=keep RUST_LOG=debug nix develop -c cargo run -- -p ./resources/scenarios
+</pre>
+</div>
+</div>
+
+
+<div id="outline-container-org4987a48" class="outline-2">
+<h2 id="org4987a48"><span class="section-number-2">2.</span> Why pop-test?</h2>
+<div class="outline-text-2" id="text-2">
 <ul class="org-ul">
 <li>Catches mistakes early – Helps find problems before real users do.</li>
 <li>Test coverage with a real meaning - test your systems from head to toe</li>
@@ -267,9 +317,9 @@ pop-tests as we affectionately call them, can range from small scope integration
 </div>
 </div>
 
-<div id="outline-container-org8c4b4ab" class="outline-2">
-<h2 id="org8c4b4ab"><span class="section-number-2">2.</span> Motivation</h2>
-<div class="outline-text-2" id="text-2">
+<div id="outline-container-org504f327" class="outline-2">
+<h2 id="org504f327"><span class="section-number-2">3.</span> Motivation</h2>
+<div class="outline-text-2" id="text-3">
 <p>
 Imagine you're building a toy robot, but you don't need to understand all the small parts inside the robot to know if it works. You just need to press a button and see if it performs the task correctly.
 </p>
@@ -314,27 +364,32 @@ In short, pop-tests make engineers happier, business people more certain of what
 </div>
 </div>
 
-<div id="outline-container-org768f160" class="outline-2">
-<h2 id="org768f160"><span class="section-number-2">3.</span> The Scenario DSL (Domain Specific Language)</h2>
-<div class="outline-text-2" id="text-3">
+<div id="outline-container-org12f6e1b" class="outline-2">
+<h2 id="org12f6e1b"><span class="section-number-2">4.</span> The Scenario DSL (Domain Specific Language)</h2>
+<div class="outline-text-2" id="text-4">
 <p>
 In order to provide an expressive and powerful way to describe test scenarios, a lot of care has gone into creating a good domain-specific language, which remains flexible but concise.
 </p>
 
 <p>
-Here follows an explanation of every individual field and parameter possible, including default or optional ones, as well as some recommendations. Unless otherwise stated, the YAML representation of the Scenario DSL will be used.
+Here follows an explanation of every individual field and parameter possible, including default or optional ones, as well as some recommendations.
 </p>
 
 <p>
-<code>pop_test</code> represents the top node under which all other nodes live.
+Unless otherwise stated, the YAML representation of the Scenario DSL will be used. This is the author's preferred file format, as it can be more readable for complex testing scenarios.
 </p>
+
+<p>
+The tool supports YAML, TOML and JSON file formats seamlessly.
+</p>
+
 
 <hr />
 </div>
 
-<div id="outline-container-org73bb262" class="outline-3">
-<h3 id="org73bb262"><span class="section-number-3">3.1.</span> pop services</h3>
-<div class="outline-text-3" id="text-3-1">
+<div id="outline-container-org4cf6577" class="outline-3">
+<h3 id="org4cf6577"><span class="section-number-3">4.1.</span> pop services</h3>
+<div class="outline-text-3" id="text-4-1">
 <p>
 <code>pop_services</code> is a list of services to be started for the scenario.
 </p>
@@ -368,9 +423,9 @@ A service is defined by:
 </p>
 </div>
 
-<div id="outline-container-org0bb8ba5" class="outline-4">
-<h4 id="org0bb8ba5"><span class="section-number-4">3.1.1.</span> service health check</h4>
-<div class="outline-text-4" id="text-3-1-1">
+<div id="outline-container-org29d13d1" class="outline-4">
+<h4 id="org29d13d1"><span class="section-number-4">4.1.1.</span> service health check</h4>
+<div class="outline-text-4" id="text-4-1-1">
 <p>
 Defines how pop-test determines whether the service is healthy. Field is <code>health_check</code>, a required object.
 </p>
@@ -401,9 +456,9 @@ HTTP health check:
 </div>
 </div>
 
-<div id="outline-container-orgf99062a" class="outline-4">
-<h4 id="orgf99062a"><span class="section-number-4">3.1.2.</span> service postgres</h4>
-<div class="outline-text-4" id="text-3-1-2">
+<div id="outline-container-orgd91af62" class="outline-4">
+<h4 id="orgd91af62"><span class="section-number-4">4.1.2.</span> service postgres</h4>
+<div class="outline-text-4" id="text-4-1-2">
 <p>
 Defines how PostgreSQL is used in the service. Field is <code>postgres</code>, an optional object.
 </p>
@@ -434,9 +489,9 @@ Defines how PostgreSQL is used in the service. Field is <code>postgres</code>, a
 </div>
 </div>
 
-<div id="outline-container-org260d7aa" class="outline-4">
-<h4 id="org260d7aa"><span class="section-number-4">3.1.3.</span> service kafka</h4>
-<div class="outline-text-4" id="text-3-1-3">
+<div id="outline-container-org327f2cb" class="outline-4">
+<h4 id="org327f2cb"><span class="section-number-4">4.1.3.</span> service kafka</h4>
+<div class="outline-text-4" id="text-4-1-3">
 <p>
 Defines how Kafka is used in the service. Field is <code>kafka</code>, an optional object.
 </p>
@@ -448,15 +503,47 @@ Defines how Kafka is used in the service. Field is <code>kafka</code>, an option
 <p>
 <code>bootstrap_server_var</code> (optional, string) - Container HTTP connection string for Kafka will be injected on services, via environment variable, by default <code>KAFKA_BOOTSTRAP_SERVER</code>
 </p>
+</div>
+</div>
+
+<div id="outline-container-org64664df" class="outline-4">
+<h4 id="org64664df"><span class="section-number-4">4.1.4.</span> service keycloak</h4>
+<div class="outline-text-4" id="text-4-1-4">
+<p>
+<code>enabled</code> (optional, boolean) - Whether to inject environment variables with Kafka details
+</p>
+
+<p>
+<code>url_var</code> (optional, string) - Container HTTP connection string for Keycloak will be injected on services, via environment variable, by default <code>KEYCLOAK_AUTH_SERVER_URL</code>
+</p>
+
+<p>
+<code>realm_var</code> (optional, string) - Container realm name string for Keycloak will be injected on services, via environment variable, by default <code>KEYCLOAK_REALM</code>
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org956c129" class="outline-4">
+<h4 id="org956c129"><span class="section-number-4">4.1.5.</span> service pop<sub>server</sub></h4>
+<div class="outline-text-4" id="text-4-1-5">
+<p>
+<code>enabled</code> (optional, boolean) - Whether to inject environment variables with Kafka details
+</p>
+
+<p>
+<code>url_vars</code> (optional, list of strings) - List of environment variable names that will be injected to the service, with pop<sub>server</sub>'s URL
+</p>
+
 
 <hr />
 </div>
 </div>
 </div>
 
-<div id="outline-container-org70cbc0a" class="outline-3">
-<h3 id="org70cbc0a"><span class="section-number-3">3.2.</span> pop actions</h3>
-<div class="outline-text-3" id="text-3-2">
+<div id="outline-container-org96a7eee" class="outline-3">
+<h3 id="org96a7eee"><span class="section-number-3">4.2.</span> pop actions</h3>
+<div class="outline-text-3" id="text-4-2">
 <p>
 <code>pop_actions</code> is a list of actions that setup state for a test and validate expected responses and behaviours from the services in the scenario. These actions help verify that the services return valid and expected data before proceeding with the scenario execution.
 </p>
@@ -467,11 +554,10 @@ there are many types of pop action, see the following sections.
 
 <hr />
 </div>
-</div>
 
-<div id="outline-container-orgd8cf93b" class="outline-3">
-<h3 id="orgd8cf93b"><span class="section-number-3">3.3.</span> a kafka produce action</h3>
-<div class="outline-text-3" id="text-3-3">
+<div id="outline-container-org7e8f603" class="outline-4">
+<h4 id="org7e8f603"><span class="section-number-4">4.2.1.</span> a kafka produce action</h4>
+<div class="outline-text-4" id="text-4-2-1">
 <p>
 A kafka produce action is defined by:
 </p>
@@ -481,7 +567,7 @@ A kafka produce action is defined by:
 </p>
 
 <p>
-<code>kafka-topic</code> (required, string)
+<code>kafka_topic</code> (required, string)
 </p>
 
 
@@ -489,11 +575,11 @@ A kafka produce action is defined by:
 </div>
 </div>
 
-<div id="outline-container-orge97c3b4" class="outline-3">
-<h3 id="orge97c3b4"><span class="section-number-3">3.4.</span> an http assertion</h3>
-<div class="outline-text-3" id="text-3-4">
+<div id="outline-container-orgf9b5239" class="outline-4">
+<h4 id="orgf9b5239"><span class="section-number-4">4.2.2.</span> an http assertion</h4>
+<div class="outline-text-4" id="text-4-2-2">
 <p>
-<code>expected_code</code> (optional, u16 number) - expected HTTP status code
+<code>expected_code</code> (optional, u16 number) - expected HTTP status code, defaults to 200
 </p>
 
 <p>
@@ -523,10 +609,11 @@ Each JSON body pattern entry includes:
 <hr />
 </div>
 </div>
+</div>
 
-<div id="outline-container-org3407d15" class="outline-3">
-<h3 id="org3407d15"><span class="section-number-3">3.5.</span> Condition DSL</h3>
-<div class="outline-text-3" id="text-3-5">
+<div id="outline-container-org9daa9ff" class="outline-3">
+<h3 id="org9daa9ff"><span class="section-number-3">4.3.</span> Condition DSL</h3>
+<div class="outline-text-3" id="text-4-3">
 <p>
 Supported conditions include:
 </p>
@@ -559,9 +646,9 @@ Supported conditions include:
 </div>
 </div>
 
-<div id="outline-container-org063146b" class="outline-3">
-<h3 id="org063146b"><span class="section-number-3">3.6.</span> pop postgres</h3>
-<div class="outline-text-3" id="text-3-6">
+<div id="outline-container-org6b01ef6" class="outline-3">
+<h3 id="org6b01ef6"><span class="section-number-3">4.4.</span> pop postgres</h3>
+<div class="outline-text-3" id="text-4-4">
 <p>
 You can use PostgreSQL in pop-tests easily.
 </p>
@@ -582,9 +669,9 @@ You can use PostgreSQL in pop-tests easily.
 </div>
 </div>
 
-<div id="outline-container-org0735384" class="outline-3">
-<h3 id="org0735384"><span class="section-number-3">3.7.</span> pop kafka</h3>
-<div class="outline-text-3" id="text-3-7">
+<div id="outline-container-orgb10eff8" class="outline-3">
+<h3 id="orgb10eff8"><span class="section-number-3">4.5.</span> pop kafka</h3>
+<div class="outline-text-3" id="text-4-5">
 <p>
 You can use Kafka in pop-tests easily.
 </p>
@@ -605,11 +692,111 @@ You can use Kafka in pop-tests easily.
 <hr />
 </div>
 </div>
+
+<div id="outline-container-org30b0f83" class="outline-3">
+<h3 id="org30b0f83"><span class="section-number-3">4.6.</span> pop-server</h3>
+<div class="outline-text-3" id="text-4-6">
+<p>
+You can use <code>pop_server</code> in pop-tests easily:
+</p>
+
+<p>
+<code>enabled</code> (optional, boolean) - Whether to enable Kafka in a container or not
+</p>
+
+<p>
+<code>image_name</code> (optional, string) - Container image for Kafka, by default <code>jjba23/pop-server</code>
+</p>
+
+<p>
+<code>image_tag</code> (optional, string) - Container image tag for Kafka, by default <code>0.2.3</code>
+</p>
+
+
+<p>
+You can then  have it prepared with certain behaviors (under <code>behaviors</code> ):
+</p>
+
+<p>
+<code>path</code> (required, string) - what URL path should be called to trigger behavior
+</p>
+
+<p>
+<code>method</code> (required, string) - what HTTP method should be used to trigger behavior
+</p>
+
+<p>
+<code>status</code> (required, string) - what HTTP status should be returned
+</p>
+
+<p>
+<code>content_type</code> (required, string) - what content type should be returned as HTTP header
+</p>
+
+<p>
+<code>body_file</code> (required, string) - path to the file to load data from, that will be returned as HTTP body
+</p>
+</div>
 </div>
 
-<div id="outline-container-org19123f4" class="outline-2">
-<h2 id="org19123f4"><span class="section-number-2">4.</span> Example tests, using the DSL</h2>
-<div class="outline-text-2" id="text-4">
+
+
+<div id="outline-container-org1591e0c" class="outline-3">
+<h3 id="org1591e0c"><span class="section-number-3">4.7.</span> pop keycloak</h3>
+<div class="outline-text-3" id="text-4-7">
+<p>
+You can use Keycloak in pop-tests easily and have it auto-setup.
+</p>
+
+<p>
+<code>enabled</code> (optional, boolean) - Whether to enable Kafka in a container or not
+</p>
+
+<p>
+<code>image_name</code> (optional, string) - Container image for Kafka, by default <code>keycloak/keycloak</code>
+</p>
+
+<p>
+<code>image_tag</code> (optional, string) - Container image tag for Keycloak, by default <code>26.1</code>
+</p>
+
+<p>
+<code>realm</code> (required, string) – Name of the Keycloak realm to be created.
+</p>
+
+<p>
+<code>client_id</code> (required, string) – OAuth ID of the Keycloak client that will be created for service authentication.
+</p>
+
+<p>
+<code>client_secret</code> (optional, string) – OAuth secret  of the Keycloak client that will be created for service authentication.
+</p>
+
+<p>
+<code>email</code>  (optional, string) – Email of the Keycloak user that will be created for service authentication.
+</p>
+
+<p>
+<code>username</code> (required, string) - Username of the Keycloak client that will be created for service authentication.
+</p>
+
+<p>
+<code>password</code> (required, string) - Password  of the Keycloak client that will be created for service authentication.
+</p>
+
+<p>
+<code>roles</code> (optional, list of strings) - Names of roles to be created realm-wide and associated to the user
+</p>
+
+
+<hr />
+</div>
+</div>
+</div>
+
+<div id="outline-container-org739c4d8" class="outline-2">
+<h2 id="org739c4d8"><span class="section-number-2">5.</span> Example tests, using the DSL</h2>
+<div class="outline-text-2" id="text-5">
 <p>
 For example tests and learning demos, refer to the scenarios directory: <a href="../../resources/scenarios">../../resources/scenarios</a>
 </p>
@@ -622,30 +809,34 @@ Here follows also a trivial example of pop-tests.
 In this example we spin up a REST API written in Scala, with SBT, and poll its <code>/health</code> endpoint for 90 seconds or until healthy. Then we perform some checks on the response of certain HTTP endpoints. These checks are performed using <code>jql</code> and this allows us to check deeply nested attributes of the JSON response.
 </p>
 
-<div class="org-src-container">
-<pre class="src src-yaml">pop_test:
-  pop_services:
-    - id: "green-energy-mix"
-      dir: "$HOME/Ontwikkeling/Werk"
-      base_url: "http://localhost:50000"
-      start_cmd_args:
-        - 'sbt "greenEnergyMix/run"'
-      env_vars:
-        SOME_TOKEN: "0027809ce9"
-      health_check:
-        path: "/health"
-        patience_seconds: 90
+<p>
+Reminder: the tool supports YAML, TOML and JSON, but YAML is as of now the preferred format.
+</p>
 
-  pop_actions:
-    - assert_url: "/api/v1/forecast"
-      service_id: "green-energy-mix"
-      json_body_patterns:
-        - pattern: '"meta""forecastDate"'
-          condition: '!= ""'
-        - pattern: '"data"[0]"load"'
-          condition: "&gt; 0"
-        - pattern: '"data"[0]"solar"'
-          condition: "&gt;= 0"
+<div class="org-src-container">
+<pre class="src src-yaml">pop_services:
+  - id: "green-energy-mix"
+    dir: "$HOME/Ontwikkeling/Werk"
+    base_url: "http://localhost:50000"
+    start_cmd_args:
+      - 'sbt "greenEnergyMix/run"'
+    env_vars:
+      SOME_TOKEN: "0027809ce9"
+    health_check:
+      path: "/health"
+      patience_seconds: 120
+
+pop_actions:
+  - name: "Check that the forecast endpoint returns a 200 with a correct data, with load and solar"
+    assert_url: "/api/v1/forecast"
+    service_id: "green-energy-mix"
+    json_body_patterns:
+      - pattern: '"meta""forecastDate"'
+        condition: '!= ""'
+      - pattern: '"data"[0]"load"'
+        condition: "&gt; 0"
+      - pattern: '"data"[0]"solar"'
+        condition: "&gt;= 0"
 
 </pre>
 </div>
@@ -653,8 +844,8 @@ In this example we spin up a REST API written in Scala, with SBT, and poll its <
 </div>
 </div>
 <div id="postamble" class="status">
-<p class="author">Author: Josep Bigorra</p>
-<p class="date">Created: 2025-02-09 zo 00:21</p>
+<p class="author">Author: Music Player Daemon (MPD) user</p>
+<p class="date">Created: 2025-02-11 di 16:38</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
