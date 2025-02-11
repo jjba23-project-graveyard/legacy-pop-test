@@ -18,17 +18,17 @@
 test-green-energy-mix: fmt
 	TESTCONTAINERS_COMMAND=keep \
 	RUST_LOG=debug \
-	nix develop -c cargo run -- -p ./resources/scenarios/green-energy-mix/check-forecast-endpoint.yaml
+	nix develop -c cargo run -- -p ./resources/scenarios/green-energy-mix/golden-test.yaml
 
 test-vehicle-management: fmt
 	TESTCONTAINERS_COMMAND=keep \
 	RUST_LOG=debug \
-	nix develop -c cargo run -- -p ./resources/scenarios/vehicle-management/check.yaml
+	nix develop -c cargo run -- -p ./resources/scenarios/vehicle-management/golden-test.yaml
 
 test-dynamic-tariff-charging: fmt
 	TESTCONTAINERS_COMMAND=keep \
 	RUST_LOG=debug \
-	nix develop -c cargo run -- -p ./resources/scenarios/dynamic-tariff-charging/check-registered-chargepoint.yaml
+	nix develop -c cargo run -- -p ./resources/scenarios/dynamic-tariff-charging/golden-test.yaml
 
 test-all: fmt
 	TESTCONTAINERS_COMMAND=keep \

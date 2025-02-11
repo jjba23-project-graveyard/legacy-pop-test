@@ -1,25 +1,25 @@
 
 # Table of Contents
 
-1.  [How to run it](#org3b7f51d)
-2.  [Why pop-test?](#org45ccefb)
-3.  [Motivation](#orgc5c5fc6)
-4.  [The Scenario DSL (Domain Specific Language)](#org3fc6f1d)
-    1.  [pop services](#org85b2a84)
-        1.  [service health check](#org86bda07)
-        2.  [service postgres](#orgd27728f)
-        3.  [service kafka](#org95baa58)
-        4.  [service keycloak](#orgba3e1a3)
-        5.  [service pop<sub>server</sub>](#orgaf8c7d4)
-    2.  [pop actions](#org2557142)
-        1.  [a kafka produce action](#orgc993e4b)
-        2.  [an http assertion](#org7fb3059)
-    3.  [Condition DSL](#org106e714)
-    4.  [pop postgres](#org17d4e76)
-    5.  [pop kafka](#org1db4433)
-    6.  [pop-server](#org712e51b)
-    7.  [pop keycloak](#org6ae79d4)
-5.  [Example tests, using the DSL](#orgb354110)
+1.  [How to run it](#org9ffd63d)
+2.  [Why pop-test?](#orgcbd0762)
+3.  [Motivation](#org88cc682)
+4.  [The Scenario DSL (Domain Specific Language)](#org5e8a96e)
+    1.  [pop services](#org193f495)
+        1.  [service health check](#orgff3bd13)
+        2.  [service postgres](#org1a51378)
+        3.  [service kafka](#org6c5971b)
+        4.  [service keycloak](#org2fcd62b)
+        5.  [service pop<sub>server</sub>](#orgff5e854)
+    2.  [pop actions](#org67b3349)
+        1.  [a kafka produce action](#org5d93659)
+        2.  [an http assertion](#org39c7d90)
+    3.  [Condition DSL](#org9bf8d3e)
+    4.  [pop postgres](#org60a9c12)
+    5.  [pop kafka](#org8c5cde2)
+    6.  [pop-server](#orgf646256)
+    7.  [pop keycloak](#orgf4f2829)
+5.  [Example tests, using the DSL](#orgfad464e)
 
 In Dutch 🇳🇱, *pop* means puppet or doll. But pop-test is not about dolls! It’s a tool that helps test computer programs in an easy and future-proof manner that improves reliability and engineering freedom.
 
@@ -36,7 +36,7 @@ pop-tests as we affectionately call them, can range from small scope integration
 ---
 
 
-<a id="org3b7f51d"></a>
+<a id="org9ffd63d"></a>
 
 # How to run it
 
@@ -61,7 +61,7 @@ This is how I usually run in development mode:
     TESTCONTAINERS_COMMAND=keep RUST_LOG=debug nix develop -c cargo run -- -p ./resources/scenarios
 
 
-<a id="org45ccefb"></a>
+<a id="orgcbd0762"></a>
 
 # Why pop-test?
 
@@ -73,7 +73,7 @@ This is how I usually run in development mode:
 -   Fast and reliable – Built with Rust, a programming language known for speed and safety.
 
 
-<a id="orgc5c5fc6"></a>
+<a id="org88cc682"></a>
 
 # Motivation
 
@@ -100,7 +100,7 @@ In short, pop-tests make engineers happier, business people more certain of what
 ---
 
 
-<a id="org3fc6f1d"></a>
+<a id="org5e8a96e"></a>
 
 # The Scenario DSL (Domain Specific Language)
 
@@ -115,7 +115,7 @@ The tool supports YAML, TOML and JSON file formats seamlessly.
 ---
 
 
-<a id="org85b2a84"></a>
+<a id="org193f495"></a>
 
 ## pop services
 
@@ -136,7 +136,7 @@ A service is defined by:
 `env_vars` (optional, map of string to string) – A set of environment variables to be defined for the service.  
 
 
-<a id="org86bda07"></a>
+<a id="orgff3bd13"></a>
 
 ### service health check
 
@@ -155,7 +155,7 @@ HTTP health check:
 `patience_seconds` (required, integer) – The maximum time allowed for the service to become healthy. If the service is healthy before this deadline, the scenario setup continues without waiting.
 
 
-<a id="orgd27728f"></a>
+<a id="org1a51378"></a>
 
 ### service postgres
 
@@ -174,7 +174,7 @@ Defines how PostgreSQL is used in the service. Field is `postgres`, an optional 
 `pass_var` (optional, string) - Container DB password will be injected on services, via environment variable, by default `POSTGRESQL_PASSWORD`
 
 
-<a id="org95baa58"></a>
+<a id="org6c5971b"></a>
 
 ### service kafka
 
@@ -185,7 +185,7 @@ Defines how Kafka is used in the service. Field is `kafka`, an optional object.
 `bootstrap_server_var` (optional, string) - Container HTTP connection string for Kafka will be injected on services, via environment variable, by default `KAFKA_BOOTSTRAP_SERVER`
 
 
-<a id="orgba3e1a3"></a>
+<a id="org2fcd62b"></a>
 
 ### service keycloak
 
@@ -196,7 +196,7 @@ Defines how Kafka is used in the service. Field is `kafka`, an optional object.
 `realm_var` (optional, string) - Container realm name string for Keycloak will be injected on services, via environment variable, by default `KEYCLOAK_REALM`
 
 
-<a id="orgaf8c7d4"></a>
+<a id="orgff5e854"></a>
 
 ### service pop<sub>server</sub>
 
@@ -207,7 +207,7 @@ Defines how Kafka is used in the service. Field is `kafka`, an optional object.
 ---
 
 
-<a id="org2557142"></a>
+<a id="org67b3349"></a>
 
 ## pop actions
 
@@ -218,7 +218,7 @@ there are many types of pop action, see the following sections.
 ---
 
 
-<a id="orgc993e4b"></a>
+<a id="org5d93659"></a>
 
 ### a kafka produce action
 
@@ -231,7 +231,7 @@ A kafka produce action is defined by:
 ---
 
 
-<a id="org7fb3059"></a>
+<a id="org39c7d90"></a>
 
 ### an http assertion
 
@@ -252,7 +252,7 @@ Each JSON body pattern entry includes:
 ---
 
 
-<a id="org106e714"></a>
+<a id="org9bf8d3e"></a>
 
 ## Condition DSL
 
@@ -273,7 +273,7 @@ Supported conditions include:
 ---
 
 
-<a id="org17d4e76"></a>
+<a id="org60a9c12"></a>
 
 ## pop postgres
 
@@ -288,7 +288,7 @@ You can use PostgreSQL in pop-tests easily.
 ---
 
 
-<a id="org1db4433"></a>
+<a id="org8c5cde2"></a>
 
 ## pop kafka
 
@@ -303,7 +303,7 @@ You can use Kafka in pop-tests easily.
 ---
 
 
-<a id="org712e51b"></a>
+<a id="orgf646256"></a>
 
 ## pop-server
 
@@ -328,7 +328,7 @@ You can then  have it prepared with certain behaviors (under `behaviors` ):
 `body_file` (required, string) - path to the file to load data from, that will be returned as HTTP body
 
 
-<a id="org6ae79d4"></a>
+<a id="orgf4f2829"></a>
 
 ## pop keycloak
 
@@ -354,10 +354,12 @@ You can use Keycloak in pop-tests easily and have it auto-setup.
 
 `roles` (optional, list of strings) - Names of roles to be created realm-wide and associated to the user
 
+`scopes` (optional, list of strings) - Names of scopes to be created realm-wide and associated to the OAuth client
+
 ---
 
 
-<a id="orgb354110"></a>
+<a id="orgfad464e"></a>
 
 # Example tests, using the DSL
 

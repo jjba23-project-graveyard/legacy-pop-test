@@ -64,7 +64,7 @@ pub struct PopService {
     pub base_url: String,
     pub shell_path: Option<String>,
     pub start_cmd_args: Vec<String>,
-    pub env_vars: HashMap<String, String>,
+    pub env_vars: Option<HashMap<String, String>>,
     pub health_check: PopServiceHealthAction,
     pub postgres: Option<PopServicePostgres>,
     pub kafka: Option<PopServiceKafka>,

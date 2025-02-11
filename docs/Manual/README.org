@@ -294,6 +294,8 @@ You can use Keycloak in pop-tests easily and have it auto-setup.
 
 ~roles~ (optional, list of strings) - Names of roles to be created realm-wide and associated to the user
 
+~scopes~ (optional, list of strings) - Names of scopes to be created realm-wide and associated to the OAuth client
+
 
 -----
 

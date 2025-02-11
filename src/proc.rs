@@ -65,7 +65,12 @@ async fn run_proc_from_service(
         .unwrap_or_else(|| "bash".to_string());
 
     let shell_path = str::replace(b, "$HOME", &user_home);
-    let env: HashMap<String, String> = pop_service.env_vars.into_iter().chain(with_env).collect();
+    let env: HashMap<String, String> = pop_service
+        .env_vars
+        .unwrap_or_default()
+        .into_iter()
+        .chain(with_env)
+        .collect();
     Command::new(shell_path)
         .args(&arg)
         .current_dir(dir)

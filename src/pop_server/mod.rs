@@ -63,6 +63,8 @@ pub async fn register_pop_server_behavior(
         .await
         .unwrap_or("".to_string());
 
+    info!("for pop_server behavior, return body: {}", body);
+
     client
         .post(format!(
             "{}/api/v2/pop-server/register-behavior",
