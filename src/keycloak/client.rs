@@ -231,6 +231,7 @@ impl KeycloakClient {
             ("grant_type", "password"),
             ("client_id", client_id.0.as_str()),
             ("client_secret", client_secret.0.as_str()),
+            ("scope", "openid"),
         ]);
 
         let response = reqwest::Client::new()
@@ -242,14 +243,20 @@ impl KeycloakClient {
             .form(&params)
             .send()
             .await
-            .map_err(|e| e.to_string())?
-            .json::<LoginResponse>()
-            .await
             .map_err(|e| e.to_string())?;
 
-        debug!("got response from keycloak: {:?}", response);
+        let resp = response;
 
-        Ok(KeycloakUserToken(response.access_token))
+        debug!("got response from keycloak: {:?}", &resp);
+
+        let body_bytes = &resp.bytes().await.map_err(|e| e.to_string())?.to_vec();
+        let body_str = String::from_utf8_lossy(body_bytes).to_string();
+
+        debug!("response body from keycloak: {}", body_str);
+
+        let rr: LoginResponse = serde_json::from_slice(body_bytes).map_err(|e| e.to_string())?;
+
+        Ok(KeycloakUserToken(rr.access_token))
     }
 
     pub async fn create_role(
