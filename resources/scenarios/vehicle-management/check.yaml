@@ -21,7 +21,7 @@ pop_services:
     dir: "$HOME/Ontwikkeling/Werk/Vandebron"
     base_url: "http://localhost:8222"
     start_cmd_args:
-      - 'sbt "dynamicTariffCharging/run"'
+      - 'sbt "vehicleManagement/run"'
     env_vars:
       SOME_TOKEN: "a"
     health_check:
@@ -42,10 +42,6 @@ pop_services:
 
 pop_actions:
   - name: "Publish a Kafka message to the chargepoint topic"
-    kafka_topic: "vehicle.registration-state"
-    message_file_path: "/home/joe/Ontwikkeling/Persoonlijk/pop-test/resources/kafka-messages/vehicle-management-registration-state.json"
-  - name: "Publish a Kafka message to the chargepoint topic"
-    delay_seconds: 10
     kafka_topic: "vehicle.registration-state"
     message_file_path: "/home/joe/Ontwikkeling/Persoonlijk/pop-test/resources/kafka-messages/vehicle-management-registration-state.json"
 
