@@ -46,10 +46,12 @@ pub async fn run_action(
     info!("executing action: {:?}", action);
     match action {
         PopAction::KafkaProduceFromFileAction {
+            name,
             message_file_path,
             delay_seconds,
             kafka_topic,
         } => {
+            name.clone().inspect(|n| info!("starting action: {}", n));
             if let Some(delay) = delay_seconds {
                 sleep(Duration::from_secs(*delay)).await;
             }
@@ -64,6 +66,7 @@ pub async fn run_action(
             r.inspect_err(|e| error!("{}", e))
         }
         PopAction::HttpAssertion {
+            name,
             assert_code,
             assert_url,
             service_id,
@@ -71,6 +74,7 @@ pub async fn run_action(
             json_body_patterns,
             with_keycloak_user_token,
         } => {
+            name.clone().inspect(|n| info!("starting action: {}", n));
             if let Some(delay) = delay_seconds {
                 sleep(Duration::from_secs(*delay)).await;
             }

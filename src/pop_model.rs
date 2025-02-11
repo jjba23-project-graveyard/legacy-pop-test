@@ -82,6 +82,7 @@ pub struct BodyPattern {
 #[serde(untagged)]
 pub enum PopAction {
     HttpAssertion {
+        name: Option<String>,
         assert_code: Option<u16>,
         assert_url: String,
         service_id: String,
@@ -90,6 +91,7 @@ pub enum PopAction {
         with_keycloak_user_token: Option<bool>,
     },
     KafkaProduceFromFileAction {
+        name: Option<String>,
         delay_seconds: Option<u64>,
         message_file_path: String,
         kafka_topic: String,
