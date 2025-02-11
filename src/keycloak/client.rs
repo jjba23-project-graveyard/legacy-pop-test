@@ -18,10 +18,10 @@
 use super::model::{CreateClientRoleMappingRequest, CreateRealmRequest, CreateRoleRequest};
 use crate::keycloak::model::{
     CreateClientRequest, CreateUserRequest, CreateUserRequestCredentials, LoginResponse,
-    RoleRepresentation,
 };
 use log::debug;
 use reqwest::Client;
+use serde_json::Value;
 use std::{collections::HashMap, fmt::Debug};
 
 #[derive(Debug, Clone)]
@@ -296,12 +296,19 @@ impl KeycloakClient {
             ))
             .send()
             .await
-            .map_err(|e| e.to_string())?
-            .json::<Vec<RoleRepresentation>>()
-            .await
             .map_err(|e| e.to_string())?;
 
-        debug!("got response from keycloak: {:?}", response);
+        let resp = response;
+
+        debug!("got response from keycloak: {:?}", &resp);
+
+        let body_bytes = &resp.bytes().await.map_err(|e| e.to_string())?.to_vec();
+        let body_str = String::from_utf8_lossy(body_bytes).to_string();
+
+        debug!("response body from keycloak: {}", body_str);
+
+        let j: Result<Value, String> =
+            serde_json::from_slice(body_bytes).map_err(|e| e.to_string());
 
         Ok(())
     }
