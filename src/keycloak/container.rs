@@ -153,6 +153,7 @@ pub async fn maybe_start_keycloak(
 
             let r = keycloak_client
                 .get_roles(
+                    admin_token.clone(),
                     KeycloakRealm(keycloak.realm.clone()),
                     KeycloakClientIdentifier(client_identifier),
                 )

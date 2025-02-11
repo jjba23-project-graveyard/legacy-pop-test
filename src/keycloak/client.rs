@@ -253,7 +253,7 @@ impl KeycloakClient {
             name: role_name.0,
             scope_param_required: false,
             composite: false,
-            client_role: false,
+            client_role: true,
         };
 
         Self::send_create_request(
@@ -286,6 +286,7 @@ impl KeycloakClient {
 
     pub async fn get_roles(
         &mut self,
+        admin_token: KeycloakAdminToken,
         realm: KeycloakRealm,
         client_identifier: KeycloakClientIdentifier,
     ) -> Result<(), String> {
@@ -294,6 +295,7 @@ impl KeycloakClient {
                 "{}/admin/realms/{}/clients/{}/roles",
                 self.url.0, realm.0, client_identifier.0
             ))
+            .header("authorization", format!("Bearer {}", admin_token.0))
             .send()
             .await
             .map_err(|e| e.to_string())?;

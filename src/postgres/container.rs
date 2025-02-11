@@ -38,7 +38,7 @@ pub async fn maybe_start_postgres(
     scenario_file: &PopScenarioFile,
 ) -> Result<Option<ContainerAsync<Postgres>>, String> {
     match &scenario_file.pop_test.pop_postgres {
-        Some(postgres) => {
+        Some(postgres) if postgres.enabled == Some(true) => {
             info!("start setting up postgres");
             Ok(Some(
                 run_postgres_container(postgres.clone()).await.unwrap(),
