@@ -36,8 +36,7 @@ pop_services:
     pop_server:
       enabled: true
       url_vars:
-        - "OCPP_FACADE_URL"
-        - "DYNAMIC_TARIFF_SERVICE_URL"
+        - "ECEDO_URL"
 
 
 pop_actions:
@@ -82,5 +81,10 @@ pop_kafka:
 
 pop_server:
   enabled: true
-
+  behaviors:
+    - path: "/organizations/byReference/232323"
+      method: "GET"
+      status: 200
+      content_type: "application/json"
+      body_file: "/home/joe/Ontwikkeling/Persoonlijk/pop-test/resources/behavior-data/vehicle-management-ecedo-register-customer.json"
         
