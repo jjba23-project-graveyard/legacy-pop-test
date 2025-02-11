@@ -5,8 +5,6 @@
 
 [[https://raster.shields.io/badge/Rust-1.84-b7410e.png]] [[https://raster.shields.io/badge/Nix-Flake-1f5cd6.png]]
 
-🚧 work-in-progress
-
 pop-test - /your test orchestration master of puppets/
 
 pop-test simplifies end-to-end testing by providing a powerful orchestration tool and expressive language for your applications and their dependencies.
@@ -15,7 +13,7 @@ Define your test scenarios in a DSL (YAML, in the future also TOML or JSON) and 
 
 pop-test is built with Rust, enhancing safety, performance and reliability, with a modern and accessible code-base.
 
-pop-tests as we affectionately call them, can range from small scope integration tests to all encompassing end-to-end or black box tests.
+pop-tests as we affectionately call them, can range from small scope integration tests to all encompassing end-to-end, black box and golden tests.
 
 I strive to provide proper and extensive documentation on pop-test, in several formats, available at your convenience.
 
