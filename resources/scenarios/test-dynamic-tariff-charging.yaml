@@ -44,9 +44,11 @@ pop_test:
     - kafka_topic: "vehicle.latest-state"
       message_file_path: "/home/joe/Ontwikkeling/Persoonlijk/pop-test/resources/kafka-messages/dynamic-tariff-charging-send-vehicle-latest-state.json"
           
-    - assert_url: "/api/v1/registeredChargepoints/3514fbab-9a15-4869-9a7d-895e9dfb3560"
+    - with_keycloak_user_token: true
+      #assert_url: "/api/v1/vehicles/1607dc97-53a1-4e16-821d-b16b76daa903/latest-state"
+      assert_url: "/api/v1/registeredChargepoints/1607dc97-53a1-4e16-821d-b16b76daa903"
       service_id: "dynamic-tariff-charging"
-      delay_seconds: 10
+      delay_seconds: 5
       json_body_patterns:
         - pattern: '"data""vehicleId"'
           condition: '!= ""'

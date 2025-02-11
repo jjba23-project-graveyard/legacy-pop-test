@@ -20,8 +20,12 @@ use crate::environment::setup_environment;
 use crate::health_check::start_health_check;
 use crate::http::run_http_assertion;
 use crate::kafka::container::{maybe_start_kafka, produce_kafka_message};
+use crate::keycloak::client::{
+    KeycloakClient, KeycloakClientId, KeycloakClientSecret, KeycloakPassword, KeycloakRealm,
+    KeycloakUrl, KeycloakUsername,
+};
 use crate::keycloak::container::maybe_start_keycloak;
-use crate::pop_model::{PopAction, PopEnv, PopScenarioFile, PopService};
+use crate::pop_model::{PopAction, PopEnv, PopKeycloak, PopScenarioFile, PopService};
 use crate::pop_server::maybe_start_pop_server;
 use crate::postgres::container::maybe_start_postgres;
 use crate::proc::{start_service, terminate_services};
@@ -37,6 +41,7 @@ pub async fn run_action(
     pop_env: &PopEnv,
     services: &[PopService],
     action: &PopAction,
+    keycloak: Option<PopKeycloak>,
 ) -> Result<(), String> {
     info!("executing action: {:?}", action);
     match action {
@@ -64,9 +69,28 @@ pub async fn run_action(
             service_id,
             delay_seconds,
             json_body_patterns,
+            with_keycloak_user_token,
         } => {
             if let Some(delay) = delay_seconds {
                 sleep(Duration::from_secs(*delay)).await;
+            }
+
+            let mut tok = None;
+            if *with_keycloak_user_token == Some(true) {
+                if let Some(mut kclient) = pop_env.keycloak_client.clone() {
+                    if let Some(kk) = keycloak {
+                        let maybe_tok = kclient
+                            .get_user_token(
+                                KeycloakRealm(kk.realm),
+                                KeycloakClientId(kk.client_id),
+                                KeycloakClientSecret(kk.client_secret),
+                                KeycloakUsername(kk.username),
+                                KeycloakPassword(kk.password),
+                            )
+                            .await;
+                        let _ = maybe_tok.inspect(|t| tok = Some(t.clone().0));
+                    }
+                }
             }
 
             if let Some(service) = services.iter().find(|s| s.id == *service_id) {
@@ -77,6 +101,7 @@ pub async fn run_action(
                     assert_url.clone(),
                     service.base_url.clone(),
                     json_body_patterns.clone(),
+                    tok,
                 )
                 .await
             } else {
@@ -166,8 +191,23 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
         kafka_bootstrap_server = fmt;
     }
 
+    let mut keycloak_client = None;
+    if let Some(kc) = &maybe_keycloak_container {
+        let host = kc.get_host().await.unwrap().to_string();
+        let port = kc
+            .ports()
+            .await
+            .unwrap()
+            .map_to_host_port_ipv4(8080)
+            .unwrap_or(8080);
+        keycloak_client = Some(KeycloakClient {
+            url: KeycloakUrl(format!("http://{}:{}", host, port)),
+        });
+    }
+
     let pop_env = crate::pop_model::PopEnv {
         kafka_bootstrap_server: kafka_bootstrap_server.to_string(),
+        keycloak_client,
     };
 
     info!("{:?}", pop_env);
@@ -181,7 +221,13 @@ pub async fn play_scenario(scenario_file: PopScenarioFile) -> Result<(), String>
         .clone()
         .unwrap_or_default()
     {
-        let action_result = run_action(&pop_env, services, action).await;
+        let action_result = run_action(
+            &pop_env,
+            services,
+            action,
+            scenario_file.pop_test.pop_keycloak.clone(),
+        )
+        .await;
         match action_result {
             Ok(_) => info!("ran action successfully: {:?}", action),
             Err(e) => error!("{}", e),

@@ -18,6 +18,8 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
+use crate::keycloak::client::KeycloakClient;
+
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 #[serde(untagged)]
 pub enum PopServiceHealthAction {
@@ -85,6 +87,7 @@ pub enum PopAction {
         service_id: String,
         delay_seconds: Option<u64>,
         json_body_patterns: Option<Vec<BodyPattern>>,
+        with_keycloak_user_token: Option<bool>,
     },
     KafkaProduceFromFileAction {
         delay_seconds: Option<u64>,
@@ -152,7 +155,8 @@ pub struct PopScenarioFile {
     pub pop_test: PopScenario,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Debug, Clone)]
 pub struct PopEnv {
     pub kafka_bootstrap_server: String,
+    pub keycloak_client: Option<KeycloakClient>,
 }

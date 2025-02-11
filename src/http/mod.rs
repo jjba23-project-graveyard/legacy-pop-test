@@ -19,16 +19,36 @@ use crate::pop_model::BodyPattern;
 
 use crate::condition_dsl::eval_condition;
 use log::{error, info};
+use reqwest::{
+    header::{self, HeaderValue},
+    Client,
+};
 
 pub async fn run_http_assertion(
     expected_code: Option<u16>,
     assert_url: String,
     service_url: String,
     json_body_patterns: Option<Vec<BodyPattern>>,
+    bearer_token: Option<String>,
 ) -> Result<(), String> {
     let url = format!("{}{}", service_url, assert_url);
 
-    let maybe_response = reqwest::get(url.clone()).await;
+    let mut headers = header::HeaderMap::new();
+    if let Some(tok) = bearer_token {
+        headers.insert(
+            "Authorization",
+            HeaderValue::from_str(format!("Bearer {}", tok).as_str()).map_err(|e| e.to_string())?,
+        );
+    }
+
+    let c = Client::builder()
+        .default_headers(headers)
+        .build()
+        .map_err(|e| e.to_string())?
+        .get(url);
+
+    let maybe_response = c.send().await;
+
     println!("{maybe_response:#?}");
     let wanted_status_code = expected_code.unwrap_or(200);
 
