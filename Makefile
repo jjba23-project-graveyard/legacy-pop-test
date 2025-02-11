@@ -23,7 +23,7 @@ test-green-energy-mix: fmt
 test-dynamic-tariff-charging: fmt
 	TESTCONTAINERS_COMMAND=keep \
 	RUST_LOG=debug \
-	nix develop -c cargo run -- -p ./resources/scenarios/test-dynamic-tariff-charging.yaml
+	nix develop -c cargo run -- -p ./resources/scenarios/dynamic-tariff-charging/check-vehicle-latest-state.yaml
 
 test-all: fmt
 	TESTCONTAINERS_COMMAND=keep \
