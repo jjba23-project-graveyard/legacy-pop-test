@@ -18,8 +18,7 @@
 use log::{error, info};
 use pop_model::PopScenario;
 use scenario::play_scenario;
-use std::env;
-use std::fs;
+use std::{fs, path::Path};
 
 mod condition_dsl;
 mod containers;
@@ -44,21 +43,59 @@ mod pop_server;
 #[path = "postgres/mod.rs"]
 mod postgres;
 
+use clap::Parser;
+
+#[derive(Parser, Debug)]
+#[command(version, about, long_about = None)]
+struct Args {
+    #[arg(short('f'), long("path"))]
+    path: String,
+
+    #[arg(short('t'), long("type"))]
+    file_type: String,
+}
+
 #[tokio::main]
 async fn main() -> Result<(), String> {
     env_logger::init();
-
     info!("\n`pop-test` starting up\n");
 
-    let args: Vec<String> = env::args().collect();
-    info!("command-line arguments: {:?}", args);
+    info!("parsing command-line arguments");
+    let args = Args::parse();
 
-    if args.len() != 3 {
-        return Err("usage: <operation> <scenario-file>".to_string());
+    info!("gathering scenario files in desired path");
+    let p = Path::new(&args.path);
+
+    let mut file_paths = Vec::new();
+
+    if p.is_dir() {
+        fs::read_dir(args.path)
+            .unwrap()
+            .for_each(|fp| file_paths.push(fp.unwrap().path().to_string_lossy().to_string()));
+    } else {
+        file_paths.push(p.to_string_lossy().to_string())
     }
 
-    let (user_cmd, scenario_path) = (&args[1], &args[2]);
-    info!("reading scenario file: {}", scenario_path);
+    async {
+        for f in file_paths {
+            info!("scenario file read successfully to string");
+
+            do_with_file_data(args.file_type.clone(), f.to_string())
+                .await
+                .map_err(|e| {
+                    error!("{}", e);
+                    "scenario failed to run"
+                })?;
+
+            info!("✅ ran scenario successfully");
+        }
+        Ok(())
+    }
+    .await
+}
+
+pub async fn do_with_file_data(file_type: String, scenario_path: String) -> Result<(), String> {
+    info!("reading file contents at: {}", scenario_path);
 
     let file_data: String = fs::read_to_string(scenario_path).map_err(|e| {
         let err_msg = format!("failed to read scenario file: {}", e);
@@ -66,32 +103,18 @@ async fn main() -> Result<(), String> {
         err_msg
     })?;
 
-    async {
-        info!("scenario file read successfully to string");
+    let maybe_scenario: Option<PopScenario> = match file_type.as_str() {
+        "yaml" | "yml" => {
+            info!("parsing YAML from file");
+            serde_yml::from_str(&file_data)
+                .inspect_err(|e| error!("{}", e))
+                .ok()
+        }
+        _ => None,
+    };
 
-        do_with_file_data(user_cmd.clone(), file_data)
-            .await
-            .map_err(|e| {
-                error!("{}", e);
-                "scenario failed to run"
-            })?;
-
-        info!("✅ ran scenario successfully");
-        Ok(())
-    }
-    .await
-}
-
-pub async fn do_with_file_data(user_cmd: String, file_data: String) -> Result<(), String> {
-    info!("parsing YAML from file");
-    let scenario: PopScenario = serde_yml::from_str(&file_data).unwrap();
-
-    info!("✅ parsed pop scenario properly from YAML file");
-    if user_cmd == "play-scenario" {
-        play_scenario(scenario).await
-    } else {
-        let msg = "could not understand the wanted task to execute";
-        error!("{}", msg);
-        Err(msg.to_string())
+    match maybe_scenario {
+        Some(scenario) => play_scenario(scenario).await,
+        None => Err("could not find a valid scenario to play".to_string()),
     }
 }
