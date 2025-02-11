@@ -50,7 +50,7 @@ pop_actions:
     action_url: "/api/v1/customers"
     service_id: "vehicle-management"
     method: "POST"
-    message_file_path: "/home/joe/Ontwikkeling/Persoonlijk/pop-test/resources/kafka-messages/vehicle-management-registration-state.json"
+    message_file_path: "/home/joe/Ontwikkeling/Persoonlijk/pop-test/resources/messages/vehicle-management-register-customer.json"
     
   - name: "Check calling the registered URL works and returns the proper JSON body"
     with_keycloak_user_token: true

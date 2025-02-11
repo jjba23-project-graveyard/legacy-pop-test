@@ -97,6 +97,9 @@ pub async fn run_http_action(
         );
     }
     let d = fs::read_to_string(message_file_path).unwrap_or("".to_string());
+
+    info!("sending request body: {}", d);
+
     let c = Client::builder()
         .default_headers(headers)
         .build()
@@ -109,7 +112,7 @@ pub async fn run_http_action(
 
     let maybe_response = c.send().await;
 
-    println!("{maybe_response:#?}");
+    info!("{maybe_response:#?}");
 
     match maybe_response {
         Err(e) => error!("{}", e),
