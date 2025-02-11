@@ -253,7 +253,7 @@ You can use ~pop_server~ in pop-tests easily:
 
 ~image_name~ (optional, string) - Container image for Kafka, by default ~jjba23/pop-server~
 
-~image_tag~ (optional, string) - Container image tag for Kafka, by default ~0.2.3~
+~image_tag~ (optional, string) - Container image tag for Kafka, by default ~0.2.5~
 
 
 You can then  have it prepared with certain behaviors (under ~behaviors~ ):

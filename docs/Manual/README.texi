@@ -329,7 +329,7 @@ You can use @code{pop_server} in pop-tests easily:
 
 @code{image_name} (optional, string) - Container image for Kafka, by default @code{jjba23/pop-server}
 
-@code{image_tag} (optional, string) - Container image tag for Kafka, by default @code{0.2.3}
+@code{image_tag} (optional, string) - Container image tag for Kafka, by default @code{0.2.5}
 
 
 You can then  have it prepared with certain behaviors (under @code{behaviors} ):
