@@ -253,7 +253,7 @@ impl KeycloakClient {
             name: role_name.0,
             scope_param_required: false,
             composite: false,
-            client_role: true,
+            client_role: false,
         };
 
         Self::send_create_request(
@@ -284,7 +284,7 @@ impl KeycloakClient {
         .await
     }
 
-    pub async fn get_roles(
+    pub async fn get_client_roles(
         &mut self,
         admin_token: KeycloakAdminToken,
         realm: KeycloakRealm,
@@ -295,6 +295,32 @@ impl KeycloakClient {
                 "{}/admin/realms/{}/clients/{}/roles",
                 self.url.0, realm.0, client_identifier.0
             ))
+            .header("authorization", format!("Bearer {}", admin_token.0))
+            .send()
+            .await
+            .map_err(|e| e.to_string())?;
+
+        let resp = response;
+
+        debug!("got response from keycloak: {:?}", &resp);
+
+        let body_bytes = &resp.bytes().await.map_err(|e| e.to_string())?.to_vec();
+        let body_str = String::from_utf8_lossy(body_bytes).to_string();
+
+        debug!("response body from keycloak: {}", body_str);
+
+        let j: Result<Value, String> =
+            serde_json::from_slice(body_bytes).map_err(|e| e.to_string());
+
+        Ok(())
+    }
+    pub async fn get_realm_roles(
+        &mut self,
+        admin_token: KeycloakAdminToken,
+        realm: KeycloakRealm,
+    ) -> Result<(), String> {
+        let response = reqwest::Client::new()
+            .get(format!("{}/admin/realms/{}/roles", self.url.0, realm.0))
             .header("authorization", format!("Bearer {}", admin_token.0))
             .send()
             .await

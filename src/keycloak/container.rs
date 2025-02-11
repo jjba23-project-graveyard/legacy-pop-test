@@ -21,7 +21,7 @@ use crate::keycloak::client::{
     KeycloakUsername,
 };
 use crate::pop_model::{PopKeycloak, PopScenarioFile, PopService};
-use log::{debug, error, info};
+use log::{error, info};
 
 use std::collections::HashMap;
 
@@ -151,8 +151,8 @@ pub async fn maybe_start_keycloak(
                     .map_err(|e| e.to_string());
             }
 
-            let r = keycloak_client
-                .get_roles(
+            let _ = keycloak_client
+                .get_client_roles(
                     admin_token.clone(),
                     KeycloakRealm(keycloak.realm.clone()),
                     KeycloakClientIdentifier(client_identifier),
@@ -160,7 +160,10 @@ pub async fn maybe_start_keycloak(
                 .await
                 .map_err(|e| e.to_string());
 
-            debug!("get roles resp: {:?}", r);
+            let _ = keycloak_client
+                .get_realm_roles(admin_token.clone(), KeycloakRealm(keycloak.realm.clone()))
+                .await
+                .map_err(|e| e.to_string());
 
             Ok(Some(keycloak_container))
         }
