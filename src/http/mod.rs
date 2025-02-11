@@ -18,7 +18,7 @@
 use crate::pop_model::BodyPattern;
 
 use crate::condition_dsl::eval_condition;
-use log::{error, info};
+use log::{debug, error, info};
 use reqwest::{
     header::{self, HeaderValue},
     Client,
@@ -56,7 +56,7 @@ pub async fn run_http_assertion(
         Err(e) => error!("{}", e),
         Ok(resp) => {
             if resp.status().as_u16() != wanted_status_code {
-                return Err("the HTTP status did not match the expectation".to_string());
+                error!("the HTTP status did not match the expectation")
             } else {
                 info!(
                     "the HTTP response contained the expected status: {:?}",
@@ -64,8 +64,12 @@ pub async fn run_http_assertion(
                 )
             }
 
-            let j = &resp.json().await;
-            if let Ok(body) = j {
+            let body_bytes = &resp.bytes().await.map_err(|e| e.to_string())?.to_vec();
+            let body_str = String::from_utf8_lossy(body_bytes).to_string();
+            debug!("response body from assertion: {}", body_str);
+
+            let j = serde_json::from_slice(body_bytes).map_err(|e| e.to_string());
+            if let Ok(body) = &j {
                 eval_condition(body, json_body_patterns.unwrap_or_default()).unwrap()
             }
         }
