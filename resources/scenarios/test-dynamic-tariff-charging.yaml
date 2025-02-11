@@ -67,12 +67,12 @@ pop_test:
       - "FLEXIOT-ADMIN"
 
   pop_postgres:
-    enabled: false
+    enabled: true
     
   pop_kafka:
-    enabled: false
+    enabled: true
 
   pop_server:
-    enabled: false
+    enabled: true
 
         

@@ -15,13 +15,13 @@
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
-use super::model::{CreateClientRoleMappingRequest, CreateRealmRequest, CreateRoleRequest};
+use super::model::{CreateRealmRequest, CreateRoleMappingRequest, CreateRoleRequest};
 use crate::keycloak::model::{
     CreateClientRequest, CreateUserRequest, CreateUserRequestCredentials, LoginResponse,
+    RoleRepresentation,
 };
 use log::debug;
 use reqwest::Client;
-use serde_json::Value;
 use std::{collections::HashMap, fmt::Debug};
 
 #[derive(Debug, Clone)]
@@ -264,14 +264,18 @@ impl KeycloakClient {
         .await
     }
 
-    pub async fn create_role_mapping(
+    pub async fn create_realm_role_mapping(
         &mut self,
         admin_token: KeycloakAdminToken,
         realm: KeycloakRealm,
         user_identifier: KeycloakUserIdentifier,
+        role_id: KeycloakRoleIdentifier,
         role_name: KeycloakRoleName,
     ) -> Result<String, String> {
-        let request_body = vec![CreateClientRoleMappingRequest { name: role_name.0 }];
+        let request_body = vec![CreateRoleMappingRequest {
+            id: role_id.0,
+            name: role_name.0,
+        }];
 
         Self::send_create_request(
             format!(
@@ -284,41 +288,11 @@ impl KeycloakClient {
         .await
     }
 
-    pub async fn get_client_roles(
-        &mut self,
-        admin_token: KeycloakAdminToken,
-        realm: KeycloakRealm,
-        client_identifier: KeycloakClientIdentifier,
-    ) -> Result<(), String> {
-        let response = reqwest::Client::new()
-            .get(format!(
-                "{}/admin/realms/{}/clients/{}/roles",
-                self.url.0, realm.0, client_identifier.0
-            ))
-            .header("authorization", format!("Bearer {}", admin_token.0))
-            .send()
-            .await
-            .map_err(|e| e.to_string())?;
-
-        let resp = response;
-
-        debug!("got response from keycloak: {:?}", &resp);
-
-        let body_bytes = &resp.bytes().await.map_err(|e| e.to_string())?.to_vec();
-        let body_str = String::from_utf8_lossy(body_bytes).to_string();
-
-        debug!("response body from keycloak: {}", body_str);
-
-        let j: Result<Value, String> =
-            serde_json::from_slice(body_bytes).map_err(|e| e.to_string());
-
-        Ok(())
-    }
     pub async fn get_realm_roles(
         &mut self,
         admin_token: KeycloakAdminToken,
         realm: KeycloakRealm,
-    ) -> Result<(), String> {
+    ) -> Result<Vec<RoleRepresentation>, String> {
         let response = reqwest::Client::new()
             .get(format!("{}/admin/realms/{}/roles", self.url.0, realm.0))
             .header("authorization", format!("Bearer {}", admin_token.0))
@@ -335,9 +309,6 @@ impl KeycloakClient {
 
         debug!("response body from keycloak: {}", body_str);
 
-        let j: Result<Value, String> =
-            serde_json::from_slice(body_bytes).map_err(|e| e.to_string());
-
-        Ok(())
+        serde_json::from_slice(body_bytes).map_err(|e| e.to_string())
     }
 }

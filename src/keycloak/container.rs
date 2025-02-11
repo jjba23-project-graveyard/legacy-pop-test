@@ -16,8 +16,8 @@
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
 use crate::keycloak::client::{
-    KeycloakClient, KeycloakClientId, KeycloakClientIdentifier, KeycloakClientSecret,
-    KeycloakPassword, KeycloakRealm, KeycloakRoleName, KeycloakUrl, KeycloakUserIdentifier,
+    KeycloakClient, KeycloakClientId, KeycloakClientSecret, KeycloakPassword, KeycloakRealm,
+    KeycloakRoleIdentifier, KeycloakRoleName, KeycloakUrl, KeycloakUserIdentifier,
     KeycloakUsername,
 };
 use crate::pop_model::{PopKeycloak, PopScenarioFile, PopService};
@@ -139,31 +139,24 @@ pub async fn maybe_start_keycloak(
                 .await
                 .map_err(|e| e.to_string())?;
 
-            for role_name in role_identifiers {
-                let mapping_identifier = keycloak_client
-                    .create_role_mapping(
+            let realm_roles = keycloak_client
+                .get_realm_roles(admin_token.clone(), KeycloakRealm(keycloak.realm.clone()))
+                .await
+                .map_err(|e| e.to_string())
+                .unwrap_or(Vec::new());
+
+            for role in realm_roles {
+                let _ = keycloak_client
+                    .create_realm_role_mapping(
                         admin_token.clone(),
                         KeycloakRealm(keycloak.realm.clone()),
                         KeycloakUserIdentifier(user_identifier.clone()),
-                        KeycloakRoleName(role_name.clone()),
+                        KeycloakRoleIdentifier(role.id.clone()),
+                        KeycloakRoleName(role.name.clone()),
                     )
                     .await
                     .map_err(|e| e.to_string());
             }
-
-            let _ = keycloak_client
-                .get_client_roles(
-                    admin_token.clone(),
-                    KeycloakRealm(keycloak.realm.clone()),
-                    KeycloakClientIdentifier(client_identifier),
-                )
-                .await
-                .map_err(|e| e.to_string());
-
-            let _ = keycloak_client
-                .get_realm_roles(admin_token.clone(), KeycloakRealm(keycloak.realm.clone()))
-                .await
-                .map_err(|e| e.to_string());
 
             Ok(Some(keycloak_container))
         }

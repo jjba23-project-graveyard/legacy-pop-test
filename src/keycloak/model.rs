@@ -46,14 +46,14 @@ pub struct CreateRoleRequest {
 pub struct RoleRepresentation {
     pub id: String,
     pub name: String,
-    pub scope_param_required: bool,
     pub composite: bool,
     pub client_role: bool,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct CreateClientRoleMappingRequest {
+pub struct CreateRoleMappingRequest {
+    pub id: String,
     pub name: String,
 }
 
