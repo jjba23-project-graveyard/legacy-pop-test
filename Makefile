@@ -20,6 +20,11 @@ test-green-energy-mix: fmt
 	RUST_LOG=debug \
 	nix develop -c cargo run -- -p ./resources/scenarios/green-energy-mix/check-forecast-endpoint.yaml
 
+test-vehicle-management: fmt
+	TESTCONTAINERS_COMMAND=keep \
+	RUST_LOG=debug \
+	nix develop -c cargo run -- -p ./resources/scenarios/vehicle-management/check.yaml
+
 test-dynamic-tariff-charging: fmt
 	TESTCONTAINERS_COMMAND=keep \
 	RUST_LOG=debug \
