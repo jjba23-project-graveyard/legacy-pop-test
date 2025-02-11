@@ -41,12 +41,13 @@ pop_services:
 
 
 pop_actions:
-  - kafka_topic: "vehicle.latest-state"
+  - name: "Publish a Kafka message to the chargepoint topic"
+    kafka_topic: "vehicle.latest-state"
     message_file_path: "/home/joe/Ontwikkeling/Persoonlijk/pop-test/resources/kafka-messages/dynamic-tariff-charging-send-vehicle-latest-state.json"
 
-  - with_keycloak_user_token: true
-    assert_url: "/api/v1/vehicles/1607dc97-53a1-4e16-821d-b16b76daa903/latest-state"
-    #assert_url: "/api/v1/registeredChargepoints/1607dc97-53a1-4e16-821d-b16b76daa903"
+  - name: "Check calling the registered chargepoints URL works and returns the proper JSON body"
+    with_keycloak_user_token: true
+    assert_url: "/api/v1/registeredChargepoints/1607dc97-53a1-4e16-821d-b16b76daa903"
     service_id: "dynamic-tariff-charging"
     delay_seconds: 5
     json_body_patterns:
