@@ -1,25 +1,25 @@
 
 # Table of Contents
 
-1.  [How to run it](#org585cbfa)
-2.  [Why pop-test?](#org033302d)
-3.  [Motivation](#org2e8eb40)
-4.  [The Scenario DSL (Domain Specific Language)](#org9902ff7)
-    1.  [pop services](#orgce207a5)
-        1.  [service health check](#orgc9a8b19)
-        2.  [service postgres](#org9dbefb5)
-        3.  [service kafka](#org8666a0d)
-        4.  [service keycloak](#orgeb63ddb)
-        5.  [service pop<sub>server</sub>](#orgbb73cc4)
-    2.  [pop actions](#org9df4125)
-        1.  [a kafka produce action](#orgf5d2f03)
-        2.  [an http assertion](#org90741f9)
-    3.  [Condition DSL](#orgedb8b9f)
-    4.  [pop postgres](#orgd66cfbe)
-    5.  [pop kafka](#org2203089)
-    6.  [pop-server](#orgcc8b944)
-    7.  [pop keycloak](#org70bdff4)
-5.  [Example tests, using the DSL](#org282e3c0)
+1.  [How to run it](#orgda20957)
+2.  [Why pop-test?](#org7af2453)
+3.  [Motivation](#orgd2ebd2c)
+4.  [The Scenario DSL (Domain Specific Language)](#org5f1e9d1)
+    1.  [pop services](#orgacefbde)
+        1.  [service health check](#org7ccd156)
+        2.  [service postgres](#orgc839a81)
+        3.  [service kafka](#orgb59101b)
+        4.  [service keycloak](#orge179579)
+        5.  [service pop<sub>server</sub>](#orgb2f1a05)
+    2.  [pop actions](#org0074456)
+        1.  [a kafka produce action](#org3a59a21)
+        2.  [an http assertion](#org9ea0ebc)
+    3.  [Condition DSL](#org4887527)
+    4.  [pop postgres](#orgabe6ea3)
+    5.  [pop kafka](#org128a8b6)
+    6.  [pop-server](#org861d3c6)
+    7.  [pop keycloak](#orgad4ba1f)
+5.  [Example tests, using the DSL](#orga1c25e4)
 
 In Dutch 🇳🇱, *pop* means puppet or doll. But pop-test is not about dolls! It’s a tool that helps test computer programs in an easy and future-proof manner that improves reliability and engineering freedom.
 
@@ -36,7 +36,7 @@ pop-tests as we affectionately call them, can range from small scope integration
 ---
 
 
-<a id="org585cbfa"></a>
+<a id="orgda20957"></a>
 
 # How to run it
 
@@ -61,7 +61,7 @@ This is how I usually run in development mode:
     TESTCONTAINERS_COMMAND=keep RUST_LOG=debug nix develop -c cargo run -- --path ./resources/scenarios
 
 
-<a id="org033302d"></a>
+<a id="org7af2453"></a>
 
 # Why pop-test?
 
@@ -73,7 +73,7 @@ This is how I usually run in development mode:
 -   Fast and reliable – Built with Rust, a programming language known for speed and safety.
 
 
-<a id="org2e8eb40"></a>
+<a id="orgd2ebd2c"></a>
 
 # Motivation
 
@@ -100,7 +100,7 @@ In short, pop-tests make engineers happier, business people more certain of what
 ---
 
 
-<a id="org9902ff7"></a>
+<a id="org5f1e9d1"></a>
 
 # The Scenario DSL (Domain Specific Language)
 
@@ -115,7 +115,7 @@ The tool supports YAML, TOML and JSON file formats seamlessly.
 ---
 
 
-<a id="orgce207a5"></a>
+<a id="orgacefbde"></a>
 
 ## pop services
 
@@ -136,7 +136,7 @@ A service is defined by:
 `env_vars` (optional, map of string to string) – A set of environment variables to be defined for the service.  
 
 
-<a id="orgc9a8b19"></a>
+<a id="org7ccd156"></a>
 
 ### service health check
 
@@ -155,7 +155,7 @@ HTTP health check:
 `patience_seconds` (required, integer) – The maximum time allowed for the service to become healthy. If the service is healthy before this deadline, the scenario setup continues without waiting.
 
 
-<a id="org9dbefb5"></a>
+<a id="orgc839a81"></a>
 
 ### service postgres
 
@@ -174,7 +174,7 @@ Defines how PostgreSQL is used in the service. Field is `postgres`, an optional 
 `pass_var` (optional, string) - Container DB password will be injected on services, via environment variable, by default `POSTGRESQL_PASSWORD`
 
 
-<a id="org8666a0d"></a>
+<a id="orgb59101b"></a>
 
 ### service kafka
 
@@ -185,7 +185,7 @@ Defines how Kafka is used in the service. Field is `kafka`, an optional object.
 `bootstrap_server_var` (optional, string) - Container HTTP connection string for Kafka will be injected on services, via environment variable, by default `KAFKA_BOOTSTRAP_SERVER`
 
 
-<a id="orgeb63ddb"></a>
+<a id="orge179579"></a>
 
 ### service keycloak
 
@@ -196,7 +196,7 @@ Defines how Kafka is used in the service. Field is `kafka`, an optional object.
 `realm_var` (optional, string) - Container realm name string for Keycloak will be injected on services, via environment variable, by default `KEYCLOAK_REALM`
 
 
-<a id="orgbb73cc4"></a>
+<a id="orgb2f1a05"></a>
 
 ### service pop<sub>server</sub>
 
@@ -207,7 +207,7 @@ Defines how Kafka is used in the service. Field is `kafka`, an optional object.
 ---
 
 
-<a id="org9df4125"></a>
+<a id="org0074456"></a>
 
 ## pop actions
 
@@ -218,7 +218,7 @@ there are many types of pop action, see the following sections.
 ---
 
 
-<a id="orgf5d2f03"></a>
+<a id="org3a59a21"></a>
 
 ### a kafka produce action
 
@@ -231,7 +231,7 @@ A kafka produce action is defined by:
 ---
 
 
-<a id="org90741f9"></a>
+<a id="org9ea0ebc"></a>
 
 ### an http assertion
 
@@ -252,7 +252,7 @@ Each JSON body pattern entry includes:
 ---
 
 
-<a id="orgedb8b9f"></a>
+<a id="org4887527"></a>
 
 ## Condition DSL
 
@@ -273,7 +273,7 @@ Supported conditions include:
 ---
 
 
-<a id="orgd66cfbe"></a>
+<a id="orgabe6ea3"></a>
 
 ## pop postgres
 
@@ -288,7 +288,7 @@ You can use PostgreSQL in pop-tests easily.
 ---
 
 
-<a id="org2203089"></a>
+<a id="org128a8b6"></a>
 
 ## pop kafka
 
@@ -303,9 +303,15 @@ You can use Kafka in pop-tests easily.
 ---
 
 
-<a id="orgcc8b944"></a>
+<a id="org861d3c6"></a>
 
 ## pop-server
+
+pop-server is a web-server that helps you simulate behaviours and test integrations with external systems.
+
+pop-server is a lightweight HTTP server that allows dynamic behavior registration and retrieval. It acts as a simple puppet server where you can define request-response behaviors dynamically via HTTP requests. This can be useful for testing, mocking APIs, or creating programmable server responses.
+
+Find the project here: <https://codeberg.org/jjba23/pop-server>
 
 You can use `pop_server` in pop-tests easily:
 
@@ -328,7 +334,7 @@ You can then  have it prepared with certain behaviors (under `behaviors` ):
 `body_file` (required, string) - path to the file to load data from, that will be returned as HTTP body
 
 
-<a id="org70bdff4"></a>
+<a id="orgad4ba1f"></a>
 
 ## pop keycloak
 
@@ -359,7 +365,7 @@ You can use Keycloak in pop-tests easily and have it auto-setup.
 ---
 
 
-<a id="org282e3c0"></a>
+<a id="orga1c25e4"></a>
 
 # Example tests, using the DSL
 

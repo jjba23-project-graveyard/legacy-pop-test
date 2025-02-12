@@ -247,6 +247,12 @@ You can use Kafka in pop-tests easily.
 
 ** pop-server
 
+pop-server is a web-server that helps you simulate behaviours and test integrations with external systems.
+
+pop-server is a lightweight HTTP server that allows dynamic behavior registration and retrieval. It acts as a simple puppet server where you can define request-response behaviors dynamically via HTTP requests. This can be useful for testing, mocking APIs, or creating programmable server responses.
+
+Find the project here: https://codeberg.org/jjba23/pop-server
+
 You can use ~pop_server~ in pop-tests easily:
 
 ~enabled~ (optional, boolean) - Whether to enable pop-server in a container or not
