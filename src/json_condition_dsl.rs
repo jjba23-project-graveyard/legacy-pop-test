@@ -20,18 +20,18 @@ use crate::pop_model::BodyPattern;
 use jql_runner::runner::raw;
 use serde_json::Value;
 
-pub fn eval_condition(body: &Value, patterns: Vec<BodyPattern>) -> Result<(), String> {
+pub fn eval_json_condition(body: &Value, patterns: Vec<BodyPattern>) -> Result<(), String> {
     for pat in patterns {
         let good_match = raw(&pat.pattern, body).map_err(|e| e.to_string())?;
 
         match pat.condition.as_str() {
             // match should not be empty
-            "non-empty-string" => {
+            "non-empty-str" => {
                 if good_match.as_str() == Some("") {
                     return Err("expectation not met of match to be non-empty".to_string());
                 }
             }
-            "empty-string" => {
+            "empty-str" => {
                 if good_match.as_str() != Some("") {
                     return Err("expectation not met of match to be empty".to_string());
                 }
@@ -155,7 +155,7 @@ mod tests {
             pattern: pattern.to_string(),
             condition: condition.to_string(),
         }];
-        let result = eval_condition(&body, patterns);
+        let result = eval_json_condition(&body, patterns);
         assert_eq!(result, expected);
     }
 
@@ -203,7 +203,7 @@ mod tests {
     fn check_non_empty_string_pat_handles_happy_case() {
         run_check_pat_test(
             "\"sut\"",
-            "non-empty-string",
+            "non-empty-str",
             json!({"sut": "something"}),
             Ok(()),
         );
@@ -211,7 +211,7 @@ mod tests {
 
     #[test]
     fn check_empty_string_pat_handles_happy_case() {
-        run_check_pat_test("\"sut\"", "empty-string", json!({"sut": ""}), Ok(()));
+        run_check_pat_test("\"sut\"", "empty-str", json!({"sut": ""}), Ok(()));
     }
 
     #[test]
@@ -221,7 +221,7 @@ mod tests {
             condition: "!= \"\"".to_string(),
         }];
         let body = json!({"sut": "something"});
-        let result = eval_condition(&body, patterns);
+        let result = eval_json_condition(&body, patterns);
         error!("{:?}", result);
         assert_ne!(result, Ok(()));
     }
@@ -233,7 +233,7 @@ mod tests {
             condition: "weird-condition".to_string(),
         }];
         let body = json!({"sut": "something"});
-        let result = eval_condition(&body, patterns);
+        let result = eval_json_condition(&body, patterns);
         error!("{:?}", result);
         assert_ne!(result, Ok(()));
     }

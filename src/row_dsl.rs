@@ -12,12 +12,14 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // Lesser GNU General Public License for more details.
 
-use log::{error, info};
+use log::{debug, error, info};
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 use regex::Regex;
 use tokio_postgres::Row;
 use uuid::Uuid;
+
+use crate::row_condition_dsl::eval_row_condition;
 
 #[derive(PartialEq, Debug, Clone)]
 pub enum RowExpressionQuantifier {
@@ -64,29 +66,58 @@ pub fn make_checker_from_expression(
     info!("found checker clauses: {:?}", clauses);
 
     let fun = move |ro: &Row| {
+        let mut parsed_row: Vec<String> = Vec::new();
         let cs = clauses.iter().enumerate().clone();
-        for (index, clause) in cs {
-            let col_type = ro.columns()[index].type_().name();
+        for (i, clause) in cs.clone() {
+            let col_type = ro.columns()[i].type_().name();
 
-            info!("working with column type: {}", col_type);
+            debug!("working with column type: {}", col_type);
             match col_type {
                 "uuid" => {
-                    let x: Result<Uuid, String> = ro.try_get(index).map_err(|e| e.to_string());
-                    match x {
-                        Ok(got) => info!("test on uuid: {:?}", got),
+                    let maybe_uuid: Result<Uuid, String> = ro.try_get(i).map_err(|e| e.to_string());
+                    match maybe_uuid {
+                        Ok(uuid) => {
+                            let mut u = Uuid::encode_buffer();
+                            let aa = uuid.hyphenated().encode_lower(&mut u);
+                            parsed_row.push(aa.to_owned());
+                            debug!("{}", aa.to_owned());
+                        }
+                        Err(e) => error!("{}", e),
+                    }
+                }
+                "varchar" => {
+                    let maybe_str: Result<String, String> =
+                        ro.try_get(i).map_err(|e| e.to_string());
+                    match maybe_str {
+                        Ok(str_val) => {
+                            parsed_row.push(str_val.to_owned());
+                        }
                         Err(e) => error!("{}", e),
                     }
                 }
                 _ => {
-                    info!("other column type: {}", col_type);
-                    let x: Result<String, String> = ro.try_get(index).map_err(|e| e.to_string());
+                    debug!("other column type: {}", col_type);
+                    let x: Result<String, String> = ro.try_get(i).map_err(|e| e.to_string());
                     match x {
-                        Ok(got) => info!("test on other: {:?}", got),
+                        Ok(got) => {
+                            debug!("test on other: {:?}", got);
+                            parsed_row.push(got.to_owned());
+                        }
                         Err(e) => error!("{}", e),
                     }
                 }
             }
         }
+
+        info!("{:?}", parsed_row);
+
+        for (i, clause) in cs.clone() {
+            let col_type = ro.columns()[i].type_().name();
+            let eval_result =
+                eval_row_condition(parsed_row[i].clone(), clause.clone(), col_type.to_string());
+            info!("{:?}", eval_result);
+        }
+
         true
     };
 
@@ -207,12 +238,12 @@ mod tests {
 
     #[test]
     fn test_basic_extraction() {
-        let input = "[0] ((non-empty-string)(== 232323)(== en_GB)(non-empty-string))";
+        let input = "[0] ((non-empty-str)(== 232323)(== en_GB)(non-empty-str))";
         let expected = vec![
-            "non-empty-string".to_string(),
+            "non-empty-str".to_string(),
             "== 232323".to_string(),
             "== en_GB".to_string(),
-            "non-empty-string".to_string(),
+            "non-empty-str".to_string(),
         ];
         assert_eq!(extract_checker_clauses(input), expected);
     }
