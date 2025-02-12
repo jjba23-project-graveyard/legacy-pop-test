@@ -109,7 +109,7 @@ pub enum PopAction {
         name: Option<String>,
         postgres_query: String,
         assert_row_count: Option<i32>,
-        assert_expression: Option<String>,
+        assert_expressions: Option<Vec<String>>,
         delay_seconds: Option<u64>,
     },
 }

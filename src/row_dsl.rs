@@ -17,6 +17,7 @@ use log::{error, info};
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 use regex::Regex;
 use tokio_postgres::Row;
+use uuid::Uuid;
 
 #[derive(PartialEq, Debug, Clone)]
 pub enum RowExpressionQuantifier {
@@ -66,11 +67,24 @@ pub fn make_checker_from_expression(
         let cs = clauses.iter().enumerate().clone();
         for (index, clause) in cs {
             let col_type = ro.columns()[index].type_().name();
+
             info!("working with column type: {}", col_type);
-            let x: Result<String, String> = ro.try_get(index).map_err(|e| e.to_string());
-            match x {
-                Ok(got) => info!("test on value: {:?}", got),
-                Err(e) => error!("{}", e),
+            match col_type {
+                "uuid" => {
+                    let x: Result<Uuid, String> = ro.try_get(index).map_err(|e| e.to_string());
+                    match x {
+                        Ok(got) => info!("test on uuid: {:?}", got),
+                        Err(e) => error!("{}", e),
+                    }
+                }
+                _ => {
+                    info!("other column type: {}", col_type);
+                    let x: Result<String, String> = ro.try_get(index).map_err(|e| e.to_string());
+                    match x {
+                        Ok(got) => info!("test on other: {:?}", got),
+                        Err(e) => error!("{}", e),
+                    }
+                }
             }
         }
         true
@@ -193,20 +207,20 @@ mod tests {
 
     #[test]
     fn test_basic_extraction() {
-        let input = "[0] ((!= \"\")(== \"232323\")(== \"en_GB\")(!= \"\"))";
+        let input = "[0] ((non-empty-string)(== 232323)(== en_GB)(non-empty-string))";
         let expected = vec![
-            "!= \"\"".to_string(),
-            "== \"232323\"".to_string(),
-            "== \"en_GB\"".to_string(),
-            "!= \"\"".to_string(),
+            "non-empty-string".to_string(),
+            "== 232323".to_string(),
+            "== en_GB".to_string(),
+            "non-empty-string".to_string(),
         ];
         assert_eq!(extract_checker_clauses(input), expected);
     }
 
     #[test]
     fn test_nested_parentheses() {
-        let input = "[0] (((== \"nested\")))";
-        let expected = vec!["== \"nested\"".to_string()];
+        let input = "[0] (((== nested)))";
+        let expected = vec!["== nested".to_string()];
         assert_eq!(extract_checker_clauses(input), expected);
     }
 
@@ -219,14 +233,14 @@ mod tests {
 
     #[test]
     fn test_no_parentheses() {
-        let input = "[0] == \"value\"";
+        let input = "[0] == value";
         let expected: Vec<String> = vec![];
         assert_eq!(extract_checker_clauses(input), expected);
     }
 
     #[test]
     fn test_malformed_input() {
-        let input = "[0] ((== \"missing end\"";
+        let input = "[0] ((== missing end";
         let expected: Vec<String> = vec![];
         assert_eq!(extract_checker_clauses(input), expected);
     }

@@ -18,7 +18,6 @@
 use crate::pop_model::BodyPattern;
 
 use jql_runner::runner::raw;
-use log::info;
 use serde_json::Value;
 
 pub fn eval_condition(body: &Value, patterns: Vec<BodyPattern>) -> Result<(), String> {
@@ -121,8 +120,6 @@ pub fn eval_condition(body: &Value, patterns: Vec<BodyPattern>) -> Result<(), St
                 ))
             }
         }
-
-        info!("{} {}", good_match, pat.condition);
     }
     Ok(())
 }
