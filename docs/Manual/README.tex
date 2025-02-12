@@ -1,4 +1,4 @@
-% Created 2025-02-12 wo 10:22
+% Created 2025-02-12 wo 23:34
 % Intended LaTeX compiler: pdflatex
 \documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
@@ -12,11 +12,11 @@
 \usepackage{amssymb}
 \usepackage{capt-of}
 \usepackage{hyperref}
-\author{Music Player Daemon (MPD) user}
+\author{Josep Bigorra}
 \date{\today}
 \title{pop-test manual}
 \hypersetup{
- pdfauthor={Music Player Daemon (MPD) user},
+ pdfauthor={Josep Bigorra},
  pdftitle={pop-test manual},
  pdfkeywords={},
  pdfsubject={},
@@ -45,7 +45,7 @@ pop-tests as we affectionately call them, can range from small scope integration
 
 
 \section{How to run it}
-\label{sec:org2271394}
+\label{sec:org912e187}
 
 It is recommended to run with \texttt{TESTCONTAINERS\_COMMAND=keep} and \texttt{RUST\_LOG=debug} as environment variables.
 
@@ -72,7 +72,7 @@ TESTCONTAINERS_COMMAND=keep RUST_LOG=debug nix develop -c cargo run -- --path ./
 
 
 \section{Why pop-test?}
-\label{sec:org42d902b}
+\label{sec:orgfd744e1}
 
 \begin{itemize}
 \item Catches mistakes early – Helps find problems before real users do.
@@ -84,7 +84,7 @@ TESTCONTAINERS_COMMAND=keep RUST_LOG=debug nix develop -c cargo run -- --path ./
 \end{itemize}
 
 \section{Motivation}
-\label{sec:org0aad2a9}
+\label{sec:org3af2c78}
 
 Imagine you're building a toy robot, but you don't need to understand all the small parts inside the robot to know if it works. You just need to press a button and see if it performs the task correctly.
 
@@ -109,7 +109,7 @@ In short, pop-tests make engineers happier, business people more certain of what
 \noindent\rule{\textwidth}{0.5pt}
 
 \section{The Scenario DSL (Domain Specific Language)}
-\label{sec:org8719e5a}
+\label{sec:org5ebc8ea}
 
 In order to provide an expressive and powerful way to describe test scenarios, a lot of care has gone into creating a good domain-specific language, which remains flexible but concise.
 
@@ -123,7 +123,7 @@ The tool supports YAML, TOML and JSON file formats seamlessly.
 \noindent\rule{\textwidth}{0.5pt}
 
 \subsection{pop services}
-\label{sec:org6bebb15}
+\label{sec:org9cf59e1}
 
 \texttt{pop\_services} is a list of services to be started for the scenario.
 
@@ -142,7 +142,7 @@ A service is defined by:
 \texttt{env\_vars} (optional, map of string to string) – A set of environment variables to be defined for the service.  
 
 \subsubsection{service health check}
-\label{sec:org27e57bb}
+\label{sec:org9d73bfe}
 
 Defines how pop-test determines whether the service is healthy. Field is \texttt{health\_check}, a required object.
 
@@ -159,7 +159,7 @@ HTTP health check:
 \texttt{patience\_seconds} (required, integer) – The maximum time allowed for the service to become healthy. If the service is healthy before this deadline, the scenario setup continues without waiting.
 
 \subsubsection{service postgres}
-\label{sec:orgc269d63}
+\label{sec:orgb566c58}
 
 Defines how PostgreSQL is used in the service. Field is \texttt{postgres}, an optional object.
 
@@ -176,7 +176,7 @@ Defines how PostgreSQL is used in the service. Field is \texttt{postgres}, an op
 \texttt{pass\_var} (optional, string) - Container DB password will be injected on services, via environment variable, by default \texttt{POSTGRESQL\_PASSWORD}
 
 \subsubsection{service kafka}
-\label{sec:org6d74aee}
+\label{sec:org331342f}
 
 Defines how Kafka is used in the service. Field is \texttt{kafka}, an optional object.
 
@@ -185,7 +185,7 @@ Defines how Kafka is used in the service. Field is \texttt{kafka}, an optional o
 \texttt{bootstrap\_server\_var} (optional, string) - Container HTTP connection string for Kafka will be injected on services, via environment variable, by default \texttt{KAFKA\_BOOTSTRAP\_SERVER}
 
 \subsubsection{service keycloak}
-\label{sec:org78b8616}
+\label{sec:org74c7ca8}
 
 \texttt{enabled} (optional, boolean) - Whether to inject environment variables with Kafka details
 
@@ -195,7 +195,7 @@ Defines how Kafka is used in the service. Field is \texttt{kafka}, an optional o
 
 
 \subsubsection{service pop\textsubscript{server}}
-\label{sec:org1fef422}
+\label{sec:orgf43462c}
 
 \texttt{enabled} (optional, boolean) - Whether to inject environment variables with Kafka details
 
@@ -205,7 +205,7 @@ Defines how Kafka is used in the service. Field is \texttt{kafka}, an optional o
 \noindent\rule{\textwidth}{0.5pt}
 
 \subsection{pop actions}
-\label{sec:orgca6a9bb}
+\label{sec:orgda6905f}
 
 \texttt{pop\_actions} is a list of actions that setup state for a test and validate expected responses and behaviours from the services in the scenario. These actions help verify that the services return valid and expected data before proceeding with the scenario execution.
 
@@ -214,7 +214,7 @@ there are many types of pop action, see the following sections.
 \noindent\rule{\textwidth}{0.5pt}
 
 \subsubsection{a kafka produce action}
-\label{sec:org8c079f5}
+\label{sec:org4df9a07}
 
 A kafka produce action is defined by:
 
@@ -226,7 +226,7 @@ A kafka produce action is defined by:
 \noindent\rule{\textwidth}{0.5pt}
 
 \subsubsection{an http assertion}
-\label{sec:orgab16a19}
+\label{sec:org34bad85}
 
 \texttt{expected\_code} (optional, u16 number) - expected HTTP status code, defaults to 200
 
@@ -245,13 +245,17 @@ Each JSON body pattern entry includes:
 \noindent\rule{\textwidth}{0.5pt}
 
 \subsection{Condition DSL}
-\label{sec:orgec4c8f4}
+\label{sec:org826d5bc}
 
-Supported conditions include:
+This DSL is present in JSON body checks and in SQL database checks, supported conditions include:
 
-\texttt{!= ""} (ensures the field is not empty)
+\texttt{non-empty-str} (ensures the field is not empty)
 
-\texttt{== ""} (ensures the field is empty)
+\texttt{empty-str} (ensures the field is empty)
+
+\texttt{== x} (ensures the field is x)
+
+\texttt{!= x} (ensures the field is not x)
 
 \texttt{> 0} (ensures the field is greater than zero)
 
@@ -263,8 +267,23 @@ Supported conditions include:
 
 \noindent\rule{\textwidth}{0.5pt}
 
+\subsection{Row DSL}
+\label{sec:orga69e866}
+
+This is the DSL used to perform assertions on SQL databases. Currently PostgreSQL supports this. 🚧
+
+\texttt{[0]} symbolizes the first row in a table, and the list of clauses in parentheses the conditions to be checked in order
+
+
+\begin{verbatim}
+[0] ((non-empty-str)(== 232323)(== en_GB)(non-empty-str))
+\end{verbatim}
+
+
+\noindent\rule{\textwidth}{0.5pt}
+
 \subsection{pop postgres}
-\label{sec:orgeecdc28}
+\label{sec:orgb31c8cc}
 
 You can use PostgreSQL in pop-tests easily.
 
@@ -277,7 +296,7 @@ You can use PostgreSQL in pop-tests easily.
 \noindent\rule{\textwidth}{0.5pt}
 
 \subsection{pop kafka}
-\label{sec:org35352dd}
+\label{sec:org55e2962}
 
 You can use Kafka in pop-tests easily.
 
@@ -291,7 +310,7 @@ You can use Kafka in pop-tests easily.
 \noindent\rule{\textwidth}{0.5pt}
 
 \subsection{pop-server}
-\label{sec:org0b5cfcc}
+\label{sec:org610960a}
 
 pop-server is a web-server that helps you simulate behaviours and test integrations with external systems.
 
@@ -323,7 +342,7 @@ You can then  have it prepared with certain behaviors (under \texttt{behaviors} 
 
 
 \subsection{pop keycloak}
-\label{sec:org29c5446}
+\label{sec:orgabc5a57}
 
 You can use Keycloak in pop-tests easily and have it auto-setup.
 
@@ -353,7 +372,7 @@ You can use Keycloak in pop-tests easily and have it auto-setup.
 \noindent\rule{\textwidth}{0.5pt}
 
 \section{Example tests, using the DSL}
-\label{sec:org8399b04}
+\label{sec:org51181f2}
 
 For example tests and learning demos, refer to the scenarios directory: \url{../../resources/scenarios}
 
