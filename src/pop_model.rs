@@ -105,6 +105,13 @@ pub enum PopAction {
         message_file_path: String,
         kafka_topic: String,
     },
+    PostgresAssertion {
+        name: Option<String>,
+        postgres_query: String,
+        assert_row_count: Option<i64>,
+        assert_expression: Option<String>,
+        delay_seconds: Option<u64>,
+    },
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

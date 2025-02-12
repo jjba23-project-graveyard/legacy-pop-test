@@ -45,6 +45,20 @@ pub async fn run_action(
 ) -> Result<(), String> {
     info!("executing action: {:?}", action);
     match action {
+        PopAction::PostgresAssertion {
+            name,
+            postgres_query,
+            assert_row_count,
+            assert_expression,
+            delay_seconds,
+        } => {
+            name.clone().inspect(|n| info!("starting action: {}", n));
+            if let Some(delay) = delay_seconds {
+                sleep(Duration::from_secs(*delay)).await;
+            }
+
+            Ok(())
+        }
         PopAction::KafkaProduceFromFileAction {
             name,
             message_file_path,
