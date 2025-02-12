@@ -12,7 +12,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // Lesser GNU General Public License for more details.
 
-use log::info;
+use log::{error, info};
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 use regex::Regex;
@@ -65,8 +65,11 @@ pub fn make_checker_from_expression(
     let fun = move |ro: &Row| {
         let cs = clauses.iter().enumerate().clone();
         for (index, clause) in cs {
-            let x: String = ro.get(index);
-            info!("test on value: {:?}", x);
+            let x: Result<String, String> = ro.try_get(index).map_err(|e| e.to_string());
+            match x {
+                Ok(got) => info!("test on value: {:?}", got),
+                Err(e) => error!("{}", e),
+            }
         }
         true
     };
