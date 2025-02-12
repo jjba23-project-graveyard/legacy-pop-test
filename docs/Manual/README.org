@@ -249,11 +249,11 @@ You can use Kafka in pop-tests easily.
 
 You can use ~pop_server~ in pop-tests easily:
 
-~enabled~ (optional, boolean) - Whether to enable Kafka in a container or not
+~enabled~ (optional, boolean) - Whether to enable pop-server in a container or not
 
-~image_name~ (optional, string) - Container image for Kafka, by default ~jjba23/pop-server~
+~image_name~ (optional, string) - Container image for pop-server, by default ~jjba23/pop-server~
 
-~image_tag~ (optional, string) - Container image tag for Kafka, by default ~0.3.0~
+~image_tag~ (optional, string) - Container image tag for pop-server, by default ~0.3.0~
 
 
 You can then  have it prepared with certain behaviors (under ~behaviors~ ):
@@ -274,9 +274,9 @@ You can then  have it prepared with certain behaviors (under ~behaviors~ ):
 
 You can use Keycloak in pop-tests easily and have it auto-setup.
 
-~enabled~ (optional, boolean) - Whether to enable Kafka in a container or not
+~enabled~ (optional, boolean) - Whether to enable Keycloak in a container or not
 
-~image_name~ (optional, string) - Container image for Kafka, by default ~keycloak/keycloak~
+~image_name~ (optional, string) - Container image for Keycloak, by default ~keycloak/keycloak~
 
 ~image_tag~ (optional, string) - Container image tag for Keycloak, by default ~26.1~
 
