@@ -59,7 +59,18 @@ fn extract_checker_clauses(input: &str) -> Vec<String> {
 pub fn make_checker_from_expression(
     expression: String,
 ) -> Result<Box<dyn Fn(&Row) -> bool>, String> {
-    let fun = |ro: &Row| true;
+    let clauses = extract_checker_clauses(expression.as_str());
+    info!("found checker clauses: {:?}", clauses);
+
+    let fun = move |ro: &Row| {
+        let cs = clauses.iter().enumerate().clone();
+        for (index, clause) in cs {
+            let x: String = ro.get(index);
+            info!("test on value: {:?}", x);
+        }
+        true
+    };
+
     Ok(Box::new(fun))
 }
 

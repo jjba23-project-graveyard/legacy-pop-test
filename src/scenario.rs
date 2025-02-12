@@ -382,7 +382,7 @@ pub async fn play_scenario(scenario: PopScenario) -> Result<(), String> {
         }
     }
 
-    terminate_services(children).await;
+    let _ = tokio::task::spawn(async { terminate_services(children).await }).await;
 
     if let Some((keycloak_out, keycloak_err)) = keycloak_logs {
         keycloak_out.abort();
