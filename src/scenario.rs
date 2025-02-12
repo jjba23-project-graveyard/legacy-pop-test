@@ -51,7 +51,7 @@ pub async fn run_action(
             name,
             postgres_query,
             assert_row_count,
-            assert_expression,
+            assert_expressions,
             delay_seconds,
         } => {
             name.clone().inspect(|n| info!("starting action: {}", n));
@@ -95,39 +95,39 @@ pub async fn run_action(
                 }
             }
 
-            let q =
-                get_row_expression_quantifier(assert_expression.clone().unwrap_or("".to_string()))?;
-            info!("row expression quantifier: {:?}", q);
+            for assert_expression in assert_expressions.clone().unwrap_or(Vec::new()) {
+                let q = get_row_expression_quantifier(assert_expression.clone())?;
+                info!("row expression quantifier: {:?}", q);
 
-            let row_checker =
-                make_checker_from_expression(assert_expression.clone().unwrap_or("".to_string()))?;
+                let row_checker = make_checker_from_expression(assert_expression.clone())?;
 
-            match q {
-                crate::row_dsl::RowExpressionQuantifier::All => {
-                    info!("TODO");
-                    for row in rows {
-                        let is_valid_row = row_checker(&row);
-                        info!("is valid row {}, {:?}", is_valid_row, row);
+                match q {
+                    crate::row_dsl::RowExpressionQuantifier::All => {
+                        info!("TODO");
+                        for row in &rows {
+                            let is_valid_row = row_checker(row);
+                            info!("is valid row {}, {:?}", is_valid_row, row);
+                        }
                     }
-                }
-                crate::row_dsl::RowExpressionQuantifier::First => {
-                    info!("reading first row: {:?}", rows[0]);
-                    let is_valid_row = row_checker(&rows[0]);
-                    info!("is valid row {}, {:?}", is_valid_row, &rows[0]);
-                }
-                crate::row_dsl::RowExpressionQuantifier::Last => {
-                    let pos = rows.len();
-                    info!("reading last row: {:?}", rows[pos]);
-                    let is_valid_row = row_checker(&rows[pos]);
-                    info!("is valid row {}, {:?}", is_valid_row, &rows[pos]);
-                }
-                crate::row_dsl::RowExpressionQuantifier::Position(p) => {
-                    let pos = p as usize;
-                    info!("reading row at pos {}: {:?}", pos, rows[pos]);
-                    let is_valid_row = row_checker(&rows[pos]);
-                    info!("is valid row {}, {:?}", is_valid_row, &rows[pos]);
-                }
-            };
+                    crate::row_dsl::RowExpressionQuantifier::First => {
+                        info!("reading first row: {:?}", rows[0]);
+                        let is_valid_row = row_checker(&rows[0]);
+                        info!("is valid row {}, {:?}", is_valid_row, &rows[0]);
+                    }
+                    crate::row_dsl::RowExpressionQuantifier::Last => {
+                        let pos = rows.len();
+                        info!("reading last row: {:?}", rows[pos]);
+                        let is_valid_row = row_checker(&rows[pos]);
+                        info!("is valid row {}, {:?}", is_valid_row, &rows[pos]);
+                    }
+                    crate::row_dsl::RowExpressionQuantifier::Position(p) => {
+                        let pos = p as usize;
+                        info!("reading row at pos {}: {:?}", pos, rows[pos]);
+                        let is_valid_row = row_checker(&rows[pos]);
+                        info!("is valid row {}, {:?}", is_valid_row, &rows[pos]);
+                    }
+                };
+            }
 
             Ok(())
         }

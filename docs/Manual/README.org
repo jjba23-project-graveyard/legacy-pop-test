@@ -204,11 +204,15 @@ Each JSON body pattern entry includes:
 
 ** Condition DSL
 
-Supported conditions include:
+This DSL is present in JSON body checks and in SQL database checks, supported conditions include:
 
-~!= ""~ (ensures the field is not empty)
+~non-empty-str~ (ensures the field is not empty)
 
-~== ""~ (ensures the field is empty)
+~empty-str~ (ensures the field is empty)
+
+~== x~ (ensures the field is x)
+
+~!= x~ (ensures the field is not x)
 
 ~> 0~ (ensures the field is greater than zero)
 
@@ -217,6 +221,20 @@ Supported conditions include:
 ~< 0~ (ensures the field is smaller than zero)
 
 ~<= 0~ (ensures the field is non-positive)
+
+-----
+
+** Row DSL
+
+This is the DSL used to perform assertions on SQL databases. Currently PostgreSQL supports this. 🚧
+
+~[0]~ symbolizes the first row in a table, and the list of clauses in parentheses the conditions to be checked in order
+
+
+#+begin_src 
+[0] ((non-empty-str)(== 232323)(== en_GB)(non-empty-str))
+#+end_src
+
 
 -----
 

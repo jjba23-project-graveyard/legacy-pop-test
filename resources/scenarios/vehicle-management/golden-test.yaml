@@ -38,21 +38,22 @@ pop_services:
 
 
 pop_actions:
-  - name: "Publish a Kafka message to the registration state topic"
-    kafka_topic: "vehicle.registration-state"
-    message_file_path: "./resources/kafka/vehicle-management/registration-state.json"
-
   - name: "Add customer to vehicle-management"
     with_keycloak_user_token: true
     action_url: "/api/v1/customers"
     service_id: "vehicle-management"
     method: "POST"
     message_file_path: "./resources/http/vehicle-management/register-customer.json"
+    
+  - name: "Publish a Kafka message to the registration state topic"
+    kafka_topic: "vehicle.registration-state"
+    message_file_path: "./resources/kafka/vehicle-management/registration-state.json"
 
   - name: "Check that the customer got recorded in the database"
     postgres_query: "SELECT organization_id, customer_reference, locale, customer_id FROM customers WHERE customer_reference = '232323'"
     assert_row_count: 1
-    assert_expression: '[0] ((!= "")(== "232323")(== "en_GB")(!= ""))'
+    assert_expressions:
+      - '[0] ((non-empty-str)(== 232323)(== en_GB)(non-empty-str))'
     
     
   - name: "Check calling the registered URL works and returns the proper JSON body"

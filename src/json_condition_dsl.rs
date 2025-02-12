@@ -18,26 +18,68 @@
 use crate::pop_model::BodyPattern;
 
 use jql_runner::runner::raw;
-use log::info;
 use serde_json::Value;
 
-pub fn eval_condition(body: &Value, patterns: Vec<BodyPattern>) -> Result<(), String> {
+pub fn eval_json_condition(body: &Value, patterns: Vec<BodyPattern>) -> Result<(), String> {
     for pat in patterns {
         let good_match = raw(&pat.pattern, body).map_err(|e| e.to_string())?;
-        info!("{:?}", good_match);
 
         match pat.condition.as_str() {
             // match should not be empty
-            "!= \"\"" => {
-                if good_match.as_str().unwrap_or("").is_empty() {
+            "non-empty-str" => {
+                if good_match.as_str() == Some("") {
                     return Err("expectation not met of match to be non-empty".to_string());
                 }
             }
-            "== \"\"" => {
-                if !good_match.as_str().unwrap_or("").is_empty() {
+            "empty-str" => {
+                if good_match.as_str() != Some("") {
                     return Err("expectation not met of match to be empty".to_string());
                 }
             }
+            // match should be different than
+            cond if cond.starts_with("!= ") => match good_match {
+                Value::String(ref s) => {
+                    if s == cond.strip_prefix("!= ").unwrap_or("".trim()) {
+                        return Err(
+                            "expectation not met of match to be different to value ".to_string()
+                        );
+                    }
+                }
+                Value::Number(ref n) => {
+                    let nn: f64 = cond
+                        .strip_prefix("!= ")
+                        .unwrap_or("".trim())
+                        .parse()
+                        .map_err(|e| format!("{}", e))?;
+                    if n.as_f64() == Some(nn) {
+                        return Err("the numbers should be different but were found to be equal"
+                            .to_string());
+                    }
+                }
+                _ => return Err("could not apply condition checking to type".to_string()),
+            },
+            // match should be equal to
+            cond if cond.starts_with("== ") => match good_match {
+                Value::String(ref s) => {
+                    if s != cond.strip_prefix("== ").unwrap_or("".trim()) {
+                        return Err(
+                            "expectation not met of match to be equal to value ".to_string()
+                        );
+                    }
+                }
+                Value::Number(ref n) => {
+                    let nn: f64 = cond
+                        .strip_prefix("== ")
+                        .unwrap_or("".trim())
+                        .parse()
+                        .map_err(|e| format!("{}", e))?;
+                    if n.as_f64() != Some(nn) {
+                        return Err("the numbers should be equal but were found to be different"
+                            .to_string());
+                    }
+                }
+                _ => return Err("could not apply condition checking to type".to_string()),
+            },
             // match should be greater or smaller than x
             cond if cond.starts_with("> ") || cond.starts_with("< ") => {
                 let exp: f64 = cond[2..].parse().map_err(|e| format!("{}", e))?;
@@ -78,8 +120,6 @@ pub fn eval_condition(body: &Value, patterns: Vec<BodyPattern>) -> Result<(), St
                 ))
             }
         }
-
-        info!("{} {}", good_match, pat.condition);
     }
     Ok(())
 }
@@ -94,17 +134,28 @@ mod tests {
     use log::error;
     use serde_json::json;
 
+    use std::sync::Once;
+
+    static INIT: Once = Once::new();
+
+    pub fn initialize() {
+        INIT.call_once(|| {
+            env_logger::init();
+        });
+    }
+
     fn run_check_pat_test(
         pattern: &str,
         condition: &str,
         body: serde_json::Value,
         expected: Result<(), String>,
     ) {
+        initialize();
         let patterns = vec![BodyPattern {
             pattern: pattern.to_string(),
             condition: condition.to_string(),
         }];
-        let result = eval_condition(&body, patterns);
+        let result = eval_json_condition(&body, patterns);
         assert_eq!(result, expected);
     }
 
@@ -139,13 +190,28 @@ mod tests {
     }
 
     #[test]
+    fn check_equals_pat_handles_happy_case() {
+        run_check_pat_test("\"sut\"", "== 1", json!({"sut": 1}), Ok(()));
+    }
+
+    #[test]
+    fn check_not_equals_pat_pat_handles_happy_case() {
+        run_check_pat_test("\"sut\"", "!= 0", json!({"sut": 1}), Ok(()));
+    }
+
+    #[test]
     fn check_non_empty_string_pat_handles_happy_case() {
-        run_check_pat_test("\"sut\"", "!= \"\"", json!({"sut": "something"}), Ok(()));
+        run_check_pat_test(
+            "\"sut\"",
+            "non-empty-str",
+            json!({"sut": "something"}),
+            Ok(()),
+        );
     }
 
     #[test]
     fn check_empty_string_pat_handles_happy_case() {
-        run_check_pat_test("\"sut\"", "== \"\"", json!({"sut": ""}), Ok(()));
+        run_check_pat_test("\"sut\"", "empty-str", json!({"sut": ""}), Ok(()));
     }
 
     #[test]
@@ -155,7 +221,7 @@ mod tests {
             condition: "!= \"\"".to_string(),
         }];
         let body = json!({"sut": "something"});
-        let result = eval_condition(&body, patterns);
+        let result = eval_json_condition(&body, patterns);
         error!("{:?}", result);
         assert_ne!(result, Ok(()));
     }
@@ -167,7 +233,7 @@ mod tests {
             condition: "weird-condition".to_string(),
         }];
         let body = json!({"sut": "something"});
-        let result = eval_condition(&body, patterns);
+        let result = eval_json_condition(&body, patterns);
         error!("{:?}", result);
         assert_ne!(result, Ok(()));
     }

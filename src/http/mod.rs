@@ -19,7 +19,7 @@ use std::{fs, str::FromStr};
 
 use crate::pop_model::BodyPattern;
 
-use crate::condition_dsl::eval_condition;
+use crate::json_condition_dsl::eval_json_condition;
 use log::{debug, error, info};
 use reqwest::{
     header::{self, HeaderValue},
@@ -72,7 +72,7 @@ pub async fn run_http_assertion(
 
             let j = serde_json::from_slice(body_bytes).map_err(|e| e.to_string());
             if let Ok(body) = &j {
-                eval_condition(body, json_body_patterns.unwrap_or_default())?
+                eval_json_condition(body, json_body_patterns.unwrap_or_default())?
             }
         }
     }

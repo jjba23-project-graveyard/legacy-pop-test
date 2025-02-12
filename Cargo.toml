@@ -17,7 +17,7 @@
 
 [package]
 name = "pop-test"
-version = "0.3.6"
+version = "0.4.0"
 edition = "2021"
 authors = ["Josep Bigorra <jjbigorra@gmail.com>"]
 
@@ -33,9 +33,15 @@ jql-parser = { version = "8.0" }
 jql-runner = { version = "8.0" }
 testcontainers = "0.23.1"
 testcontainers-modules = { version = "0.11.6", features = ["postgres", "kafka"] }
-tokio-postgres = "0.7.13"
+tokio-postgres = { version = "0.7.13", features = ["with-time-0_3", "with-uuid-1"] }
 kafka = "0.10"
 log = "0.4"
 env_logger = "0.11.6"
 clap = { version = "4.5.28", features = ["derive"] }
 regex = "1.11.1"
+time = "0.3.37"
+uuid = {version = "1.13.1", features = [
+    "v4",                
+    "fast-rng",          
+    "macro-diagnostics", 
+]}

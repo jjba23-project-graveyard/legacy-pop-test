@@ -20,12 +20,13 @@ use pop_model::PopScenario;
 use scenario::play_scenario;
 use std::{fs, path::Path};
 
-mod condition_dsl;
 mod containers;
 mod environment;
 mod health_check;
+mod json_condition_dsl;
 mod pop_model;
 mod proc;
+mod row_condition_dsl;
 mod row_dsl;
 mod scenario;
 
