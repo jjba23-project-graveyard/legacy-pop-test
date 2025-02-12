@@ -16,6 +16,7 @@ use log::info;
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 use regex::Regex;
+use tokio_postgres::Row;
 
 #[derive(PartialEq, Debug, Clone)]
 pub enum RowExpressionQuantifier {
@@ -25,6 +26,13 @@ pub enum RowExpressionQuantifier {
     Position(i32),
 }
 
+pub fn make_checker_from_expression(
+    expression: String,
+) -> Result<Box<dyn Fn(&Row) -> bool>, String> {
+    let fun = |ro: &Row| true;
+    Ok(Box::new(fun))
+}
+
 pub fn get_row_expression_quantifier(
     expression: String,
 ) -> Result<RowExpressionQuantifier, String> {
@@ -32,11 +40,11 @@ pub fn get_row_expression_quantifier(
         return Ok(RowExpressionQuantifier::All);
     }
 
-    if expression.starts_with("[first]") {
+    if expression.starts_with("[first]") || expression.starts_with("[0]") {
         return Ok(RowExpressionQuantifier::First);
     }
 
-    if expression.starts_with("[last]") {
+    if expression.starts_with("[last]") || expression.starts_with("[-1]") {
         return Ok(RowExpressionQuantifier::Last);
     }
 
@@ -85,6 +93,12 @@ mod tests {
     fn test_get_row_expression_quantifier_first() {
         let result = get_row_expression_quantifier("[first]".to_string());
         assert_eq!(result, Ok(RowExpressionQuantifier::First));
+    }
+
+    #[test]
+    fn test_get_row_expression_quantifier_last_min_one() {
+        let result = get_row_expression_quantifier("[-1]".to_string());
+        assert_eq!(result, Ok(RowExpressionQuantifier::Last));
     }
 
     #[test]

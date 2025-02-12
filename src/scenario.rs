@@ -29,7 +29,7 @@ use crate::pop_model::{PopAction, PopEnv, PopKeycloak, PopScenario, PopService};
 use crate::pop_server::maybe_start_pop_server;
 use crate::postgres::container::maybe_start_postgres;
 use crate::proc::{start_service, terminate_services};
-use crate::row_dsl::get_row_expression_quantifier;
+use crate::row_dsl::{get_row_expression_quantifier, make_checker_from_expression};
 use log::{error, info};
 use std::time::Duration;
 use tokio_postgres::NoTls;
@@ -96,11 +96,38 @@ pub async fn run_action(
             }
 
             let q =
-                get_row_expression_quantifier(assert_expression.clone().unwrap_or("".to_string()));
-
+                get_row_expression_quantifier(assert_expression.clone().unwrap_or("".to_string()))?;
             info!("row expression quantifier: {:?}", q);
 
-            //let value: &str = rows[0].get(0);
+            let row_checker =
+                make_checker_from_expression(assert_expression.clone().unwrap_or("".to_string()))?;
+
+            match q {
+                crate::row_dsl::RowExpressionQuantifier::All => {
+                    info!("TODO");
+                    for row in rows {
+                        let is_valid_row = row_checker(&row);
+                        info!("is valid row {}, {:?}", is_valid_row, row);
+                    }
+                }
+                crate::row_dsl::RowExpressionQuantifier::First => {
+                    info!("reading first row: {:?}", rows[0]);
+                    let is_valid_row = row_checker(&rows[0]);
+                    info!("is valid row {}, {:?}", is_valid_row, &rows[0]);
+                }
+                crate::row_dsl::RowExpressionQuantifier::Last => {
+                    let pos = rows.len();
+                    info!("reading last row: {:?}", rows[pos]);
+                    let is_valid_row = row_checker(&rows[pos]);
+                    info!("is valid row {}, {:?}", is_valid_row, &rows[pos]);
+                }
+                crate::row_dsl::RowExpressionQuantifier::Position(p) => {
+                    let pos = p as usize;
+                    info!("reading row at pos {}: {:?}", pos, rows[pos]);
+                    let is_valid_row = row_checker(&rows[pos]);
+                    info!("is valid row {}, {:?}", is_valid_row, &rows[pos]);
+                }
+            };
 
             Ok(())
         }
