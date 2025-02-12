@@ -45,7 +45,7 @@ fmt:
 
 # test: run unit and integration tests for pop-test's implementation itself
 test: fmt
-	nix develop -c cargo test
+	RUST_LOG=debug nix develop -c cargo test
 
 # publish-manual: Generates and publishes the manual from Org files using Emacs.
 publish-manual:

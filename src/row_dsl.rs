@@ -65,6 +65,8 @@ pub fn make_checker_from_expression(
     let fun = move |ro: &Row| {
         let cs = clauses.iter().enumerate().clone();
         for (index, clause) in cs {
+            let col_type = ro.columns()[index].type_().name();
+            info!("working with column type: {}", col_type);
             let x: Result<String, String> = ro.try_get(index).map_err(|e| e.to_string());
             match x {
                 Ok(got) => info!("test on value: {:?}", got),
