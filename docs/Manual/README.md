@@ -1,27 +1,28 @@
 
 # Table of Contents
 
-1.  [How to run it](#orgda20957)
-2.  [Why pop-test?](#org7af2453)
-3.  [Motivation](#orgd2ebd2c)
-4.  [The Scenario DSL (Domain Specific Language)](#org5f1e9d1)
-    1.  [pop services](#orgacefbde)
-        1.  [service health check](#org7ccd156)
-        2.  [service postgres](#orgc839a81)
-        3.  [service kafka](#orgb59101b)
-        4.  [service keycloak](#orge179579)
-        5.  [service pop<sub>server</sub>](#orgb2f1a05)
-    2.  [pop actions](#org0074456)
-        1.  [a kafka produce action](#org3a59a21)
-        2.  [an http assertion](#org9ea0ebc)
-    3.  [Condition DSL](#org4887527)
-    4.  [pop postgres](#orgabe6ea3)
-    5.  [pop kafka](#org128a8b6)
-    6.  [pop-server](#org861d3c6)
-    7.  [pop keycloak](#orgad4ba1f)
-5.  [Example tests, using the DSL](#orga1c25e4)
+1.  [How to run it](#org85a46ec)
+2.  [Why pop-test?](#org6d18928)
+3.  [Motivation](#orge31e88b)
+4.  [The Scenario DSL (Domain Specific Language)](#org7a887cf)
+    1.  [pop services](#org2a9c7c5)
+        1.  [service health check](#orgb5b3706)
+        2.  [service postgres](#orge541efc)
+        3.  [service kafka](#orgbcd2b83)
+        4.  [service keycloak](#org584434b)
+        5.  [service pop<sub>server</sub>](#org30b9297)
+    2.  [pop actions](#orgeb93770)
+        1.  [a kafka produce action](#org940e32a)
+        2.  [an http assertion](#org938e23d)
+    3.  [Condition DSL](#orgf044f4c)
+    4.  [Row DSL](#org754780d)
+    5.  [pop postgres](#org190c0e9)
+    6.  [pop kafka](#orgdeb4db6)
+    7.  [pop-server](#org009154f)
+    8.  [pop keycloak](#org7dc3737)
+5.  [Example tests, using the DSL](#org80fbdba)
 
-In Dutch 🇳🇱, *pop* means puppet or doll. But pop-test is not about dolls! It’s a tool that helps test computer programs in an easy and future-proof manner that improves reliability and engineering freedom.
+In Dutch, *pop* means puppet or doll. But pop-test is not about dolls! It’s a tool that helps test computer programs in an easy and future-proof manner that improves reliability and engineering freedom.
 
 pop-test simplifies end-to-end testing by providing a powerful orchestration tool and expressive language for your applications and their dependencies.
 
@@ -36,7 +37,7 @@ pop-tests as we affectionately call them, can range from small scope integration
 ---
 
 
-<a id="orgda20957"></a>
+<a id="org85a46ec"></a>
 
 # How to run it
 
@@ -61,7 +62,7 @@ This is how I usually run in development mode:
     TESTCONTAINERS_COMMAND=keep RUST_LOG=debug nix develop -c cargo run -- --path ./resources/scenarios
 
 
-<a id="org7af2453"></a>
+<a id="org6d18928"></a>
 
 # Why pop-test?
 
@@ -73,7 +74,7 @@ This is how I usually run in development mode:
 -   Fast and reliable – Built with Rust, a programming language known for speed and safety.
 
 
-<a id="orgd2ebd2c"></a>
+<a id="orge31e88b"></a>
 
 # Motivation
 
@@ -100,7 +101,7 @@ In short, pop-tests make engineers happier, business people more certain of what
 ---
 
 
-<a id="org5f1e9d1"></a>
+<a id="org7a887cf"></a>
 
 # The Scenario DSL (Domain Specific Language)
 
@@ -115,7 +116,7 @@ The tool supports YAML, TOML and JSON file formats seamlessly.
 ---
 
 
-<a id="orgacefbde"></a>
+<a id="org2a9c7c5"></a>
 
 ## pop services
 
@@ -136,7 +137,7 @@ A service is defined by:
 `env_vars` (optional, map of string to string) – A set of environment variables to be defined for the service.  
 
 
-<a id="org7ccd156"></a>
+<a id="orgb5b3706"></a>
 
 ### service health check
 
@@ -155,7 +156,7 @@ HTTP health check:
 `patience_seconds` (required, integer) – The maximum time allowed for the service to become healthy. If the service is healthy before this deadline, the scenario setup continues without waiting.
 
 
-<a id="orgc839a81"></a>
+<a id="orge541efc"></a>
 
 ### service postgres
 
@@ -174,7 +175,7 @@ Defines how PostgreSQL is used in the service. Field is `postgres`, an optional 
 `pass_var` (optional, string) - Container DB password will be injected on services, via environment variable, by default `POSTGRESQL_PASSWORD`
 
 
-<a id="orgb59101b"></a>
+<a id="orgbcd2b83"></a>
 
 ### service kafka
 
@@ -185,7 +186,7 @@ Defines how Kafka is used in the service. Field is `kafka`, an optional object.
 `bootstrap_server_var` (optional, string) - Container HTTP connection string for Kafka will be injected on services, via environment variable, by default `KAFKA_BOOTSTRAP_SERVER`
 
 
-<a id="orge179579"></a>
+<a id="org584434b"></a>
 
 ### service keycloak
 
@@ -196,7 +197,7 @@ Defines how Kafka is used in the service. Field is `kafka`, an optional object.
 `realm_var` (optional, string) - Container realm name string for Keycloak will be injected on services, via environment variable, by default `KEYCLOAK_REALM`
 
 
-<a id="orgb2f1a05"></a>
+<a id="org30b9297"></a>
 
 ### service pop<sub>server</sub>
 
@@ -207,7 +208,7 @@ Defines how Kafka is used in the service. Field is `kafka`, an optional object.
 ---
 
 
-<a id="org0074456"></a>
+<a id="orgeb93770"></a>
 
 ## pop actions
 
@@ -218,7 +219,7 @@ there are many types of pop action, see the following sections.
 ---
 
 
-<a id="org3a59a21"></a>
+<a id="org940e32a"></a>
 
 ### a kafka produce action
 
@@ -231,7 +232,7 @@ A kafka produce action is defined by:
 ---
 
 
-<a id="org9ea0ebc"></a>
+<a id="org938e23d"></a>
 
 ### an http assertion
 
@@ -252,15 +253,19 @@ Each JSON body pattern entry includes:
 ---
 
 
-<a id="org4887527"></a>
+<a id="orgf044f4c"></a>
 
 ## Condition DSL
 
-Supported conditions include:
+This DSL is present in JSON body checks and in SQL database checks, supported conditions include:
 
-`!= ""` (ensures the field is not empty)
+`non-empty-str` (ensures the field is not empty)
 
-`== ""` (ensures the field is empty)
+`empty-str` (ensures the field is empty)
+
+`== x` (ensures the field is x)
+
+`!= x` (ensures the field is not x)
 
 `> 0` (ensures the field is greater than zero)
 
@@ -273,7 +278,20 @@ Supported conditions include:
 ---
 
 
-<a id="orgabe6ea3"></a>
+<a id="org754780d"></a>
+
+## Row DSL
+
+This is the DSL used to perform assertions on SQL databases. Currently PostgreSQL supports this. 🚧
+
+`[0]` symbolizes the first row in a table, and the list of clauses in parentheses the conditions to be checked in order
+
+    [0] ((non-empty-str)(== 232323)(== en_GB)(non-empty-str))
+
+---
+
+
+<a id="org190c0e9"></a>
 
 ## pop postgres
 
@@ -288,7 +306,7 @@ You can use PostgreSQL in pop-tests easily.
 ---
 
 
-<a id="org128a8b6"></a>
+<a id="orgdeb4db6"></a>
 
 ## pop kafka
 
@@ -303,7 +321,7 @@ You can use Kafka in pop-tests easily.
 ---
 
 
-<a id="org861d3c6"></a>
+<a id="org009154f"></a>
 
 ## pop-server
 
@@ -334,7 +352,7 @@ You can then  have it prepared with certain behaviors (under `behaviors` ):
 `body_file` (required, string) - path to the file to load data from, that will be returned as HTTP body
 
 
-<a id="orgad4ba1f"></a>
+<a id="org7dc3737"></a>
 
 ## pop keycloak
 
@@ -365,7 +383,7 @@ You can use Keycloak in pop-tests easily and have it auto-setup.
 ---
 
 
-<a id="orga1c25e4"></a>
+<a id="org80fbdba"></a>
 
 # Example tests, using the DSL
 

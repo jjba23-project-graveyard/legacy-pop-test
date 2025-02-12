@@ -2,7 +2,7 @@
 #+language: en
 #+email: jjbigorra@gmail.com
 
-In Dutch 🇳🇱, /pop/ means puppet or doll. But pop-test is not about dolls! It’s a tool that helps test computer programs in an easy and future-proof manner that improves reliability and engineering freedom.
+In Dutch, /pop/ means puppet or doll. But pop-test is not about dolls! It’s a tool that helps test computer programs in an easy and future-proof manner that improves reliability and engineering freedom.
 
 pop-test simplifies end-to-end testing by providing a powerful orchestration tool and expressive language for your applications and their dependencies.
 
@@ -230,10 +230,9 @@ This is the DSL used to perform assertions on SQL databases. Currently PostgreSQ
 
 ~[0]~ symbolizes the first row in a table, and the list of clauses in parentheses the conditions to be checked in order
 
-
-#+begin_src 
+#+begin_example
 [0] ((non-empty-str)(== 232323)(== en_GB)(non-empty-str))
-#+end_src
+#+end_example
 
 
 -----
