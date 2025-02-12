@@ -26,6 +26,36 @@ pub enum RowExpressionQuantifier {
     Position(i32),
 }
 
+fn extract_checker_clauses(input: &str) -> Vec<String> {
+    let mut depth = 0;
+    let mut clause = String::new();
+
+    input
+        .chars()
+        .filter_map(|c| match c {
+            '(' => {
+                depth += 1;
+                None
+            }
+            ')' => {
+                depth -= 1;
+                if !clause.is_empty() && depth >= 1 {
+                    let extracted = Some(clause.trim().to_string());
+                    clause.clear();
+                    extracted
+                } else {
+                    None
+                }
+            }
+            _ if depth >= 1 => {
+                clause.push(c);
+                None
+            }
+            _ => None,
+        })
+        .collect()
+}
+
 pub fn make_checker_from_expression(
     expression: String,
 ) -> Result<Box<dyn Fn(&Row) -> bool>, String> {
@@ -141,5 +171,47 @@ mod tests {
     fn test_get_row_expression_quantifier_mixed_brackets() {
         let result = get_row_expression_quantifier("[123abc]".to_string());
         assert_eq!(result, Ok(RowExpressionQuantifier::Position(123)));
+    }
+
+    // clause extraction tests
+
+    #[test]
+    fn test_basic_extraction() {
+        let input = "[0] ((!= \"\")(== \"232323\")(== \"en_GB\")(!= \"\"))";
+        let expected = vec![
+            "!= \"\"".to_string(),
+            "== \"232323\"".to_string(),
+            "== \"en_GB\"".to_string(),
+            "!= \"\"".to_string(),
+        ];
+        assert_eq!(extract_checker_clauses(input), expected);
+    }
+
+    #[test]
+    fn test_nested_parentheses() {
+        let input = "[0] (((== \"nested\")))";
+        let expected = vec!["== \"nested\"".to_string()];
+        assert_eq!(extract_checker_clauses(input), expected);
+    }
+
+    #[test]
+    fn test_empty_input() {
+        let input = "";
+        let expected: Vec<String> = vec![];
+        assert_eq!(extract_checker_clauses(input), expected);
+    }
+
+    #[test]
+    fn test_no_parentheses() {
+        let input = "[0] == \"value\"";
+        let expected: Vec<String> = vec![];
+        assert_eq!(extract_checker_clauses(input), expected);
+    }
+
+    #[test]
+    fn test_malformed_input() {
+        let input = "[0] ((== \"missing end\"";
+        let expected: Vec<String> = vec![];
+        assert_eq!(extract_checker_clauses(input), expected);
     }
 }
