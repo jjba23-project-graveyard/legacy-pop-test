@@ -19,7 +19,9 @@ pop-tests as we affectionately call them, can range from small scope integration
 
 * How to run it
 
-It is recommended to run with TESTCONTAINERS_COMMAND=keep , since pop-test will do the resource management for you, and doesn't need to rely on Ryuk or on testcontainers-rs to do the cleanup.
+It is recommended to run with ~TESTCONTAINERS_COMMAND=keep~ and ~RUST_LOG=debug~ as environment variables.
+
+Also since pop-test will do the resource management for you, we don't need to rely on Ryuk or on testcontainers-rs to do the cleanup.
 
 See the [[file:~/Ontwikkeling/Persoonlijk/pop-test/Makefile][Makefile]] for more examples of how to run it.
 
@@ -28,19 +30,16 @@ When installed and available as binary, simply run:
 TESTCONTAINERS_COMMAND=keep pop-test -p ./path/to/file.yaml
 #+end_example
 
-The tool supports also to pass a directory to recursively gather YAML, TOML and JSON files from:
-#+begin_example
-pop-test --path ./path/to/directory
-#+end_example
+~-p~ or ~--path~ (required, string) - path to file or directory that contains scenarios
 
-The tool supports also to pass options in long format:
-#+begin_example
-pop-test --path ./path/to/file.yaml
-#+end_example
+~-h~ or ~--help~ for help
+
+~-v~ or ~--version~ for version
+
 
 This is how I usually run in development mode:
 #+begin_example
-TESTCONTAINERS_COMMAND=keep RUST_LOG=debug nix develop -c cargo run -- -p ./resources/scenarios
+TESTCONTAINERS_COMMAND=keep RUST_LOG=debug nix develop -c cargo run -- --path ./resources/scenarios
 #+end_example
 
 
@@ -174,7 +173,8 @@ there are many types of pop action, see the following sections.
 
 -----
 
-*** a kafka produce action 
+*** a kafka produce action
+
 A kafka produce action is defined by:
 
 ~message_file_path~ (optional, string)
@@ -253,7 +253,7 @@ You can use ~pop_server~ in pop-tests easily:
 
 ~image_name~ (optional, string) - Container image for Kafka, by default ~jjba23/pop-server~
 
-~image_tag~ (optional, string) - Container image tag for Kafka, by default ~0.2.5~
+~image_tag~ (optional, string) - Container image tag for Kafka, by default ~0.3.0~
 
 
 You can then  have it prepared with certain behaviors (under ~behaviors~ ):

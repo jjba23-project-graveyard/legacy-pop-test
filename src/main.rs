@@ -55,7 +55,7 @@ struct Args {
 #[tokio::main]
 async fn main() -> Result<(), String> {
     env_logger::init();
-    info!("\n`pop-test` starting up\n");
+    info!("\npop-test starting up\n");
 
     info!("parsing command-line arguments");
     let args = Args::parse();

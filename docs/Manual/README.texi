@@ -9,7 +9,7 @@
 @finalout
 @titlepage
 @title pop-test manual
-@author Josep Bigorra
+@author Music Player Daemon (MPD) user
 @end titlepage
 
 @contents
@@ -71,7 +71,9 @@ pop actions
 @node How to run it
 @chapter How to run it
 
-It is recommended to run with TESTCONTAINERS@math{_COMMAND}=keep , since pop-test will do the resource management for you, and doesn't need to rely on Ryuk or on testcontainers-rs to do the cleanup.
+It is recommended to run with @code{TESTCONTAINERS_COMMAND=keep} and @code{RUST_LOG=debug} as environment variables.
+
+Also since pop-test will do the resource management for you, we don't need to rely on Ryuk or on testcontainers-rs to do the cleanup.
 
 See the @uref{file:///home/joe/Ontwikkeling/Persoonlijk/pop-test/Makefile, Makefile} for more examples of how to run it.
 
@@ -80,19 +82,16 @@ When installed and available as binary, simply run:
 TESTCONTAINERS_COMMAND=keep pop-test -p ./path/to/file.yaml
 @end example
 
-The tool supports also to pass a directory to recursively gather YAML, TOML and JSON files from:
-@example
-pop-test --path ./path/to/directory
-@end example
+@code{-p} or @code{--path} (required, string) - path to file or directory that contains scenarios
 
-The tool supports also to pass options in long format:
-@example
-pop-test --path ./path/to/file.yaml
-@end example
+@code{-h} or @code{--help} for help
+
+@code{-v} or @code{--version} for version
+
 
 This is how I usually run in development mode:
 @example
-TESTCONTAINERS_COMMAND=keep RUST_LOG=debug nix develop -c cargo run -- -p ./resources/scenarios
+TESTCONTAINERS_COMMAND=keep RUST_LOG=debug nix develop -c cargo run -- --path ./resources/scenarios
 @end example
 
 @node Why pop-test?
@@ -329,7 +328,7 @@ You can use @code{pop_server} in pop-tests easily:
 
 @code{image_name} (optional, string) - Container image for Kafka, by default @code{jjba23/pop-server}
 
-@code{image_tag} (optional, string) - Container image tag for Kafka, by default @code{0.2.5}
+@code{image_tag} (optional, string) - Container image tag for Kafka, by default @code{0.3.0}
 
 
 You can then  have it prepared with certain behaviors (under @code{behaviors} ):
