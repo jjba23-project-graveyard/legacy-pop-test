@@ -26,6 +26,7 @@ mod environment;
 mod health_check;
 mod pop_model;
 mod proc;
+mod row_dsl;
 mod scenario;
 
 #[path = "http/mod.rs"]

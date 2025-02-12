@@ -29,6 +29,7 @@ use crate::pop_model::{PopAction, PopEnv, PopKeycloak, PopScenario, PopService};
 use crate::pop_server::maybe_start_pop_server;
 use crate::postgres::container::maybe_start_postgres;
 use crate::proc::{start_service, terminate_services};
+use crate::row_dsl::get_row_expression_quantifier;
 use log::{error, info};
 use std::time::Duration;
 use tokio_postgres::NoTls;
@@ -93,6 +94,11 @@ pub async fn run_action(
                     info!("found expected amount of rows in the table")
                 }
             }
+
+            let q =
+                get_row_expression_quantifier(assert_expression.clone().unwrap_or("".to_string()));
+
+            info!("row expression quantifier: {:?}", q);
 
             //let value: &str = rows[0].get(0);
 
