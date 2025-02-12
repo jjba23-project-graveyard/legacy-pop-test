@@ -22,7 +22,7 @@ use log::{error, info};
 use reqwest::Response;
 use testcontainers::core::ContainerPort;
 use testcontainers::runners::AsyncRunner;
-use testcontainers::{ContainerAsync, GenericImage};
+use testcontainers::{ContainerAsync, GenericImage, ImageExt};
 use tokio::fs;
 
 async fn run_pop_server_container(
@@ -35,6 +35,7 @@ async fn run_pop_server_container(
         pop_server.image_tag.unwrap_or("0.3.0".to_string()),
     )
     .with_exposed_port(ContainerPort::Tcp(50088))
+    .with_env_var("RUST_LOG", "debug")
     .start()
     .await
     .map_err(|e| format!("{}", e))

@@ -108,7 +108,7 @@ pub enum PopAction {
     PostgresAssertion {
         name: Option<String>,
         postgres_query: String,
-        assert_row_count: Option<i64>,
+        assert_row_count: Option<i32>,
         assert_expression: Option<String>,
         delay_seconds: Option<u64>,
     },
@@ -172,6 +172,7 @@ pub struct PopScenario {
 
 #[derive(Debug, Clone)]
 pub struct PopEnv {
-    pub kafka_bootstrap_server: String,
+    pub kafka_bootstrap_server: Option<String>,
     pub keycloak_client: Option<KeycloakClient>,
+    pub postgres_conn_string: Option<String>,
 }

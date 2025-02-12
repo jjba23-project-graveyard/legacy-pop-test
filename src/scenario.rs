@@ -31,6 +31,7 @@ use crate::postgres::container::maybe_start_postgres;
 use crate::proc::{start_service, terminate_services};
 use log::{error, info};
 use std::time::Duration;
+use tokio_postgres::NoTls;
 
 use testcontainers_modules::kafka::KAFKA_PORT;
 
@@ -57,6 +58,44 @@ pub async fn run_action(
                 sleep(Duration::from_secs(*delay)).await;
             }
 
+            let (client, connection) = tokio_postgres::connect(
+                pop_env
+                    .postgres_conn_string
+                    .clone()
+                    .unwrap_or("".to_string())
+                    .as_str(),
+                NoTls,
+            )
+            .await
+            .map_err(|e| e.to_string())?;
+
+            // The connection object performs the actual communication with the database,
+            // so spawn it off to run on its own.
+            tokio::spawn(async move {
+                if let Err(e) = connection.await {
+                    error!("connection error: {}", e);
+                }
+            });
+
+            //.query("SELECT $1::TEXT", &[&"hello world"])
+
+            let rows = client
+                .query(postgres_query, &[])
+                .await
+                .map_err(|e| e.to_string())?;
+
+            info!("postgres rows: {:?}", rows);
+
+            if let Some(rc) = assert_row_count {
+                if rows.len() != (rc.to_owned() as usize) {
+                    error!("found an unexpected amount of rows in the table")
+                } else {
+                    info!("found expected amount of rows in the table")
+                }
+            }
+
+            //let value: &str = rows[0].get(0);
+
             Ok(())
         }
         PopAction::KafkaProduceFromFileAction {
@@ -72,7 +111,10 @@ pub async fn run_action(
 
             info!("producing kafka message");
             let r = produce_kafka_message(
-                pop_env.kafka_bootstrap_server.clone(),
+                pop_env
+                    .kafka_bootstrap_server
+                    .clone()
+                    .unwrap_or("".to_owned()),
                 message_file_path.to_owned(),
                 kafka_topic.to_owned(),
             )
@@ -256,6 +298,23 @@ pub async fn play_scenario(scenario: PopScenario) -> Result<(), String> {
         kafka_bootstrap_server = fmt;
     }
 
+    let mut postgres_conn = "".to_string();
+    if let Some(p) = &maybe_postgres_container {
+        let host = p.get_host().await.unwrap().to_string();
+        let port = p
+            .ports()
+            .await
+            .unwrap()
+            .map_to_host_port_ipv4(5432)
+            .unwrap_or(5432);
+
+        let fmt = format!(
+            "host={} port={} user=postgres password=postgres dbname=postgres",
+            host, port
+        );
+        postgres_conn = fmt;
+    }
+
     let mut keycloak_client = None;
     if let Some(kc) = &maybe_keycloak_container {
         let host = kc.get_host().await.unwrap().to_string();
@@ -271,8 +330,9 @@ pub async fn play_scenario(scenario: PopScenario) -> Result<(), String> {
     }
 
     let pop_env = crate::pop_model::PopEnv {
-        kafka_bootstrap_server: kafka_bootstrap_server.to_string(),
+        kafka_bootstrap_server: Some(kafka_bootstrap_server),
         keycloak_client,
+        postgres_conn_string: Some(postgres_conn),
     };
 
     info!("{:?}", pop_env);
