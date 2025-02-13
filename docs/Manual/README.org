@@ -226,9 +226,11 @@ This DSL is present in JSON body checks and in SQL database checks, supported co
 
 ** Row DSL
 
-This is the DSL used to perform assertions on SQL databases. Currently PostgreSQL supports this. 🚧
+This is the DSL used to perform assertions on SQL databases. Currently PostgreSQL supports this.
 
 ~[0]~ symbolizes the first row in a table, and the list of clauses in parentheses the conditions to be checked in order
+
+The rest of the clause is a tuple-based variant of the condition DSL, in order.
 
 #+begin_example
 [0] ((non-empty-str)(== 232323)(== en_GB)(non-empty-str))
