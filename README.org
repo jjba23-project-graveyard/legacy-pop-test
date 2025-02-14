@@ -3,7 +3,7 @@
 #+language: en
 #+email: jjbigorra@gmail.com
 
-[[https://raster.shields.io/badge/Rust-1.84-957856.png]] [[https://raster.shields.io/badge/Nix-Flake-229fb2.png]] [[https://raster.shields.io/badge/Kafka-6.1.1-501a2d.png]] [[https://raster.shields.io/badge/PostgreSQL-17.2-0f3f4f.png]] [[https://raster.shields.io/badge/Keycloak-26.1-412f4f.png]] [[https://raster.shields.io/badge/PopServer-0.3.0-4e3930.png]]
+[[https://raster.shields.io/badge/Rust-1.84-957856.png?logo=rust]] [[https://raster.shields.io/badge/Nix-Flake-229fb2.png?logo=nix]] [[https://raster.shields.io/badge/Kafka-6.1.1-501a2d.png]] [[https://raster.shields.io/badge/PostgreSQL-17.2-0f3f4f.png?logo=postgresql]] [[https://raster.shields.io/badge/Keycloak-26.1-412f4f.png]] [[https://raster.shields.io/badge/PopServer-0.3.0-4e3930.png]]
 
 pop-test - /your test orchestration master of puppets/
 
