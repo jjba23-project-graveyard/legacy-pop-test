@@ -9,7 +9,7 @@
 @finalout
 @titlepage
 @title pop-test manual
-@author Music Player Daemon (MPD) user
+@author Josep Bigorra
 @end titlepage
 
 @contents
