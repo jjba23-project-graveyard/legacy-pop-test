@@ -2,6 +2,7 @@
 #+language: en
 #+email: jjbigorra@gmail.com
 
+[[file:../../resources/img/Rust-1.84-d0730f.png]] [[file:../../resources/img/Nix-Flake-118ea1.png]] [[file:../../resources/img/Kafka-6.1.1-501a2d.png]] [[file:../../resources/img/PostgreSQL-17.2-0f3f4f.png]] [[file:../../resources/img/Keycloak-26.1-412f4f.png]] [[file:../../resources/img/PopServer-0.3.0-4e3930.png]]
 
 In Dutch, /pop/ means puppet or doll. But pop-test is not about dolls! It’s a tool that helps test computer programs in an easy and future-proof manner that improves reliability and engineering freedom.
 
