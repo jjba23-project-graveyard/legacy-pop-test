@@ -105,6 +105,12 @@ pub enum PopAction {
         message_file_path: String,
         kafka_topic: String,
     },
+    KafkaCheck {
+        name: Option<String>,
+        delay_seconds: Option<u64>,
+        kafka_topic: String,
+        check: String,
+    },
     PostgresAssertion {
         name: Option<String>,
         postgres_query: String,

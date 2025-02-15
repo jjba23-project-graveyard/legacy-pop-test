@@ -16,8 +16,7 @@
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
 use crate::pop_model::{PopKafka, PopScenario, PopService};
-use kafka::client::{FetchOffset, GroupOffsetStorage};
-use kafka::consumer::{self, Consumer};
+use kafka::client::KafkaClient;
 use kafka::producer::{Producer, Record, RequiredAcks};
 use log::info;
 use std::collections::HashMap;
@@ -27,28 +26,40 @@ use testcontainers::{runners::AsyncRunner, ImageExt};
 use testcontainers_modules::kafka::{Kafka, KAFKA_PORT};
 use tokio::fs;
 
-pub async fn check_topic(
-    bootstrap_server: String,
-    group: String,
-    topic: String,
-) -> Result<(), String> {
-    let mut consumer = Consumer::from_hosts(vec![bootstrap_server])
-        .with_fallback_offset(FetchOffset::Earliest)
-        .with_group(group)
-        .with_topic(topic)
-        .with_offset_storage(Some(GroupOffsetStorage::Kafka))
-        .create()
-        .map_err(|e| e.to_string())?;
+// pub async fn check_topic(
+//     bootstrap_server: String,
+//     group: String,
+//     topic: String,
+// ) -> Result<(), String> {
+//     let mut consumer = Consumer::from_hosts(vec![bootstrap_server])
+//         .with_fallback_offset(FetchOffset::Earliest)
+//         .with_group(group)
+//         .with_topic(topic)
+//         .with_offset_storage(Some(GroupOffsetStorage::Kafka))
+//         .create()
+//         .map_err(|e| e.to_string())?;
 
-    loop {
-        for ms in consumer.poll().unwrap().iter() {
-            for m in ms.messages() {
-                println!("{:?}", m);
-            }
-            consumer.consume_messageset(ms);
-        }
-        consumer.commit_consumed().unwrap();
-    }
+//     loop {
+//         for ms in consumer.poll().unwrap().iter() {
+//             for m in ms.messages() {
+//                 println!("{:?}", m);
+//             }
+//             consumer.consume_messageset(ms);
+//         }
+//         consumer.commit_consumed().unwrap();
+//     }
+// }
+
+pub async fn check_consumer_group_offsets(bootstrap_server: String) -> Result<(), String> {
+    let mut client = KafkaClient::new(vec![bootstrap_server]);
+    client.load_metadata_all().map_err(|e| e.to_string())?;
+    let topics: Vec<String> = client.topics().names().map(ToOwned::to_owned).collect();
+    info!("kafka topics: {:#?}", topics);
+    let offsets = client
+        .fetch_offsets(&topics, kafka::client::FetchOffset::Latest)
+        .map_err(|e| e.to_string())?;
+    info!("kafka offsets: {:#?}", offsets);
+    Ok(())
 }
 
 pub async fn produce_kafka_message(

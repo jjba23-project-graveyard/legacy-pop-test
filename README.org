@@ -22,6 +22,18 @@ I strive to provide proper and extensive documentation on pop-test, in several f
 
 HTML, Markdown, texi, info also available at: [[file:docs/Manual/]]
 
------
 
 [[file:resources/img/wp10992149-modified.png]]
+
+-----
+
+* Why pop-test?
+
+- Frees you and allows you to refactor and test your systems more easily. You can for example completely rewrite a program, even in a different language, and stay certain your implementation works as expected.
+- Catches mistakes early – Helps find problems before real users do since you test with real dependencies.
+- Test coverage with a real meaning - test your systems from head to toe
+- Saves time – No need to test every little part manually, test on higher level.
+- Easy to use – Just write simple rules, in a comfy DSL and ~pop-test~ does the rest!
+- Fast and reliable – Built with Rust, a programming language known for speed and safety.
+
+

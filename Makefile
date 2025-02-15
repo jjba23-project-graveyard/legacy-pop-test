@@ -18,25 +18,22 @@
 test-green-energy-mix: fmt
 	TESTCONTAINERS_COMMAND=keep \
 	RUST_LOG=debug \
-	nix develop -c cargo run -- -p ./resources/scenarios/green-energy-mix/golden-test.yaml
+	nix develop -c time cargo run -- -p ./resources/scenarios/green-energy-mix/golden-test.yaml
 
 test-vehicle-management: fmt
 	TESTCONTAINERS_COMMAND=keep \
 	RUST_LOG=debug \
-	nix develop -c cargo run -- -p ./resources/scenarios/vehicle-management/golden-test.yaml
+	nix develop -c time cargo run -- -p ./resources/scenarios/vehicle-management/golden-test.yaml
 
 test-dynamic-tariff-charging: fmt
 	TESTCONTAINERS_COMMAND=keep \
 	RUST_LOG=debug \
-	nix develop -c cargo run -- -p ./resources/scenarios/dynamic-tariff-charging/golden-test.yaml
+	nix develop -c time cargo run -- -p ./resources/scenarios/dynamic-tariff-charging/golden-test.yaml
 
 test-all: fmt
 	TESTCONTAINERS_COMMAND=keep \
 	RUST_LOG=debug \
-	nix develop -c cargo run -- -p ./resources/scenarios
-
-test-dynamic-tariff-charging-call:
-	curl -v -X GET --header "Authorization: Bearer $(ADMIN_TOKEN)" http://localhost:8222/api/v1/registeredChargepoints/3514fbab-9a15-4869-9a7d-895e9dfb3560
+	nix develop -c time cargo run -- -p ./resources/scenarios
 
 fmt:
 	nix develop -c cargo fix --allow-dirty --bin "pop-test"

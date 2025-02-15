@@ -19,7 +19,9 @@ use crate::containers::{maybe_terminate_container, setup_container_logging};
 use crate::environment::setup_environment;
 use crate::health_check::start_health_check;
 use crate::http::{run_http_action, run_http_assertion};
-use crate::kafka::container::{maybe_start_kafka, produce_kafka_message};
+use crate::kafka::container::{
+    check_consumer_group_offsets, maybe_start_kafka, produce_kafka_message,
+};
 use crate::keycloak::client::{
     KeycloakClient, KeycloakClientId, KeycloakClientSecret, KeycloakPassword, KeycloakRealm,
     KeycloakUrl, KeycloakUsername,
@@ -47,6 +49,31 @@ pub async fn run_action(
 ) -> Result<(), String> {
     info!("executing action: {:?}", action);
     match action {
+        PopAction::KafkaCheck {
+            name,
+            delay_seconds,
+            kafka_topic,
+            check,
+        } => {
+            name.clone().inspect(|n| info!("starting action: {}", n));
+            if let Some(delay) = delay_seconds {
+                sleep(Duration::from_secs(*delay)).await;
+            }
+
+            match check.as_str() {
+                "check-offsets" => {
+                    check_consumer_group_offsets(
+                        pop_env
+                            .kafka_bootstrap_server
+                            .clone()
+                            .unwrap_or("".to_owned()),
+                    )
+                    .await
+                }
+                _ => Err("did not find a valid check to perform".to_string()),
+            }
+        }
+
         PopAction::PostgresAssertion {
             name,
             postgres_query,
