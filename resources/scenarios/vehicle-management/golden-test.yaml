@@ -105,7 +105,7 @@ pop_server:
     - path: "/"
       method: "POST"
       status: 200
-      content_type: "application/json"
+      content_type: "application/x-www-form-urlencoded"
       body_file: "./resources/pop-server/vehicle-management/eon-success.json"
       
         
