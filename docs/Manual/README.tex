@@ -1,4 +1,4 @@
-% Created 2025-02-14 vr 23:47
+% Created 2025-02-15 za 14:42
 % Intended LaTeX compiler: pdflatex
 \documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
@@ -41,7 +41,9 @@
 \includegraphics[width=.9\linewidth]{../../resources/img/PopServer-0.3.0-4e3930.png}
 \end{center}
 
-In Dutch, \emph{pop} means puppet or doll. But pop-test is not about dolls! It’s a tool that helps test computer programs in an easy and future-proof manner that improves reliability and engineering freedom.
+pop-test - \emph{your test orchestration master of puppets}
+
+In Dutch, \emph{pop} means puppet or doll. pop-test is a tool that helps test computer programs in an easy and future-proof manner that improves reliability and engineering freedom.
 
 pop-test simplifies end-to-end testing by providing a powerful orchestration tool and expressive language for your applications and their dependencies.
 
@@ -57,9 +59,22 @@ pop-tests as we affectionately call them, can range from small scope integration
 
 \noindent\rule{\textwidth}{0.5pt}
 
+\section{Why pop-test?}
+\label{sec:org4a4b5e3}
+
+\begin{itemize}
+\item Frees you and allows you to refactor and test your systems more easily. You can for example completely rewrite a program, even in a different language, and stay certain your implementation works as expected.
+\item Catches mistakes early – Helps find problems before real users do since you test with real dependencies.
+\item Test coverage with a real meaning - test your systems from head to toe
+\item Saves time – No need to test every little part manually, test on higher level.
+\item Easy to use – Just write simple rules, in a comfy DSL and \texttt{pop-test} does the rest!
+\item Fast and reliable – Built with Rust, a programming language known for speed and safety.
+\end{itemize}
+
+\noindent\rule{\textwidth}{0.5pt}
 
 \section{How to run it}
-\label{sec:orgb8f4fc0}
+\label{sec:orgecce710}
 
 It is recommended to run with \texttt{TESTCONTAINERS\_COMMAND=keep} and \texttt{RUST\_LOG=debug} as environment variables.
 
@@ -85,20 +100,9 @@ TESTCONTAINERS_COMMAND=keep RUST_LOG=debug nix develop -c cargo run -- --path ./
 \end{verbatim}
 
 
-\section{Why pop-test?}
-\label{sec:org3dea8ae}
-
-\begin{itemize}
-\item Catches mistakes early – Helps find problems before real users do.
-\item Test coverage with a real meaning - test your systems from head to toe
-\item Frees you and allows you to refactor and test your systems more easily
-\item Saves time – No need to test every little part manually, test on higher level.
-\item Easy to use – Just write simple rules, in a comfy DSL and \texttt{pop-test} does the rest!
-\item Fast and reliable – Built with Rust, a programming language known for speed and safety.
-\end{itemize}
 
 \section{Motivation}
-\label{sec:org3048478}
+\label{sec:orgf7323e1}
 
 Imagine you're building a toy robot, but you don't need to understand all the small parts inside the robot to know if it works. You just need to press a button and see if it performs the task correctly.
 
@@ -123,7 +127,7 @@ In short, pop-tests make engineers happier, business people more certain of what
 \noindent\rule{\textwidth}{0.5pt}
 
 \section{The Scenario DSL (Domain Specific Language)}
-\label{sec:orgf025e24}
+\label{sec:orgac1f07e}
 
 In order to provide an expressive and powerful way to describe test scenarios, a lot of care has gone into creating a good domain-specific language, which remains flexible but concise.
 
@@ -137,7 +141,7 @@ The tool supports YAML, TOML and JSON file formats seamlessly.
 \noindent\rule{\textwidth}{0.5pt}
 
 \subsection{pop services}
-\label{sec:org8b30cb5}
+\label{sec:org5714bd8}
 
 \texttt{pop\_services} is a list of services to be started for the scenario.
 
@@ -156,7 +160,7 @@ A service is defined by:
 \texttt{env\_vars} (optional, map of string to string) – A set of environment variables to be defined for the service.  
 
 \subsubsection{service health check}
-\label{sec:org02a75c4}
+\label{sec:orgebc36ef}
 
 Defines how pop-test determines whether the service is healthy. Field is \texttt{health\_check}, a required object.
 
@@ -173,7 +177,7 @@ HTTP health check:
 \texttt{patience\_seconds} (required, integer) – The maximum time allowed for the service to become healthy. If the service is healthy before this deadline, the scenario setup continues without waiting.
 
 \subsubsection{service postgres}
-\label{sec:org464ce34}
+\label{sec:orgc07c376}
 
 Defines how PostgreSQL is used in the service. Field is \texttt{postgres}, an optional object.
 
@@ -190,7 +194,7 @@ Defines how PostgreSQL is used in the service. Field is \texttt{postgres}, an op
 \texttt{pass\_var} (optional, string) - Container DB password will be injected on services, via environment variable, by default \texttt{POSTGRESQL\_PASSWORD}
 
 \subsubsection{service kafka}
-\label{sec:org763236e}
+\label{sec:org7e8eb6a}
 
 Defines how Kafka is used in the service. Field is \texttt{kafka}, an optional object.
 
@@ -199,7 +203,7 @@ Defines how Kafka is used in the service. Field is \texttt{kafka}, an optional o
 \texttt{bootstrap\_server\_var} (optional, string) - Container HTTP connection string for Kafka will be injected on services, via environment variable, by default \texttt{KAFKA\_BOOTSTRAP\_SERVER}
 
 \subsubsection{service keycloak}
-\label{sec:org7892ae6}
+\label{sec:org9c13f2f}
 
 \texttt{enabled} (optional, boolean) - Whether to inject environment variables with Kafka details
 
@@ -209,7 +213,7 @@ Defines how Kafka is used in the service. Field is \texttt{kafka}, an optional o
 
 
 \subsubsection{service pop\textsubscript{server}}
-\label{sec:org8fe925f}
+\label{sec:org786fbcf}
 
 \texttt{enabled} (optional, boolean) - Whether to inject environment variables with Kafka details
 
@@ -219,7 +223,7 @@ Defines how Kafka is used in the service. Field is \texttt{kafka}, an optional o
 \noindent\rule{\textwidth}{0.5pt}
 
 \subsection{pop actions}
-\label{sec:orgc9ad300}
+\label{sec:orgbc2161a}
 
 \texttt{pop\_actions} is a list of actions that setup state for a test and validate expected responses and behaviours from the services in the scenario. These actions help verify that the services return valid and expected data before proceeding with the scenario execution.
 
@@ -228,7 +232,7 @@ there are many types of pop action, see the following sections.
 \noindent\rule{\textwidth}{0.5pt}
 
 \subsubsection{a kafka produce action}
-\label{sec:org8e75d67}
+\label{sec:org1d57704}
 
 A kafka produce action is defined by:
 
@@ -240,7 +244,7 @@ A kafka produce action is defined by:
 \noindent\rule{\textwidth}{0.5pt}
 
 \subsubsection{an http assertion}
-\label{sec:org0a36332}
+\label{sec:org7df166a}
 
 \texttt{expected\_code} (optional, u16 number) - expected HTTP status code, defaults to 200
 
@@ -259,7 +263,7 @@ Each JSON body pattern entry includes:
 \noindent\rule{\textwidth}{0.5pt}
 
 \subsection{Condition DSL}
-\label{sec:orga5c3da8}
+\label{sec:orgc7c73ad}
 
 This DSL is present in JSON body checks and in SQL database checks, supported conditions include:
 
@@ -282,7 +286,7 @@ This DSL is present in JSON body checks and in SQL database checks, supported co
 \noindent\rule{\textwidth}{0.5pt}
 
 \subsection{Row DSL}
-\label{sec:org0a5f39c}
+\label{sec:orgd85d47c}
 
 This is the DSL used to perform assertions on SQL databases. Currently PostgreSQL supports this.
 
@@ -298,7 +302,7 @@ The rest of the clause is a tuple-based variant of the condition DSL, in order.
 \noindent\rule{\textwidth}{0.5pt}
 
 \subsection{pop postgres}
-\label{sec:org2d124a8}
+\label{sec:org1f7b254}
 
 You can use PostgreSQL in pop-tests easily.
 
@@ -311,7 +315,7 @@ You can use PostgreSQL in pop-tests easily.
 \noindent\rule{\textwidth}{0.5pt}
 
 \subsection{pop kafka}
-\label{sec:orgb5f2fc7}
+\label{sec:orgd92ca43}
 
 You can use Kafka in pop-tests easily.
 
@@ -325,7 +329,7 @@ You can use Kafka in pop-tests easily.
 \noindent\rule{\textwidth}{0.5pt}
 
 \subsection{pop-server}
-\label{sec:org762cfe5}
+\label{sec:org817010f}
 
 pop-server is a web-server that helps you simulate behaviours and test integrations with external systems.
 
@@ -357,7 +361,7 @@ You can then  have it prepared with certain behaviors (under \texttt{behaviors} 
 
 
 \subsection{pop keycloak}
-\label{sec:orgb94a519}
+\label{sec:org40052f1}
 
 You can use Keycloak in pop-tests easily and have it auto-setup.
 
@@ -387,7 +391,7 @@ You can use Keycloak in pop-tests easily and have it auto-setup.
 \noindent\rule{\textwidth}{0.5pt}
 
 \section{Example tests, using the DSL}
-\label{sec:orgb07f422}
+\label{sec:org7364d69}
 
 For example tests and learning demos, refer to the scenarios directory: \url{../../resources/scenarios}
 
