@@ -137,9 +137,13 @@ pub async fn run_action(
                         }
                     }
                     crate::row_dsl::RowExpressionQuantifier::First => {
-                        info!("reading first row: {:?}", rows[0]);
-                        let is_valid_row = row_checker(&rows[0]);
-                        info!("is valid row {}, {:?}", is_valid_row, &rows[0]);
+                        if !rows.is_empty() {
+                            info!("reading first row: {:?}", rows[0]);
+                            let is_valid_row = row_checker(&rows[0]);
+                            info!("is valid row {}, {:?}", is_valid_row, &rows[0]);
+                        } else {
+                            error!("no rows were found for your query")
+                        }
                     }
                     crate::row_dsl::RowExpressionQuantifier::Last => {
                         let pos = rows.len();
