@@ -35,6 +35,9 @@ pop_services:
       enabled: true
       url_vars:
         - "ECEDO_URL"
+        - "EON_DASHBOARD_URL"
+        - "EON_OAUTH_URL"
+        - "EON_ADMIN_URL"
 
 
 pop_actions:
