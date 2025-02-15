@@ -1,5 +1,5 @@
 #+title: 🎶 pop-test
-#+options: num:nil
+#+options: num:nil toc:nil
 #+language: en
 #+email: jjbigorra@gmail.com
 
