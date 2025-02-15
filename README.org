@@ -7,6 +7,10 @@
 
 pop-test - /your test orchestration master of puppets/
 
+pop-test is a tool that helps test computer programs, in integration, e2e, black-box, and other ways, in an easy and future-proof manner that improves reliability and engineering freedom.
+
+In Dutch, /pop/ means puppet or doll.
+
 pop-test simplifies end-to-end testing by providing a powerful orchestration tool and expressive language for your applications and their dependencies.
 
 Define your test scenarios in a DSL (represented in YAML, TOML or JSON) and automate the spinning up (and down) of complex environments involving multiple programs, databases, and services, executing comprehensive tests with ease.

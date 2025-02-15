@@ -5,11 +5,13 @@
 
 pop-test - /your test orchestration master of puppets/
 
-In Dutch, /pop/ means puppet or doll. pop-test is a tool that helps test computer programs in an easy and future-proof manner that improves reliability and engineering freedom.
+pop-test is a tool that helps test computer programs, in integration, e2e, black-box, and other ways, in an easy and future-proof manner that improves reliability and engineering freedom.
+
+In Dutch, /pop/ means puppet or doll. 
 
 pop-test simplifies end-to-end testing by providing a powerful orchestration tool and expressive language for your applications and their dependencies.
 
-Define your test scenarios in a DSL (YAML, in the future also TOML or JSON) and automate the spinning up (and down) of complex environments involving multiple programs, databases, and services, executing comprehensive tests with ease.
+Define your test scenarios in a DSL (represented in YAML, TOML or JSON) and automate the spinning up (and down) of complex environments involving multiple programs, databases, and services, executing comprehensive tests with ease.
 
 pop-test is built with Rust, enhancing safety, performance and reliability, with a modern and accessible code-base.
 
@@ -29,6 +31,49 @@ pop-tests as we affectionately call them, can range from small scope integration
 - Fast and reliable – Built with Rust, a programming language known for speed and safety.
 
 ---------------
+
+* A simple test, using the DSL
+
+For example tests and learning demos, refer to the scenarios directory: [[file:../../resources/scenarios]]
+
+Here follows a trivial example of pop-tests.
+
+In this example we spin up a REST API written in Scala, with SBT, and poll its ~/health~ endpoint for 120 seconds or until healthy.
+
+If the service is deemed healthy, then we perform some checks on the response of certain HTTP endpoints. These checks are performed using a ~jql~ inspired query format, and this allows us to check deeply nested attributes of the JSON response.
+
+Reminder: the tool supports YAML, TOML and JSON, but YAML is as of now the preferred format.
+
+More checks are possible (and encouraged), including PostgreSQL rows existence, Kafka offsets and more. For example's sake, we keep it simple:
+
+#+begin_src yaml
+  pop_services:
+    - id: "green-energy-mix"
+      dir: "$HOME/Ontwikkeling/Werk"
+      base_url: "http://localhost:50000"
+      start_cmd_args:
+        - 'sbt "greenEnergyMix/run"'
+      env_vars:
+        SOME_TOKEN: "0027809ce9"
+      health_check:
+        path: "/health"
+        patience_seconds: 120
+
+  pop_actions:
+    - name: "Check that the forecast endpoint returns a 200 with a correct data, with load and solar"
+      assert_url: "/api/v1/forecast"
+      service_id: "green-energy-mix"
+      json_body_patterns:
+        - pattern: '"meta""forecastDate"'
+          condition: '!= ""'
+        - pattern: '"data"[0]"load"'
+          condition: "> 0"
+        - pattern: '"data"[0]"solar"'
+          condition: ">= 0"
+
+#+end_src
+
+
 
 * How to run it
 
@@ -329,40 +374,44 @@ You can use Keycloak in pop-tests easily and have it auto-setup.
 
 -----
 
-* Example tests, using the DSL
+** Why pop-test is a Game-Changer
 
-For example tests and learning demos, refer to the scenarios directory: [[file:../../resources/scenarios]]
+Software testing is an essential part of modern engineering, and pop-test takes it to the next level by making end-to-end testing simple, powerful, and reliable. Whether you’re refactoring legacy code, maintaining a complex system, or ensuring business continuity, pop-test provides the confidence and efficiency your team needs.
 
-Here follows also a trivial example of pop-tests.
+*** Engineering Freedom and Confidence
+pop-test enables fearless refactoring.
 
-In this example we spin up a REST API written in Scala, with SBT, and poll its ~/health~ endpoint for 90 seconds or until healthy. Then we perform some checks on the response of certain HTTP endpoints. These checks are performed using ~jql~ and this allows us to check deeply nested attributes of the JSON response.
+Engineers can completely rewrite a system—even in a different way, or language, without second-guessing whether it still functions correctly.
 
-Reminder: the tool supports YAML, TOML and JSON, but YAML is as of now the preferred format.
+With pop-test validating the expected behaviors, teams can iterate quickly and improve systems without introducing regressions.
 
-#+begin_src yaml
-  pop_services:
-    - id: "green-energy-mix"
-      dir: "$HOME/Ontwikkeling/Werk"
-      base_url: "http://localhost:50000"
-      start_cmd_args:
-        - 'sbt "greenEnergyMix/run"'
-      env_vars:
-        SOME_TOKEN: "0027809ce9"
-      health_check:
-        path: "/health"
-        patience_seconds: 120
+*** Reliable and Meaningful Test Coverage
 
-  pop_actions:
-    - name: "Check that the forecast endpoint returns a 200 with a correct data, with load and solar"
-      assert_url: "/api/v1/forecast"
-      service_id: "green-energy-mix"
-      json_body_patterns:
-        - pattern: '"meta""forecastDate"'
-          condition: '!= ""'
-        - pattern: '"data"[0]"load"'
-          condition: "> 0"
-        - pattern: '"data"[0]"solar"'
-          condition: ">= 0"
+Unlike mocks, which actually deliver few guarantees and are often more of a pain than a blessing, pop-tests verify the entire system as a whole.
 
-#+end_src
+By testing with real dependencies—databases, APIs, message queues, pop-test ensures that your application works as expected in real-world conditions.
+
+This approach leads to fewer surprises in production and more stable software releases.
+
+*** Faster Development and Maintenance
+
+Maintaining a large codebase is much easier with pop-test in place. As systems evolve, tests remain valid, preventing accidental breakages and reducing the need for tedious manual verification.
+
+Automating these processes saves valuable engineering time, allowing teams to focus on building new features instead of debugging regressions.
+
+***  Business Value and Risk Reduction
+
+For businesses, software stability is critical. Bugs in production can lead to costly downtime, reputational damage, and loss of user trust.
+
+pop-test mitigates these risks by catching issues early, before they impact customers.
+
+With predictable and repeatable test automation, teams can ship faster with greater assurance, leading to a more agile and resilient business.
+
+** The Future of Testing
+
+pop-test is designed for modern development teams who need robust testing without complexity. Its expressive DSL, seamless service orchestration, and extensibility make it a long-term solution for ensuring software quality across any technology stack.
+
+With pop-test, you gain more than just a testing tool—you gain a strategic advantage in software development. Engineering teams become more productive, businesses gain confidence in their products, and maintaining large systems becomes easier than ever.
+
+pop-test is not just about testing—it’s about enabling better engineering.
 
