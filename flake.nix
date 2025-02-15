@@ -38,6 +38,7 @@
       devShells = forEachSupportedSystem ({ pkgs }: {
         default = pkgs.mkShell {
           packages = with pkgs; [
+            time
             rustToolchain
             openssl
             pkg-config
