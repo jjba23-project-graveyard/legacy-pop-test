@@ -18,8 +18,6 @@
 @node Top
 @top pop-test manual
 
-@image{../../resources/img/Rust-1.84-d0730f,,,,png} @image{../../resources/img/Nix-Flake-118ea1,,,,png} @image{../../resources/img/Kafka-6.1.1-501a2d,,,,png} @image{../../resources/img/PostgreSQL-17.2-0f3f4f,,,,png} @image{../../resources/img/Keycloak-26.1-412f4f,,,,png} @image{../../resources/img/PopServer-0.3.0-4e3930,,,,png}
-
 pop-test - @emph{your test orchestration master of puppets}
 
 In Dutch, @emph{pop} means puppet or doll. pop-test is a tool that helps test computer programs in an easy and future-proof manner that improves reliability and engineering freedom.
