@@ -79,6 +79,12 @@ More checks are possible (and encouraged), including PostgreSQL rows existence, 
 
 * 🖥️ How to run it
 
+If you received a binary from a friend, in most systems you can just add it to ~~/.local/bin/~ or ~/usr/local/bin~ or somewhere in your ~$PATH~.
+
+I also provide container images frequently: https://hub.docker.com/repository/docker/jjba23/pop-test/general
+
+I prefer running directly from the Rust source code, and use Nix as my package manager and development environment.
+
 It is recommended to run with ~TESTCONTAINERS_COMMAND=keep~ and ~RUST_LOG=debug~ as environment variables.
 
 Also since pop-test will do the resource management for you, we don't need to rely on Ryuk or on testcontainers-rs to do the cleanup.

@@ -31,6 +31,9 @@ publish-manual:
 		--funcall pop-test/publish-manual && cd ../../	
 
 
+#
+# example runs
+# 
 
 test-green-energy-mix: fmt
 	TESTCONTAINERS_COMMAND=keep \
@@ -56,3 +59,13 @@ test-all: fmt
 	TESTCONTAINERS_COMMAND=keep \
 	RUST_LOG=debug \
 	nix develop -c time -p cargo run -- -p ./resources/scenarios
+
+#
+# container management
+#
+container-build:
+	podman build -t jjba23/pop-test:$(CONTAINER_TAG) .
+container-run:
+	podman run jjba23/pop-test:$(CONTAINER_TAG)
+container-push:
+	podman push jjba23/pop-test:$(CONTAINER_TAG)
