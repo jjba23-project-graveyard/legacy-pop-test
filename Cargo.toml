@@ -45,3 +45,4 @@ uuid = {version = "1.13.1", features = [
     "fast-rng",          
     "macro-diagnostics", 
 ]}
+scraper = "0.22.0"

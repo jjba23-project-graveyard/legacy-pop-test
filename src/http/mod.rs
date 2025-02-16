@@ -18,6 +18,8 @@
 use std::{fs, str::FromStr};
 
 use crate::pop_model::BodyPattern;
+use scraper::{ElementRef, Html, Selector};
+use serde_json::Value;
 
 use crate::json_condition_dsl::eval_json_condition;
 use log::{debug, error, info};
@@ -31,6 +33,7 @@ pub async fn run_http_assertion(
     assert_url: String,
     service_url: String,
     json_body_patterns: Option<Vec<BodyPattern>>,
+    html_body_patterns: Option<Vec<String>>,
     bearer_token: Option<String>,
 ) -> Result<(), String> {
     let url = format!("{}{}", service_url, assert_url);
@@ -55,7 +58,7 @@ pub async fn run_http_assertion(
     let wanted_status_code = expected_code.unwrap_or(200);
 
     match maybe_response {
-        Err(e) => error!("{}", e),
+        Err(e) => Err(e.to_string()),
         Ok(resp) => {
             if resp.status().as_u16() != wanted_status_code {
                 error!("the HTTP status did not match the expectation")
@@ -68,16 +71,34 @@ pub async fn run_http_assertion(
 
             let body_bytes = &resp.bytes().await.map_err(|e| e.to_string())?.to_vec();
             let body_str = String::from_utf8_lossy(body_bytes).to_string();
-            debug!("response body from assertion: {}", body_str);
 
-            let j = serde_json::from_slice(body_bytes).map_err(|e| e.to_string());
-            if let Ok(body) = &j {
-                eval_json_condition(body, json_body_patterns.unwrap_or_default())?
+            match (json_body_patterns, html_body_patterns) {
+                (None, Some(html_patterns)) => {
+                    let document: Html = Html::parse_document(body_str.as_str());
+                    for p in html_patterns {
+                        let selector = Selector::parse(&p).unwrap();
+                        let m: Vec<ElementRef> = document.select(&selector).collect();
+                        info!("found {} elements that match pattern", m.len());
+                    }
+
+                    Ok(())
+                }
+                (Some(json_patterns), None) => {
+                    let body: Value =
+                        serde_json::from_slice(body_bytes).map_err(|e| e.to_string())?;
+                    let res = json_patterns
+                        .iter()
+                        .map(|pattern| eval_json_condition(&body, pattern.clone()));
+                    let collected: Result<(), String> = res.into_iter().collect();
+                    collected
+                }
+                (Some(_), Some(_)) => {
+                    Err("cannot perform JSON and HTML patterns simultaneously ".to_string())
+                }
+                (None, None) => Ok(()),
             }
         }
     }
-
-    Ok(())
 }
 
 pub async fn run_http_action(

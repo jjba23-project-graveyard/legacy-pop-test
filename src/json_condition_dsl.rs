@@ -20,107 +20,106 @@ use crate::pop_model::BodyPattern;
 use jql_runner::runner::raw;
 use serde_json::Value;
 
-pub fn eval_json_condition(body: &Value, patterns: Vec<BodyPattern>) -> Result<(), String> {
-    for pat in patterns {
-        let good_match = raw(&pat.pattern, body).map_err(|e| e.to_string())?;
+pub fn eval_json_condition(body: &Value, pattern: BodyPattern) -> Result<(), String> {
+    let good_match = raw(&pattern.pattern, body).map_err(|e| e.to_string())?;
 
-        match pat.condition.as_str() {
-            // match should not be empty
-            "non-empty-str" => {
-                if good_match.as_str() == Some("") {
-                    return Err("expectation not met of match to be non-empty".to_string());
-                }
-            }
-            "empty-str" => {
-                if good_match.as_str() != Some("") {
-                    return Err("expectation not met of match to be empty".to_string());
-                }
-            }
-            // match should be different than
-            cond if cond.starts_with("!= ") => match good_match {
-                Value::String(ref s) => {
-                    if s == cond.strip_prefix("!= ").unwrap_or("".trim()) {
-                        return Err(
-                            "expectation not met of match to be different to value ".to_string()
-                        );
-                    }
-                }
-                Value::Number(ref n) => {
-                    let nn: f64 = cond
-                        .strip_prefix("!= ")
-                        .unwrap_or("".trim())
-                        .parse()
-                        .map_err(|e| format!("{}", e))?;
-                    if n.as_f64() == Some(nn) {
-                        return Err("the numbers should be different but were found to be equal"
-                            .to_string());
-                    }
-                }
-                _ => return Err("could not apply condition checking to type".to_string()),
-            },
-            // match should be equal to
-            cond if cond.starts_with("== ") => match good_match {
-                Value::String(ref s) => {
-                    if s != cond.strip_prefix("== ").unwrap_or("".trim()) {
-                        return Err(
-                            "expectation not met of match to be equal to value ".to_string()
-                        );
-                    }
-                }
-                Value::Number(ref n) => {
-                    let nn: f64 = cond
-                        .strip_prefix("== ")
-                        .unwrap_or("".trim())
-                        .parse()
-                        .map_err(|e| format!("{}", e))?;
-                    if n.as_f64() != Some(nn) {
-                        return Err("the numbers should be equal but were found to be different"
-                            .to_string());
-                    }
-                }
-                _ => return Err("could not apply condition checking to type".to_string()),
-            },
-            // match should be greater or smaller than x
-            cond if cond.starts_with("> ") || cond.starts_with("< ") => {
-                let exp: f64 = cond[2..].parse().map_err(|e| format!("{}", e))?;
-                let the_num = good_match
-                    .as_number()
-                    .and_then(|n| n.as_f64())
-                    .ok_or_else(|| format!("expected numeric value, got: {:?}", good_match))?;
-
-                let is_greater = pat.condition.starts_with("> ");
-                if (is_greater && the_num <= exp) || (!is_greater && the_num >= exp) {
-                    return Err(format!(
-                        "expectation not met of numeric value: {} {}",
-                        the_num, pat.condition
-                    ));
-                }
-            }
-            // match should be greater or equal or smaller or equal than x
-            cond if cond.starts_with(">= ") || cond.starts_with("<= ") => {
-                let exp: f64 = cond[3..].parse().map_err(|e| format!("{}", e))?;
-                let the_num = good_match
-                    .as_number()
-                    .and_then(|n| n.as_f64())
-                    .ok_or_else(|| format!("expected numeric value, got: {:?}", good_match))?;
-
-                let is_greater = pat.condition.starts_with(">= ");
-                if (is_greater && the_num < exp) || (!is_greater && the_num > exp) {
-                    return Err(format!(
-                        "expectation not met of numeric value: {} {}",
-                        the_num, pat.condition
-                    ));
-                }
-            }
-            // unknown conditions should result in error
-            cond => {
-                return Err(format!(
-                    "found a condition that was unable to process: {}",
-                    cond
-                ))
+    match pattern.condition.as_str() {
+        // match should not be empty
+        "non-empty-str" => {
+            if good_match.as_str() == Some("") {
+                return Err("expectation not met of match to be non-empty".to_string());
             }
         }
+        "empty-str" => {
+            if good_match.as_str() != Some("") {
+                return Err("expectation not met of match to be empty".to_string());
+            }
+        }
+        // match should be different than
+        cond if cond.starts_with("!= ") => match good_match {
+            Value::String(ref s) => {
+                if s == cond.strip_prefix("!= ").unwrap_or("".trim()) {
+                    return Err(
+                        "expectation not met of match to be different to value ".to_string()
+                    );
+                }
+            }
+            Value::Number(ref n) => {
+                let nn: f64 = cond
+                    .strip_prefix("!= ")
+                    .unwrap_or("".trim())
+                    .parse()
+                    .map_err(|e| format!("{}", e))?;
+                if n.as_f64() == Some(nn) {
+                    return Err(
+                        "the numbers should be different but were found to be equal".to_string()
+                    );
+                }
+            }
+            _ => return Err("could not apply condition checking to type".to_string()),
+        },
+        // match should be equal to
+        cond if cond.starts_with("== ") => match good_match {
+            Value::String(ref s) => {
+                if s != cond.strip_prefix("== ").unwrap_or("".trim()) {
+                    return Err("expectation not met of match to be equal to value ".to_string());
+                }
+            }
+            Value::Number(ref n) => {
+                let nn: f64 = cond
+                    .strip_prefix("== ")
+                    .unwrap_or("".trim())
+                    .parse()
+                    .map_err(|e| format!("{}", e))?;
+                if n.as_f64() != Some(nn) {
+                    return Err(
+                        "the numbers should be equal but were found to be different".to_string()
+                    );
+                }
+            }
+            _ => return Err("could not apply condition checking to type".to_string()),
+        },
+        // match should be greater or smaller than x
+        cond if cond.starts_with("> ") || cond.starts_with("< ") => {
+            let exp: f64 = cond[2..].parse().map_err(|e| format!("{}", e))?;
+            let the_num = good_match
+                .as_number()
+                .and_then(|n| n.as_f64())
+                .ok_or_else(|| format!("expected numeric value, got: {:?}", good_match))?;
+
+            let is_greater = pattern.condition.starts_with("> ");
+            if (is_greater && the_num <= exp) || (!is_greater && the_num >= exp) {
+                return Err(format!(
+                    "expectation not met of numeric value: {} {}",
+                    the_num, pattern.condition
+                ));
+            }
+        }
+        // match should be greater or equal or smaller or equal than x
+        cond if cond.starts_with(">= ") || cond.starts_with("<= ") => {
+            let exp: f64 = cond[3..].parse().map_err(|e| format!("{}", e))?;
+            let the_num = good_match
+                .as_number()
+                .and_then(|n| n.as_f64())
+                .ok_or_else(|| format!("expected numeric value, got: {:?}", good_match))?;
+
+            let is_greater = pattern.condition.starts_with(">= ");
+            if (is_greater && the_num < exp) || (!is_greater && the_num > exp) {
+                return Err(format!(
+                    "expectation not met of numeric value: {} {}",
+                    the_num, pattern.condition
+                ));
+            }
+        }
+        // unknown conditions should result in error
+        cond => {
+            return Err(format!(
+                "found a condition that was unable to process: {}",
+                cond
+            ))
+        }
     }
+
     Ok(())
 }
 
@@ -151,11 +150,13 @@ mod tests {
         expected: Result<(), String>,
     ) {
         initialize();
-        let patterns = vec![BodyPattern {
-            pattern: pattern.to_string(),
-            condition: condition.to_string(),
-        }];
-        let result = eval_json_condition(&body, patterns);
+        let result = eval_json_condition(
+            &body,
+            BodyPattern {
+                pattern: pattern.to_string(),
+                condition: condition.to_string(),
+            },
+        );
         assert_eq!(result, expected);
     }
 
@@ -216,24 +217,28 @@ mod tests {
 
     #[test]
     fn check_fails_gracefully_when_no_matches_found() {
-        let patterns = vec![BodyPattern {
-            pattern: "\"suta\"".to_string(),
-            condition: "!= \"\"".to_string(),
-        }];
         let body = json!({"sut": "something"});
-        let result = eval_json_condition(&body, patterns);
+        let result = eval_json_condition(
+            &body,
+            BodyPattern {
+                pattern: "\"suta\"".to_string(),
+                condition: "!= \"\"".to_string(),
+            },
+        );
         error!("{:?}", result);
         assert_ne!(result, Ok(()));
     }
 
     #[test]
     fn check_fails_gracefully_when_no_condition_matches_found() {
-        let patterns = vec![BodyPattern {
-            pattern: "\"sut\"".to_string(),
-            condition: "weird-condition".to_string(),
-        }];
         let body = json!({"sut": "something"});
-        let result = eval_json_condition(&body, patterns);
+        let result = eval_json_condition(
+            &body,
+            BodyPattern {
+                pattern: "\"sut\"".to_string(),
+                condition: "weird-condition".to_string(),
+            },
+        );
         error!("{:?}", result);
         assert_ne!(result, Ok(()));
     }

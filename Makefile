@@ -43,7 +43,7 @@ test-all: fmt
 fmt:
 	nix develop -c cargo fix --allow-dirty --bin "pop-test"
 	nix develop -c cargo clippy --fix --allow-dirty
-	nix develop -c find . -maxdepth 8 -name "*.rs" -type f -exec rustfmt --edition 2021 {} \;
+	nix develop -c find . -maxdepth 8 -path target -prune -name "*.rs" -type f -exec rustfmt --edition 2021 {} \;
 
 # test: run unit and integration tests for pop-test's implementation itself
 test: fmt

@@ -30,3 +30,5 @@ pop_actions:
     assert_url: "/projects"
     assert_code: 200
     service_id: "lucidplan"
+    html_body_patterns:
+      - "h2"

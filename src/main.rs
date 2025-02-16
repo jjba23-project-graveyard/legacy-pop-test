@@ -20,6 +20,7 @@ use pop_model::PopScenario;
 use scenario::play_scenario;
 use std::{fs, path::Path};
 
+mod action;
 mod containers;
 mod environment;
 mod health_check;

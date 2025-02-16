@@ -88,6 +88,7 @@ pub enum PopAction {
         service_id: String,
         delay_seconds: Option<u64>,
         json_body_patterns: Option<Vec<BodyPattern>>,
+        html_body_patterns: Option<Vec<String>>,
         with_keycloak_user_token: Option<bool>,
     },
     HttpAction {
