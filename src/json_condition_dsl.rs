@@ -18,6 +18,7 @@
 use crate::pop_model::BodyPattern;
 
 use jql_runner::runner::raw;
+use log::info;
 use serde_json::Value;
 
 pub fn eval_json_condition(body: &Value, pattern: BodyPattern) -> Result<(), String> {
@@ -29,11 +30,13 @@ pub fn eval_json_condition(body: &Value, pattern: BodyPattern) -> Result<(), Str
             if good_match.as_str() == Some("") {
                 return Err("expectation not met of match to be non-empty".to_string());
             }
+            info!("condition successful: {} {}", good_match, pattern.condition);
         }
         "empty-str" => {
             if good_match.as_str() != Some("") {
                 return Err("expectation not met of match to be empty".to_string());
             }
+            info!("condition successful: {} {}", good_match, pattern.condition);
         }
         // match should be different than
         cond if cond.starts_with("!= ") => match good_match {
@@ -43,6 +46,7 @@ pub fn eval_json_condition(body: &Value, pattern: BodyPattern) -> Result<(), Str
                         "expectation not met of match to be different to value ".to_string()
                     );
                 }
+                info!("condition successful: {} {}", good_match, pattern.condition);
             }
             Value::Number(ref n) => {
                 let nn: f64 = cond
@@ -55,6 +59,7 @@ pub fn eval_json_condition(body: &Value, pattern: BodyPattern) -> Result<(), Str
                         "the numbers should be different but were found to be equal".to_string()
                     );
                 }
+                info!("condition successful: {} {}", good_match, pattern.condition);
             }
             _ => return Err("could not apply condition checking to type".to_string()),
         },
@@ -64,6 +69,7 @@ pub fn eval_json_condition(body: &Value, pattern: BodyPattern) -> Result<(), Str
                 if s != cond.strip_prefix("== ").unwrap_or("".trim()) {
                     return Err("expectation not met of match to be equal to value ".to_string());
                 }
+                info!("condition successful: {} {}", good_match, pattern.condition);
             }
             Value::Number(ref n) => {
                 let nn: f64 = cond
@@ -76,6 +82,7 @@ pub fn eval_json_condition(body: &Value, pattern: BodyPattern) -> Result<(), Str
                         "the numbers should be equal but were found to be different".to_string()
                     );
                 }
+                info!("condition successful: {} {}", good_match, pattern.condition);
             }
             _ => return Err("could not apply condition checking to type".to_string()),
         },
@@ -94,6 +101,7 @@ pub fn eval_json_condition(body: &Value, pattern: BodyPattern) -> Result<(), Str
                     the_num, pattern.condition
                 ));
             }
+            info!("condition successful: {} {}", good_match, pattern.condition);
         }
         // match should be greater or equal or smaller or equal than x
         cond if cond.starts_with(">= ") || cond.starts_with("<= ") => {
@@ -110,6 +118,7 @@ pub fn eval_json_condition(body: &Value, pattern: BodyPattern) -> Result<(), Str
                     the_num, pattern.condition
                 ));
             }
+            info!("condition successful: {} {}", good_match, pattern.condition);
         }
         // unknown conditions should result in error
         cond => {
