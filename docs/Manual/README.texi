@@ -42,22 +42,27 @@ pop-tests as we affectionately call them, can range from small scope integration
 * How to run it::
 * Motivation::
 * The Scenario DSL (Domain Specific Language)::
+* Why pop-test can be a Game-Changer::
+* Conclusion::
 
 @detailmenu
 --- The Detailed Node Listing ---
 
 The Scenario DSL (Domain Specific Language)
 
-* pop services::
-* pop actions::
 * Condition DSL::
 * Row DSL::
+* pop services::
+* pop actions::
 * pop postgres::
 * pop kafka::
 * pop-server::
 * pop keycloak::
-* Why pop-test is a Game-Changer::
-* The Future of Testing::
+
+Row DSL
+
+* Quantifiers::
+* Conditions::
 
 pop services
 
@@ -72,7 +77,7 @@ pop actions
 * a kafka produce action::
 * an http assertion::
 
-Why pop-test is a Game-Changer
+Why pop-test can be a Game-Changer
 
 * Engineering Freedom and Confidence::
 * Reliable and Meaningful Test Coverage::
@@ -203,17 +208,66 @@ Unless otherwise stated, the YAML representation of the Scenario DSL will be use
 The tool supports YAML, TOML and JSON file formats seamlessly.
 
 @menu
-* pop services::
-* pop actions::
 * Condition DSL::
 * Row DSL::
+* pop services::
+* pop actions::
 * pop postgres::
 * pop kafka::
 * pop-server::
 * pop keycloak::
-* Why pop-test is a Game-Changer::
-* The Future of Testing::
 @end menu
+
+@node Condition DSL
+@section Condition DSL
+
+This DSL is present in JSON body checks and in SQL database checks, supported conditions include:
+
+@code{non-empty-str} (ensures the field is not empty)
+
+@code{empty-str} (ensures the field is empty)
+
+@code{== x} (ensures the field is x)
+
+@code{!= x} (ensures the field is not x)
+
+@code{> 0} (ensures the field is greater than zero)
+
+@code{>= 0} (ensures the field is non-negative)
+
+@code{< 0} (ensures the field is smaller than zero)
+
+@code{<= 0} (ensures the field is non-positive)
+
+@node Row DSL
+@section Row DSL
+
+This is the DSL used to perform assertions on SQL databases. Currently PostgreSQL supports this.
+
+@example
+[0] ((non-empty-str)(>= 12)(== en_GB)(non-empty-str))
+@end example
+
+@menu
+* Quantifiers::
+* Conditions::
+@end menu
+
+@node Quantifiers
+@subsection Quantifiers
+
+@code{[0]} or @code{[first]} means the check should be applied to the first row in the result set
+
+@code{[all]} means the check should be applied to all the rows in the result set
+
+@code{[last]} means the check should be applied to the last row in the result set
+
+@code{[n]} with n being a positive integer, means the check should be applied to the nth row in the result set
+
+@node Conditions
+@subsection Conditions
+
+The rest of the clause is a tuple-based variant of the condition DSL, in order of selection in a query.
 
 @node pop services
 @section pop services
@@ -339,40 +393,6 @@ Each JSON body pattern entry includes:
 
 @code{condition} (required, string) – A logical condition to be checked.
 
-@node Condition DSL
-@section Condition DSL
-
-This DSL is present in JSON body checks and in SQL database checks, supported conditions include:
-
-@code{non-empty-str} (ensures the field is not empty)
-
-@code{empty-str} (ensures the field is empty)
-
-@code{== x} (ensures the field is x)
-
-@code{!= x} (ensures the field is not x)
-
-@code{> 0} (ensures the field is greater than zero)
-
-@code{>= 0} (ensures the field is non-negative)
-
-@code{< 0} (ensures the field is smaller than zero)
-
-@code{<= 0} (ensures the field is non-positive)
-
-@node Row DSL
-@section Row DSL
-
-This is the DSL used to perform assertions on SQL databases. Currently PostgreSQL supports this.
-
-@code{[0]} symbolizes the first row in a table, and the list of clauses in parentheses the conditions to be checked in order
-
-The rest of the clause is a tuple-based variant of the condition DSL, in order.
-
-@example
-[0] ((non-empty-str)(== 232323)(== en_GB)(non-empty-str))
-@end example
-
 @node pop postgres
 @section pop postgres
 
@@ -452,10 +472,12 @@ You can use Keycloak in pop-tests easily and have it auto-setup.
 
 @code{scopes} (optional, list of strings) - Names of scopes to be created realm-wide and associated to the OAuth client
 
-@node Why pop-test is a Game-Changer
-@section Why pop-test is a Game-Changer
+@node Why pop-test can be a Game-Changer
+@chapter Why pop-test can be a Game-Changer
 
-Software testing is an essential part of modern engineering, and pop-test takes it to the next level by making end-to-end testing simple, powerful, and reliable. Whether you’re refactoring legacy code, maintaining a complex system, or ensuring business continuity, pop-test provides the confidence and efficiency your team needs.
+Software testing is an essential part of modern engineering, and pop-test takes it to the next level by making end-to-end testing simple, powerful, and reliable.
+
+Whether you’re refactoring legacy code, maintaining a complex system, or ensuring business continuity, pop-test provides the confidence and efficiency your team needs.
 
 @menu
 * Engineering Freedom and Confidence::
@@ -465,7 +487,7 @@ Software testing is an essential part of modern engineering, and pop-test takes 
 @end menu
 
 @node Engineering Freedom and Confidence
-@subsection Engineering Freedom and Confidence
+@section Engineering Freedom and Confidence
 
 pop-test enables fearless refactoring.
 
@@ -474,7 +496,7 @@ Engineers can completely rewrite a system—even in a different way, or language
 With pop-test validating the expected behaviors, teams can iterate quickly and improve systems without introducing regressions.
 
 @node Reliable and Meaningful Test Coverage
-@subsection Reliable and Meaningful Test Coverage
+@section Reliable and Meaningful Test Coverage
 
 Unlike mocks, which actually deliver few guarantees and are often more of a pain than a blessing, pop-tests verify the entire system as a whole.
 
@@ -483,14 +505,14 @@ By testing with real dependencies—databases, APIs, message queues, pop-test en
 This approach leads to fewer surprises in production and more stable software releases.
 
 @node Faster Development and Maintenance
-@subsection Faster Development and Maintenance
+@section Faster Development and Maintenance
 
 Maintaining a large codebase is much easier with pop-test in place. As systems evolve, tests remain valid, preventing accidental breakages and reducing the need for tedious manual verification.
 
 Automating these processes saves valuable engineering time, allowing teams to focus on building new features instead of debugging regressions.
 
 @node Business Value and Risk Reduction
-@subsection Business Value and Risk Reduction
+@section Business Value and Risk Reduction
 
 For businesses, software stability is critical. Bugs in production can lead to costly downtime, reputational damage, and loss of user trust.
 
@@ -498,8 +520,8 @@ pop-test mitigates these risks by catching issues early, before they impact cust
 
 With predictable and repeatable test automation, teams can ship faster with greater assurance, leading to a more agile and resilient business.
 
-@node The Future of Testing
-@section The Future of Testing
+@node Conclusion
+@chapter Conclusion
 
 pop-test is designed for modern development teams who need robust testing without complexity. Its expressive DSL, seamless service orchestration, and extensibility make it a long-term solution for ensuring software quality across any technology stack.
 

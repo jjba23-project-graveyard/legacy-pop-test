@@ -63,7 +63,7 @@ pub fn make_checker_from_expression(
     expression: String,
 ) -> Result<Box<dyn Fn(&Row) -> bool>, String> {
     let clauses = extract_checker_clauses(expression.as_str());
-    info!("found checker clauses: {:?}", clauses);
+    info!("found checker clauses: {:#?}", clauses);
 
     let fun = move |ro: &Row| {
         let mut parsed_row: Vec<String> = Vec::new();
@@ -109,13 +109,13 @@ pub fn make_checker_from_expression(
             }
         }
 
-        info!("{:?}", parsed_row);
+        info!("{:#?}", parsed_row);
 
         for (i, clause) in cs.clone() {
             let col_type = ro.columns()[i].type_().name();
             let eval_result =
                 eval_row_condition(parsed_row[i].clone(), clause.clone(), col_type.to_string());
-            info!("{:?}", eval_result);
+            info!("{:#?}", eval_result);
         }
 
         true

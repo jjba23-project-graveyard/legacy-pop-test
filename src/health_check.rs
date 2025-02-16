@@ -59,7 +59,7 @@ async fn health_check(
                         continue;
                     }
                     Ok(v) => {
-                        info!("{:?}", v);
+                        info!("{:#?}", v);
                         break;
                     }
                 }

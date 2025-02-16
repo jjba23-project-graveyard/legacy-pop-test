@@ -139,6 +139,53 @@ The tool supports YAML, TOML and JSON file formats seamlessly.
 
 -----
 
+** Condition DSL
+
+This DSL is present in JSON body checks and in SQL database checks, supported conditions include:
+
+~non-empty-str~ (ensures the field is not empty)
+
+~empty-str~ (ensures the field is empty)
+
+~== x~ (ensures the field is x)
+
+~!= x~ (ensures the field is not x)
+
+~> 0~ (ensures the field is greater than zero)
+
+~>= 0~ (ensures the field is non-negative)
+
+~< 0~ (ensures the field is smaller than zero)
+
+~<= 0~ (ensures the field is non-positive)
+
+-----
+
+** Row DSL
+
+This is the DSL used to perform assertions on SQL databases. Currently PostgreSQL supports this.
+
+#+begin_example
+[0] ((non-empty-str)(>= 12)(== en_GB)(non-empty-str))
+#+end_example
+
+
+*** Quantifiers 
+
+~[0]~ or ~[first]~ means the check should be applied to the first row in the result set
+
+~[all]~ means the check should be applied to all the rows in the result set
+
+~[last]~ means the check should be applied to the last row in the result set
+
+~[n]~ with n being a positive integer, means the check should be applied to the nth row in the result set
+
+*** Conditions
+
+The rest of the clause is a tuple-based variant of the condition DSL, in order of selection in a query.
+
+-----
+
 ** pop services
 
 ~pop_services~ is a list of services to be started for the scenario.
@@ -252,43 +299,6 @@ Each JSON body pattern entry includes:
 
 ------
 
-** Condition DSL
-
-This DSL is present in JSON body checks and in SQL database checks, supported conditions include:
-
-~non-empty-str~ (ensures the field is not empty)
-
-~empty-str~ (ensures the field is empty)
-
-~== x~ (ensures the field is x)
-
-~!= x~ (ensures the field is not x)
-
-~> 0~ (ensures the field is greater than zero)
-
-~>= 0~ (ensures the field is non-negative)
-
-~< 0~ (ensures the field is smaller than zero)
-
-~<= 0~ (ensures the field is non-positive)
-
------
-
-** Row DSL
-
-This is the DSL used to perform assertions on SQL databases. Currently PostgreSQL supports this.
-
-~[0]~ symbolizes the first row in a table, and the list of clauses in parentheses the conditions to be checked in order
-
-The rest of the clause is a tuple-based variant of the condition DSL, in order.
-
-#+begin_example
-[0] ((non-empty-str)(== 232323)(== en_GB)(non-empty-str))
-#+end_example
-
-
------
-
 ** pop postgres
 
 You can use PostgreSQL in pop-tests easily.
@@ -344,7 +354,6 @@ You can then  have it prepared with certain behaviors (under ~behaviors~ ):
 ~body_file~ (required, string) - path to the file to load data from, that will be returned as HTTP body
 
 
-
 ** pop keycloak
 
 You can use Keycloak in pop-tests easily and have it auto-setup.
@@ -372,20 +381,23 @@ You can use Keycloak in pop-tests easily and have it auto-setup.
 ~scopes~ (optional, list of strings) - Names of scopes to be created realm-wide and associated to the OAuth client
 
 
+
 -----
 
-** Why pop-test is a Game-Changer
+* Why pop-test can be a Game-Changer
 
-Software testing is an essential part of modern engineering, and pop-test takes it to the next level by making end-to-end testing simple, powerful, and reliable. Whether you’re refactoring legacy code, maintaining a complex system, or ensuring business continuity, pop-test provides the confidence and efficiency your team needs.
+Software testing is an essential part of modern engineering, and pop-test takes it to the next level by making end-to-end testing simple, powerful, and reliable.
 
-*** Engineering Freedom and Confidence
+Whether you’re refactoring legacy code, maintaining a complex system, or ensuring business continuity, pop-test provides the confidence and efficiency your team needs.
+
+** Engineering Freedom and Confidence
 pop-test enables fearless refactoring.
 
 Engineers can completely rewrite a system—even in a different way, or language, without second-guessing whether it still functions correctly.
 
 With pop-test validating the expected behaviors, teams can iterate quickly and improve systems without introducing regressions.
 
-*** Reliable and Meaningful Test Coverage
+** Reliable and Meaningful Test Coverage
 
 Unlike mocks, which actually deliver few guarantees and are often more of a pain than a blessing, pop-tests verify the entire system as a whole.
 
@@ -393,13 +405,13 @@ By testing with real dependencies—databases, APIs, message queues, pop-test en
 
 This approach leads to fewer surprises in production and more stable software releases.
 
-*** Faster Development and Maintenance
+** Faster Development and Maintenance
 
 Maintaining a large codebase is much easier with pop-test in place. As systems evolve, tests remain valid, preventing accidental breakages and reducing the need for tedious manual verification.
 
 Automating these processes saves valuable engineering time, allowing teams to focus on building new features instead of debugging regressions.
 
-***  Business Value and Risk Reduction
+**  Business Value and Risk Reduction
 
 For businesses, software stability is critical. Bugs in production can lead to costly downtime, reputational damage, and loss of user trust.
 
@@ -407,7 +419,7 @@ pop-test mitigates these risks by catching issues early, before they impact cust
 
 With predictable and repeatable test automation, teams can ship faster with greater assurance, leading to a more agile and resilient business.
 
-** The Future of Testing
+* Conclusion
 
 pop-test is designed for modern development teams who need robust testing without complexity. Its expressive DSL, seamless service orchestration, and extensibility make it a long-term solution for ensuring software quality across any technology stack.
 

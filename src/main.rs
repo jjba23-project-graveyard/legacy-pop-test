@@ -65,7 +65,7 @@ async fn main() -> Result<(), String> {
 
     info!("gathering scenario files in desired path");
     let file_paths = gather_file_paths(args.path.clone());
-    info!("gathered files: {:?}", file_paths);
+    info!("gathered files: {:#?}", file_paths);
 
     async {
         for f in &file_paths {

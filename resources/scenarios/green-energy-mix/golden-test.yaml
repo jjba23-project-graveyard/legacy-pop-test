@@ -47,7 +47,7 @@ pop_actions:
         condition: '>= 0'
       - pattern: '"windowStartUtc"'
         condition: "non-empty-str"
-      - pattern: '"windowStartAmsterdam"'
+      - pattern: '"windowStartAms"'
         condition: "non-empty-str"        
 
 

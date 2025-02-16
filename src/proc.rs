@@ -25,7 +25,7 @@ use crate::pop_model::PopService;
 pub async fn terminate_services(children: Vec<Child>) {
     info!("terminating all processes");
     for mut child in children {
-        info!("terminating pid: {:?}", child.id());
+        info!("terminating pid: {:#?}", child.id());
         let _ = child.kill().await;
         info!("terminated process successfully");
     }
@@ -48,8 +48,8 @@ async fn run_proc_from_service(
     let dir = str::replace(&pop_service.dir, "$HOME", &user_home);
 
     info!("in dir {}", &dir);
-    info!("with args {:?}", &pop_service.start_cmd_args);
-    info!("with env {:?}", &with_env);
+    info!("with args {:#?}", &pop_service.start_cmd_args);
+    info!("with env {:#?}", &with_env);
 
     let mut arg: Vec<String> = Vec::new();
     arg.push("-c".to_string());
@@ -57,7 +57,7 @@ async fn run_proc_from_service(
         arg.push(b.to_string());
     }
 
-    info!("run shell with args {:?}", &arg);
+    info!("run shell with args {:#?}", &arg);
 
     let b = &pop_service
         .shell_path

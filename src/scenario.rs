@@ -149,7 +149,7 @@ pub async fn play_scenario(scenario: PopScenario) -> Result<(), String> {
         postgres_conn_string: Some(postgres_conn),
     };
 
-    info!("{:?}", pop_env);
+    info!("{:#?}", pop_env);
 
     info!("performing tests and assertions");
     let services = &scenario.pop_services.clone().unwrap_or_default();
@@ -158,7 +158,7 @@ pub async fn play_scenario(scenario: PopScenario) -> Result<(), String> {
         let action_result =
             run_action(&pop_env, services, action, scenario.pop_keycloak.clone()).await;
         match action_result {
-            Ok(_) => info!("ran action successfully: {:?}", action),
+            Ok(_) => info!("ran action successfully: {:#?}", action),
             Err(e) => error!("{}", e),
         }
     }

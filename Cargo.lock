@@ -1662,7 +1662,7 @@ checksum = "953ec861398dccce10c670dfeaf3ec4911ca479e9c02154b3a215178c5f566f2"
 
 [[package]]
 name = "pop-test"
-version = "0.4.5"
+version = "0.4.6"
 dependencies = [
  "clap",
  "env_logger",

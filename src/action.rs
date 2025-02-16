@@ -33,7 +33,7 @@ pub async fn run_action(
     action: &PopAction,
     keycloak: Option<PopKeycloak>,
 ) -> Result<(), String> {
-    info!("executing action: {:?}", action);
+    info!("executing action: {:#?}", action);
     match action {
         PopAction::KafkaCheck {
             name,
@@ -98,7 +98,7 @@ pub async fn run_action(
                 .await
                 .map_err(|e| e.to_string())?;
 
-            info!("postgres rows: {:?}", rows);
+            info!("postgres rows: {:#?}", rows);
 
             if let Some(rc) = assert_row_count {
                 if rows.len() != (rc.to_owned() as usize) {
@@ -110,7 +110,7 @@ pub async fn run_action(
 
             for assert_expression in assert_expressions.clone().unwrap_or(Vec::new()) {
                 let q = get_row_expression_quantifier(assert_expression.clone())?;
-                info!("row expression quantifier: {:?}", q);
+                info!("row expression quantifier: {:#?}", q);
 
                 let row_checker = make_checker_from_expression(assert_expression.clone())?;
 
@@ -119,29 +119,29 @@ pub async fn run_action(
                         info!("TODO");
                         for row in &rows {
                             let is_valid_row = row_checker(row);
-                            info!("is valid row {}, {:?}", is_valid_row, row);
+                            info!("is valid row {}, {:#?}", is_valid_row, row);
                         }
                     }
                     crate::row_dsl::RowExpressionQuantifier::First => {
                         if !rows.is_empty() {
-                            info!("reading first row: {:?}", rows[0]);
+                            info!("reading first row: {:#?}", rows[0]);
                             let is_valid_row = row_checker(&rows[0]);
-                            info!("is valid row {}, {:?}", is_valid_row, &rows[0]);
+                            info!("is valid row {}, {:#?}", is_valid_row, &rows[0]);
                         } else {
                             error!("no rows were found for your query")
                         }
                     }
                     crate::row_dsl::RowExpressionQuantifier::Last => {
                         let pos = rows.len();
-                        info!("reading last row: {:?}", rows[pos]);
+                        info!("reading last row: {:#?}", rows[pos]);
                         let is_valid_row = row_checker(&rows[pos]);
-                        info!("is valid row {}, {:?}", is_valid_row, &rows[pos]);
+                        info!("is valid row {}, {:#?}", is_valid_row, &rows[pos]);
                     }
                     crate::row_dsl::RowExpressionQuantifier::Position(p) => {
                         let pos = p as usize;
-                        info!("reading row at pos {}: {:?}", pos, rows[pos]);
+                        info!("reading row at pos {}: {:#?}", pos, rows[pos]);
                         let is_valid_row = row_checker(&rows[pos]);
-                        info!("is valid row {}, {:?}", is_valid_row, &rows[pos]);
+                        info!("is valid row {}, {:#?}", is_valid_row, &rows[pos]);
                     }
                 };
             }
@@ -204,8 +204,8 @@ pub async fn run_action(
             }
 
             if let Some(service) = services.iter().find(|s| s.id == *service_id) {
-                info!("found service to check: {:?}", service);
-                info!("running http assertion: {:?}", action);
+                info!("found service to check: {:#?}", service);
+                info!("running http assertion: {:#?}", action);
                 run_http_action(
                     action_url.clone(),
                     service.base_url.clone(),
@@ -252,8 +252,8 @@ pub async fn run_action(
             }
 
             if let Some(service) = services.iter().find(|s| s.id == *service_id) {
-                info!("found service to check: {:?}", service);
-                info!("running http assertion: {:?}", action);
+                info!("found service to check: {:#?}", service);
+                info!("running http assertion: {:#?}", action);
                 run_http_assertion(
                     *assert_code,
                     assert_url.clone(),
