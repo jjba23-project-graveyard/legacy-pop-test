@@ -15,6 +15,23 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
+fmt:
+	nix develop -c cargo fix --allow-dirty --bin "pop-test"
+	nix develop -c cargo clippy --fix --allow-dirty
+	nix develop -c find . -maxdepth 8 -path target -prune -name "*.rs" -type f -exec rustfmt --edition 2021 {} \;
+
+# test: run unit and integration tests for pop-test's implementation itself
+test: fmt
+	RUST_LOG=debug nix develop -c cargo test
+
+# publish-manual: Generates and publishes the manual from Org files using Emacs.
+publish-manual:
+	cd docs/Manual/ && emacs -Q --batch \
+		-l $(shell realpath ./src/manual/pop-test-manual.el) \
+		--funcall pop-test/publish-manual && cd ../../	
+
+
+
 test-green-energy-mix: fmt
 	TESTCONTAINERS_COMMAND=keep \
 	RUST_LOG=debug \
@@ -39,19 +56,3 @@ test-all: fmt
 	TESTCONTAINERS_COMMAND=keep \
 	RUST_LOG=debug \
 	nix develop -c time -p cargo run -- -p ./resources/scenarios
-
-fmt:
-	nix develop -c cargo fix --allow-dirty --bin "pop-test"
-	nix develop -c cargo clippy --fix --allow-dirty
-	nix develop -c find . -maxdepth 8 -path target -prune -name "*.rs" -type f -exec rustfmt --edition 2021 {} \;
-
-# test: run unit and integration tests for pop-test's implementation itself
-test: fmt
-	RUST_LOG=debug nix develop -c cargo test
-
-# publish-manual: Generates and publishes the manual from Org files using Emacs.
-publish-manual:
-	cd docs/Manual/ && emacs -Q --batch \
-		-l $(shell realpath ./src/manual/pop-test-manual.el) \
-		--funcall pop-test/publish-manual && cd ../../	
-
