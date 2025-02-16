@@ -18,22 +18,27 @@
 test-green-energy-mix: fmt
 	TESTCONTAINERS_COMMAND=keep \
 	RUST_LOG=debug \
-	nix develop -c time cargo run -- -p ./resources/scenarios/green-energy-mix/golden-test.yaml
+	nix develop -c time -p cargo run -- -p ./resources/scenarios/green-energy-mix/golden-test.yaml
 
 test-vehicle-management: fmt
 	TESTCONTAINERS_COMMAND=keep \
 	RUST_LOG=debug \
-	nix develop -c time cargo run -- -p ./resources/scenarios/vehicle-management/golden-test.yaml
+	nix develop -c time -p cargo run -- -p ./resources/scenarios/vehicle-management/golden-test.yaml
 
 test-dynamic-tariff-charging: fmt
 	TESTCONTAINERS_COMMAND=keep \
 	RUST_LOG=debug \
-	nix develop -c time cargo run -- -p ./resources/scenarios/dynamic-tariff-charging/golden-test.yaml
+	nix develop -c time -p cargo run -- -p ./resources/scenarios/dynamic-tariff-charging/golden-test.yaml
+
+test-lucidplan: fmt
+	TESTCONTAINERS_COMMAND=keep \
+	RUST_LOG=debug \
+	nix develop -c time -p cargo run -- -p ./resources/scenarios/lucidplan/golden-test.yaml
 
 test-all: fmt
 	TESTCONTAINERS_COMMAND=keep \
 	RUST_LOG=debug \
-	nix develop -c time cargo run -- -p ./resources/scenarios
+	nix develop -c time -p cargo run -- -p ./resources/scenarios
 
 fmt:
 	nix develop -c cargo fix --allow-dirty --bin "pop-test"
