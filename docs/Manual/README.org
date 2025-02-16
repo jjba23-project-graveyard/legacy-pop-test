@@ -277,17 +277,6 @@ there are many types of pop action, see the following sections.
 
 -----
 
-*** a kafka produce action
-
-A kafka produce action is defined by:
-
-~message_file_path~ (optional, string)
-
-~kafka_topic~ (required, string)
-
-
------
-
 *** an http assertion
 
 ~expected_code~ (optional, u16 number) - expected HTTP status code, defaults to 200
@@ -305,16 +294,26 @@ Each JSON body pattern entry includes:
 ~condition~ (required, string) – A logical condition to be checked.
 
 *** an http action
+*** a kafka produce action
 
-*** a kafka check
+A kafka produce action is defined by:
+
+~message_file_path~ (optional, string)
+
+~kafka_topic~ (required, string)
+
+
+-----
+
+*** a kafka check 🚧
+*** a postgresql assertion
+
 
 ------
 
 
 
-
-
-* Orchestrated services, also 3rd party
+* 🎵 orchestrated services, also 3rd party
 
 ** 🌐 pop postgres
 
@@ -405,7 +404,7 @@ You can use Keycloak in pop-tests easily and have it auto-setup.
 
 -----
 
-* Why pop-test can be a Game-Changer
+* 🫶🏼Why pop-test can be a Game-Changer
 
 Software testing is an essential part of modern engineering, and pop-test takes it to the next level by making end-to-end testing simple, powerful, and reliable.
 
@@ -450,5 +449,7 @@ pop-test is designed for modern development teams who need robust testing withou
 With pop-test, you gain more than just a testing tool—you gain a strategic advantage in software development. Engineering teams become more productive, businesses gain confidence in their products, and maintaining large systems becomes easier than ever.
 
 pop-test is not just about testing—it’s about enabling better engineering.
+
+[[file:../../resources/img/wp10992149-modified.png]]
 
 ------
