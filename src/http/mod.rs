@@ -54,7 +54,7 @@ pub async fn run_http_assertion(
 
     let maybe_response = c.send().await;
 
-    println!("{maybe_response:#?}");
+    debug!("{maybe_response:#?}");
     let wanted_status_code = expected_code.unwrap_or(200);
 
     match maybe_response {
@@ -71,6 +71,8 @@ pub async fn run_http_assertion(
 
             let body_bytes = &resp.bytes().await.map_err(|e| e.to_string())?.to_vec();
             let body_str = String::from_utf8_lossy(body_bytes).to_string();
+
+            debug!("\n{}", body_str);
 
             match (json_body_patterns, html_body_patterns) {
                 (None, Some(html_patterns)) => {

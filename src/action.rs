@@ -252,7 +252,6 @@ pub async fn run_action(
             }
 
             if let Some(service) = services.iter().find(|s| s.id == *service_id) {
-                info!("found service to check: {:#?}", service);
                 info!("running http assertion: {:#?}", action);
                 run_http_assertion(
                     *assert_code,
