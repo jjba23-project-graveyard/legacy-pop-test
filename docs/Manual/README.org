@@ -419,9 +419,9 @@ With pop-test validating the expected behaviors, teams can iterate quickly and i
 
 In my opinion mocks sometimes deliver few or even fake guarantees, are often more of a pain to maintain, and some implementations are outright broken and illogical...
 
-pop-tests verify the entire system as a whole ✅.
-
 By testing with real dependencies—databases, APIs, message queues, pop-test ensures that your application works as expected in real-world conditions.
+
+This can also be interesting when testing experimental versions against your applications, for example, it can help you migrate to a new database system, while verifying all scenarios and cases still work.
 
 This approach leads to fewer surprises in production and more stable software releases.
 
@@ -450,6 +450,11 @@ With pop-test, you gain more than just a testing tool—you gain a strategic adv
 
 pop-test is not just about testing—it’s about enabling better engineering.
 
+
 [[file:../../resources/img/wp10992149-modified.png]]
+
+Aside:
+
+With the power of pop-test, and taking profit of the rise of LLMs (Large Language Models) , having tests be declarative and expressed in tree like structures we can also open the gates to automated generation of test cases that test your systems as a user would.
 
 ------
