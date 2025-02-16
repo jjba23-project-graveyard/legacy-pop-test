@@ -1,4 +1,4 @@
-#+title: pop-test manual
+#+title: 🎶 pop-test manual
 #+language: en
 #+email: jjbigorra@gmail.com
 
@@ -21,7 +21,7 @@ pop-tests as we affectionately call them, can range from small scope integration
 
 ------
 
-* Why pop-test?
+*  Why pop-test?
 
 - Frees you and allows you to refactor and test your systems more easily. You can for example completely rewrite a program, even in a different language, and stay certain your implementation works as expected.
 - Catches mistakes early – Helps find problems before real users do since you test with real dependencies.
@@ -32,7 +32,7 @@ pop-tests as we affectionately call them, can range from small scope integration
 
 ---------------
 
-* A simple test, using the DSL
+* ⚙️ A simple test, using the DSL
 
 For example tests and learning demos, refer to the scenarios directory: [[file:../../resources/scenarios]]
 
@@ -75,7 +75,7 @@ More checks are possible (and encouraged), including PostgreSQL rows existence, 
 
 
 
-* How to run it
+* 🖥️ How to run it
 
 It is recommended to run with ~TESTCONTAINERS_COMMAND=keep~ and ~RUST_LOG=debug~ as environment variables.
 
@@ -102,7 +102,7 @@ TESTCONTAINERS_COMMAND=keep RUST_LOG=debug nix develop -c cargo run -- --path ./
 
 
 
-* Motivation
+* 🐒 Motivation
 
 Imagine you're building a toy robot, but you don't need to understand all the small parts inside the robot to know if it works. You just need to press a button and see if it performs the task correctly.
 
@@ -126,7 +126,8 @@ In short, pop-tests make engineers happier, business people more certain of what
 
 -----
 
-* The Scenario DSL (Domain Specific Language)
+
+* 🈴  The Scenario DSL (Domain Specific Language)
 
 In order to provide an expressive and powerful way to describe test scenarios, a lot of care has gone into creating a good domain-specific language, which remains flexible but concise.
 
@@ -185,6 +186,10 @@ This is the DSL used to perform assertions on SQL databases. Currently PostgreSQ
 The rest of the clause is a tuple-based variant of the condition DSL, in order of selection in a query.
 
 -----
+
+* pop-test primitives
+
+See [[file:../../src/pop_model.rs]] for more. Below follows a detailed, as up-to-date as possible overview of pop-test's own data models.
 
 ** pop services
 
@@ -297,9 +302,19 @@ Each JSON body pattern entry includes:
 
 ~condition~ (required, string) – A logical condition to be checked.
 
+*** an http action
+
+*** a kafka check
+
 ------
 
-** pop postgres
+
+
+
+
+* Orchestrated services, also 3rd party
+
+** 🌐 pop postgres
 
 You can use PostgreSQL in pop-tests easily.
 
@@ -311,7 +326,7 @@ You can use PostgreSQL in pop-tests easily.
 
 -----
 
-** pop kafka
+** 🌐 pop kafka
 
 You can use Kafka in pop-tests easily.
 
@@ -324,7 +339,7 @@ You can use Kafka in pop-tests easily.
 
 -----
 
-** pop-server
+** 🧞 pop-server
 
 pop-server is a web-server that helps you simulate behaviours and test integrations with external systems.
 
@@ -354,7 +369,8 @@ You can then  have it prepared with certain behaviors (under ~behaviors~ ):
 ~body_file~ (required, string) - path to the file to load data from, that will be returned as HTTP body
 
 
-** pop keycloak
+** 🗝️ pop keycloak
+
 
 You can use Keycloak in pop-tests easily and have it auto-setup.
 
@@ -384,34 +400,37 @@ You can use Keycloak in pop-tests easily and have it auto-setup.
 
 -----
 
+
+-----
+
 * Why pop-test can be a Game-Changer
 
 Software testing is an essential part of modern engineering, and pop-test takes it to the next level by making end-to-end testing simple, powerful, and reliable.
 
 Whether you’re refactoring legacy code, maintaining a complex system, or ensuring business continuity, pop-test provides the confidence and efficiency your team needs.
 
-** Engineering Freedom and Confidence
+** 💚 Engineering Freedom and Confidence
 pop-test enables fearless refactoring.
 
 Engineers can completely rewrite a system—even in a different way, or language, without second-guessing whether it still functions correctly.
 
 With pop-test validating the expected behaviors, teams can iterate quickly and improve systems without introducing regressions.
 
-** Reliable and Meaningful Test Coverage
+In my opinion mocks sometimes deliver few or even fake guarantees, are often more of a pain to maintain, and some implementations are outright broken and illogical...
 
-Unlike mocks, which actually deliver few guarantees and are often more of a pain than a blessing, pop-tests verify the entire system as a whole.
+pop-tests verify the entire system as a whole ✅.
 
 By testing with real dependencies—databases, APIs, message queues, pop-test ensures that your application works as expected in real-world conditions.
 
 This approach leads to fewer surprises in production and more stable software releases.
 
-** Faster Development and Maintenance
+**  🦸 Faster Development and Easier Maintenance
 
 Maintaining a large codebase is much easier with pop-test in place. As systems evolve, tests remain valid, preventing accidental breakages and reducing the need for tedious manual verification.
 
 Automating these processes saves valuable engineering time, allowing teams to focus on building new features instead of debugging regressions.
 
-**  Business Value and Risk Reduction
+**  💲 Business Value and Risk Reduction
 
 For businesses, software stability is critical. Bugs in production can lead to costly downtime, reputational damage, and loss of user trust.
 
@@ -419,7 +438,10 @@ pop-test mitigates these risks by catching issues early, before they impact cust
 
 With predictable and repeatable test automation, teams can ship faster with greater assurance, leading to a more agile and resilient business.
 
-* Conclusion
+
+------
+
+* 🎶  Conclusion
 
 pop-test is designed for modern development teams who need robust testing without complexity. Its expressive DSL, seamless service orchestration, and extensibility make it a long-term solution for ensuring software quality across any technology stack.
 

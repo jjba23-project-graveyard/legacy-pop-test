@@ -21,8 +21,6 @@
   "Publish the POP-TEST manual from Org to several formats.
 This assumes that the current directory is docs/Manual/"
   (find-file "README.org")
-  (org-latex-export-to-latex)
-  (org-latex-export-to-pdf)
   (org-html-export-to-html)
-  (org-texinfo-export-to-info)
-  (org-md-export-to-markdown))
+  (org-md-export-to-markdown)
+  (message "finished publishing pop-test manual"))
