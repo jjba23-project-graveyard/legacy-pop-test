@@ -11,7 +11,6 @@ pop-test is a tool that helps test computer programs, in integration, e2e, black
 
 pop-test - /your test orchestration master of puppets/
 
-[[file:resources/img/pop-test-readme.png]]
 
 In Dutch 🇳🇱, /pop/ means puppet or doll. pop-test simplifies end-to-end testing by providing a powerful orchestration tool and expressive language for your applications and their dependencies.
 
@@ -42,3 +41,6 @@ HTML and Markdown also available at: [[file:docs/Manual/]]
 
 -----
 
+pop-test - /your test orchestration master of puppets/
+
+[[file:resources/img/pop-test-readme.png]]
