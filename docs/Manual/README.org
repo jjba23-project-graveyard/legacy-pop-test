@@ -201,8 +201,10 @@ This DSL is present in JSON body checks and in SQL database checks, supported co
 
 This is the DSL used to perform assertions on SQL databases. Currently PostgreSQL supports this.
 
+Nullable fields are seamlessly supported. For example if you want to check a nullable UUID field is set, just use ~uuid~. If you want to check it's empty, use ~nil~.
+
 #+begin_example
-[0] ((non-empty-str)(>= 12)(== en_GB)(non-empty-str))
+[0] ((non-empty-str)(>= 12)(== en_GB)(non-empty-str)(true)(uuid))
 #+end_example
 
 
