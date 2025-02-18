@@ -119,14 +119,14 @@ pub async fn do_postgres_assertion(
                 info!("TODO");
                 for row in &rows {
                     let is_valid_row = row_checker(row);
-                    info!("is valid row {}, {:#?}", is_valid_row, row);
+                    info!("is valid row {}", is_valid_row);
                 }
             }
             crate::row_dsl::RowExpressionQuantifier::First => {
                 if !rows.is_empty() {
                     info!("reading first row");
                     let is_valid_row = row_checker(&rows[0]);
-                    info!("is valid row {}, {:#?}", is_valid_row, &rows[0]);
+                    info!("is valid row {}", is_valid_row);
                 } else {
                     error!("no rows were found for your query")
                 }
@@ -135,13 +135,13 @@ pub async fn do_postgres_assertion(
                 let pos = rows.len();
                 info!("reading last row");
                 let is_valid_row = row_checker(&rows[pos]);
-                info!("is valid row {}, {:#?}", is_valid_row, &rows[pos]);
+                info!("is valid row {}", is_valid_row);
             }
             crate::row_dsl::RowExpressionQuantifier::Position(p) => {
                 let pos = p as usize;
                 info!("reading row at pos {}", pos);
                 let is_valid_row = row_checker(&rows[pos]);
-                info!("is valid row {}, {:#?}", is_valid_row, &rows[pos]);
+                info!("is valid row {}", is_valid_row);
             }
         };
     }
