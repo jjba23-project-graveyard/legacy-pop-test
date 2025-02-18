@@ -36,6 +36,7 @@ testcontainers-modules = { version = "0.11.6", features = ["postgres", "kafka"] 
 tokio-postgres = { version = "0.7.13", features = ["with-time-0_3", "with-uuid-1"] }
 kafka = "0.10"
 log = "0.4"
+chrono = "0.4.39"
 env_logger = "0.11.6"
 clap = { version = "4.5.28", features = ["derive"] }
 regex = "1.11.1"

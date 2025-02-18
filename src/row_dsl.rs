@@ -12,6 +12,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // Lesser GNU General Public License for more details.
 
+use std::time::SystemTime;
+
+use chrono::{DateTime, Utc};
 use log::{debug, error, info};
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
@@ -95,6 +98,17 @@ pub fn make_checker_from_expression(
                         Err(e) => error!("{}", e),
                     }
                 }
+                "timestamp" => {
+                    let maybe_str: Result<SystemTime, String> =
+                        ro.try_get(i).map_err(|e| e.to_string());
+                    match maybe_str {
+                        Ok(st) => {
+                            let dt: DateTime<Utc> = st.into();
+                            parsed_row.push(dt.to_string());
+                        }
+                        Err(e) => error!("{}", e),
+                    }
+                }
                 _ => {
                     debug!("other column type: {}", col_type);
                     let x: Result<String, String> = ro.try_get(i).map_err(|e| e.to_string());
@@ -112,10 +126,12 @@ pub fn make_checker_from_expression(
         info!("{:#?}", parsed_row);
 
         for (i, clause) in cs.clone() {
-            let col_type = ro.columns()[i].type_().name();
-            let eval_result =
-                eval_row_condition(parsed_row[i].clone(), clause.clone(), col_type.to_string());
-            info!("{:#?}", eval_result);
+            if ro.columns().len() >= i && parsed_row.len() >= i {
+                let col_type = ro.columns()[i].type_().name();
+                let eval_result =
+                    eval_row_condition(parsed_row[i].clone(), clause.clone(), col_type.to_string());
+                info!("{:#?}", eval_result);
+            }
         }
 
         true
