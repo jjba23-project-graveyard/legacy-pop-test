@@ -45,6 +45,8 @@ pop-test - /your test orchestration master of puppets/
 
 🧪 stands for ~experimental~ and will be used when describing and documenting parts of pop-test which are not completely tested yet
 
+💡 stands for ~todo/idea~ and will be used when describing and documenting future improvements or TODO's
+
 
 
 * ⚙️ A simple test, using the DSL
@@ -181,6 +183,13 @@ This DSL is present in JSON body checks and in SQL database checks, supported co
 ~< 0~ (ensures the field is smaller than zero)
 
 ~<= 0~ (ensures the field is non-positive)
+
+💡 TODO
+
+ ~uuid~ (ensures it's a valid uuid)
+
+ ~true/false~ (ensures it's a bool true or false)
+
 
 -----
 
