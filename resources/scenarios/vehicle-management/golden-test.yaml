@@ -67,7 +67,7 @@ pop_actions:
     postgres_query: 'SELECT id, customer_id, config_id, device_id, brand FROM electric_vehicles'
     assert_row_count: 1
     assert_expressions:
-      - '[0] ((non-empty-str)(non-empty-str)(non-empty-str)(non-empty-str)(non-empty-str)'      
+      - '[0] ((non-empty-str)(non-empty-str)(non-empty-str)(non-empty-str)(non-empty-str))' 
     
   - name: 'Check calling the registered URL works and returns the proper JSON body'
     with_keycloak_user_token: true

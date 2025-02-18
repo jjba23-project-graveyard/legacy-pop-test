@@ -30,6 +30,16 @@ publish-manual:
 		-l $(shell realpath ./src/manual/pop-test-manual.el) \
 		--funcall pop-test/publish-manual && cd ../../	
 
+#
+# container management
+#
+container-build:
+	podman build -t jjba23/pop-test:$(CONTAINER_TAG) .
+container-run:
+	podman run jjba23/pop-test:$(CONTAINER_TAG)
+container-push:
+	podman push jjba23/pop-test:$(CONTAINER_TAG)
+
 
 #
 # example runs
@@ -50,6 +60,12 @@ test-dynamic-tariff-charging: fmt
 	RUST_LOG=debug \
 	nix develop -c time -p cargo run -- -p ./resources/scenarios/dynamic-tariff-charging/golden-test.yaml
 
+test-consumer-solar-steering: fmt
+	TESTCONTAINERS_COMMAND=keep \
+	RUST_LOG=debug \
+	nix develop -c time -p cargo run -- -p ./resources/scenarios/consumer-solar-steering/golden-test.yaml
+
+
 test-lucidplan: fmt
 	TESTCONTAINERS_COMMAND=keep \
 	RUST_LOG=debug \
@@ -60,12 +76,3 @@ test-all: fmt
 	RUST_LOG=debug \
 	nix develop -c time -p cargo run -- -p ./resources/scenarios
 
-#
-# container management
-#
-container-build:
-	podman build -t jjba23/pop-test:$(CONTAINER_TAG) .
-container-run:
-	podman run jjba23/pop-test:$(CONTAINER_TAG)
-container-push:
-	podman push jjba23/pop-test:$(CONTAINER_TAG)
