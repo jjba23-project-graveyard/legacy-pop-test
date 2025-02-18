@@ -17,13 +17,13 @@
 
 
 pop_services:
-  - id: "dynamic-tariff-charging"
-    dir: "$HOME/Ontwikkeling/Werk/Vandebron"
-    base_url: "http://localhost:8222"
+  - id: 'dynamic-tariff-charging'
+    dir: '$HOME/Ontwikkeling/Werk/Vandebron'
+    base_url: 'http://localhost:8222'
     start_cmd_args:
       - 'sbt "dynamicTariffCharging/run"'
     health_check:
-      path: "/health"
+      path: '/health'
       patience_seconds: 180
     postgres:
       enabled: true
@@ -34,36 +34,36 @@ pop_services:
     pop_server:
       enabled: true
       url_vars:
-        - "OCPP_FACADE_URL"
-        - "DYNAMIC_TARIFF_SERVICE_URL"
+        - 'OCPP_FACADE_URL'
+        - 'DYNAMIC_TARIFF_SERVICE_URL'
 
 
 pop_actions:
-  - name: "Publish a Kafka message to the chargepoint topic"
-    kafka_topic: "ocpp.start-transaction"
-    message_file_path: "./resources/kafka/dynamic-tariff-charging/start-transaction.json"
+  - name: 'Publish a Kafka message to the chargepoint topic'
+    kafka_topic: 'ocpp.start-transaction'
+    message_file_path: './resources/kafka/dynamic-tariff-charging/start-transaction.json'
 
-  - name: "Check calling the registered chargepoints URL works and returns the proper JSON body"
+  - name: 'Check calling the registered chargepoints URL works and returns the proper JSON body'
     with_keycloak_user_token: true
-    assert_url: "/api/v1/registeredChargepoints/b53f212f-77e4-4591-964a-c46fd479ee18"
-    service_id: "dynamic-tariff-charging"
+    assert_url: '/api/v1/registeredChargepoints/b53f212f-77e4-4591-964a-c46fd479ee18'
+    service_id: 'dynamic-tariff-charging'
     delay_seconds: 5
     json_body_patterns:
-      - pattern: '"data""vehicleId"'
-        condition: '!= ""'
+      - pattern: 'data.vehicleId'
+        condition: 'non-empty-str'
 
 pop_keycloak:
   enabled: true
-  realm: "vandebron"
-  client_id: "batterypack-services"
-  client_secret: "test"
-  email: "battery@pack.com"
-  username: "batterpack-services"
-  password: "test"
+  realm: 'vandebron'
+  client_id: 'batterypack-services'
+  client_secret: 'test'
+  email: 'battery@pack.com'
+  username: 'batterpack-services'
+  password: 'test'
   roles:
-    - "FLEXIOT-READONLY"
-    - "FLEXIOT_UPDATE"
-    - "FLEXIOT-ADMIN"
+    - 'FLEXIOT-READONLY'
+    - 'FLEXIOT_UPDATE'
+    - 'FLEXIOT-ADMIN'
 
 pop_postgres:
   enabled: true

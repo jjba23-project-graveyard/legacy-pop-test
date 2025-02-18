@@ -21,8 +21,31 @@ use jql_runner::runner::raw;
 use log::info;
 use serde_json::Value;
 
+fn translate_pattern(p: String) -> String {
+    let x: Vec<String> = p.split(".").map(|s| s.to_string()).collect();
+    info!("{:?}", x);
+    let xx: Vec<String> = x
+        .into_iter()
+        .map(|fragment| {
+            if fragment.starts_with("[") {
+                fragment.to_string()
+            } else {
+                let pp = format!("\"{}\"", fragment);
+                pp.clone()
+            }
+        })
+        .collect();
+    info!("{:?}", xx);
+
+    xx.join("")
+}
+
 pub fn eval_json_condition(body: &Value, pattern: BodyPattern) -> Result<(), String> {
-    let good_match = raw(&pattern.pattern, body).map_err(|e| e.to_string())?;
+    info!("BEFORE TRANSLATE");
+    let t_pattern = translate_pattern(pattern.pattern);
+    info!("{:?}", t_pattern);
+
+    let good_match = raw(&t_pattern, body).map_err(|e| e.to_string())?;
 
     match pattern.condition.as_str() {
         // match should not be empty
@@ -171,57 +194,52 @@ mod tests {
 
     #[test]
     fn check_greater_or_equal_than_pat_handles_happy_case() {
-        run_check_pat_test("\"sut\"", ">= 0", json!({"sut": 0}), Ok(()));
+        run_check_pat_test("sut", ">= 0", json!({"sut": 0}), Ok(()));
     }
 
     #[test]
     fn check_greater_or_equal_than_pat_handles_happy_case2() {
-        run_check_pat_test("\"sut\"", ">= 0", json!({"sut": 22}), Ok(()));
+        run_check_pat_test("sut", ">= 0", json!({"sut": 22}), Ok(()));
     }
 
     #[test]
     fn check_smaller_or_equal_than_pat_handles_happy_case() {
-        run_check_pat_test("\"sut\"", "<= 0", json!({"sut": 0}), Ok(()));
+        run_check_pat_test("sut", "<= 0", json!({"sut": 0}), Ok(()));
     }
 
     #[test]
     fn check_smaller_or_equal_than_pat_handles_happy_case2() {
-        run_check_pat_test("\"sut\"", "<= 0", json!({"sut": -22}), Ok(()));
+        run_check_pat_test("sut", "<= 0", json!({"sut": -22}), Ok(()));
     }
 
     #[test]
     fn check_smaller_than_pat_handles_happy_case() {
-        run_check_pat_test("\"sut\"", "< 0", json!({"sut": -1}), Ok(()));
+        run_check_pat_test("sut", "< 0", json!({"sut": -1}), Ok(()));
     }
 
     #[test]
     fn check_greater_than_pat_handles_happy_case() {
-        run_check_pat_test("\"sut\"", "> 0", json!({"sut": 1}), Ok(()));
+        run_check_pat_test("sut", "> 0", json!({"sut": 1}), Ok(()));
     }
 
     #[test]
     fn check_equals_pat_handles_happy_case() {
-        run_check_pat_test("\"sut\"", "== 1", json!({"sut": 1}), Ok(()));
+        run_check_pat_test("sut.sut2", "== 1", json!({"sut": {"sut2": 1}}), Ok(()));
     }
 
     #[test]
     fn check_not_equals_pat_pat_handles_happy_case() {
-        run_check_pat_test("\"sut\"", "!= 0", json!({"sut": 1}), Ok(()));
+        run_check_pat_test("sut", "!= 0", json!({"sut": 1}), Ok(()));
     }
 
     #[test]
     fn check_non_empty_string_pat_handles_happy_case() {
-        run_check_pat_test(
-            "\"sut\"",
-            "non-empty-str",
-            json!({"sut": "something"}),
-            Ok(()),
-        );
+        run_check_pat_test("sut", "non-empty-str", json!({"sut": "something"}), Ok(()));
     }
 
     #[test]
     fn check_empty_string_pat_handles_happy_case() {
-        run_check_pat_test("\"sut\"", "empty-str", json!({"sut": ""}), Ok(()));
+        run_check_pat_test("sut", "empty-str", json!({"sut": ""}), Ok(()));
     }
 
     #[test]
@@ -230,7 +248,7 @@ mod tests {
         let result = eval_json_condition(
             &body,
             BodyPattern {
-                pattern: "\"suta\"".to_string(),
+                pattern: "suta".to_string(),
                 condition: "!= \"\"".to_string(),
             },
         );
@@ -244,11 +262,47 @@ mod tests {
         let result = eval_json_condition(
             &body,
             BodyPattern {
-                pattern: "\"sut\"".to_string(),
+                pattern: "sut".to_string(),
                 condition: "weird-condition".to_string(),
             },
         );
         error!("{:?}", result);
         assert_ne!(result, Ok(()));
+    }
+
+    #[test]
+    fn test_translate_pattern_basic() {
+        assert_eq!(translate_pattern("data".to_string()), "\"data\"");
+        assert_eq!(translate_pattern("meta".to_string()), "\"meta\"");
+    }
+
+    #[test]
+    fn test_translate_pattern_with_index() {
+        assert_eq!(translate_pattern("[0]".to_string()), "[0]");
+        assert_eq!(translate_pattern("[123]".to_string()), "[123]");
+    }
+
+    #[test]
+    fn test_translate_pattern_with_dot_notation() {
+        assert_eq!(
+            translate_pattern("data.[0].forecastDate".to_string()),
+            "\"data\"[0]\"forecastDate\""
+        );
+        assert_eq!(
+            translate_pattern("data.meta.green".to_string()),
+            "\"data\"\"meta\"\"green\""
+        );
+    }
+
+    #[test]
+    fn test_translate_pattern_mixed() {
+        assert_eq!(
+            translate_pattern("user.details.[42].name".to_string()),
+            "\"user\"\"details\"[42]\"name\""
+        );
+        assert_eq!(
+            translate_pattern("settings.[3].theme.dark".to_string()),
+            "\"settings\"[3]\"theme\"\"dark\""
+        );
     }
 }

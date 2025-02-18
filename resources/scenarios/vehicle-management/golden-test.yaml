@@ -17,13 +17,13 @@
 
 
 pop_services:
-  - id: "vehicle-management"
-    dir: "$HOME/Ontwikkeling/Werk/Vandebron"
-    base_url: "http://localhost:8306"
+  - id: 'vehicle-management'
+    dir: '$HOME/Ontwikkeling/Werk/Vandebron'
+    base_url: 'http://localhost:8306'
     start_cmd_args:
       - 'sbt "vehicleManagement/run"'
     health_check:
-      path: "/health"
+      path: '/health'
       patience_seconds: 180
     postgres:
       enabled: true
@@ -34,59 +34,59 @@ pop_services:
     pop_server:
       enabled: true
       url_vars:
-        - "ECEDO_URL"
-        - "EON_DASHBOARD_URL"
-        - "EON_OAUTH_URL"
-        - "EON_ADMIN_URL"
+        - 'ECEDO_URL'
+        - 'EON_DASHBOARD_URL'
+        - 'EON_OAUTH_URL'
+        - 'EON_ADMIN_URL'
 
 
 pop_actions:
-  - name: "Add customer to vehicle-management"
+  - name: 'Add customer to vehicle-management'
     with_keycloak_user_token: true
-    action_url: "/api/v1/customers"
-    service_id: "vehicle-management"
-    method: "POST"
-    message_file_path: "./resources/http/vehicle-management/register-customer.json"
+    action_url: '/api/v1/customers'
+    service_id: 'vehicle-management'
+    method: 'POST'
+    message_file_path: './resources/http/vehicle-management/register-customer.json'
     
-  - name: "Publish a Kafka message to the registration state topic"
-    kafka_topic: "vehicle.registration-state"
-    message_file_path: "./resources/kafka/vehicle-management/registration-state.json"
+  - name: 'Publish a Kafka message to the registration state topic'
+    kafka_topic: 'vehicle.registration-state'
+    message_file_path: './resources/kafka/vehicle-management/registration-state.json'
 
-  - name: "Check offsets in Kafka topic"
+  - name: 'Check offsets in Kafka topic'
     delay_seconds: 3
-    kafka_topic: "vehicle.registration-state"
-    check: "check-offsets"
+    kafka_topic: 'vehicle.registration-state'
+    check: 'check-offsets'
 
-  - name: "Check that the customer got recorded in the database"
+  - name: 'Check that the customer got recorded in the database'
     postgres_query: "SELECT organization_id, customer_reference, locale, customer_id FROM customers WHERE customer_reference = '232323'"
     assert_row_count: 1
     assert_expressions:
       - '[0] ((non-empty-str)(== 232323)(== en_GB)(non-empty-str))'
 
-  - name: "Check that the vehicle got recorded in the database"
-    postgres_query: "SELECT id, customer_id, config_id, device_id, brand FROM electric_vehicles"
+  - name: 'Check that the vehicle got recorded in the database'
+    postgres_query: 'SELECT id, customer_id, config_id, device_id, brand FROM electric_vehicles'
     assert_row_count: 1
     assert_expressions:
       - '[0] ((non-empty-str)(non-empty-str)(non-empty-str)(non-empty-str)(non-empty-str)'      
     
     
-  - name: "Check calling the registered URL works and returns the proper JSON body"
+  - name: 'Check calling the registered URL works and returns the proper JSON body'
     with_keycloak_user_token: true
-    assert_url: "/api/v1/status?customerReference=232323"
-    service_id: "vehicle-management"
+    assert_url: '/api/v1/status?customerReference=232323'
+    service_id: 'vehicle-management'
     delay_seconds: 5
 
 pop_keycloak:
   enabled: true
-  realm: "vandebron"
-  client_id: "batterypack-services"
-  client_secret: "test"
-  email: "battery@pack.com"
-  username: "batterpack-services"
-  password: "test"
+  realm: 'vandebron'
+  client_id: 'batterypack-services'
+  client_secret: 'test'
+  email: 'battery@pack.com'
+  username: 'batterpack-services'
+  password: 'test'
   scopes:
-    - "urn:vandebron:batterypack:read"
-    - "urn:vandebron:batterypack:write"
+    - 'urn:vandebron:batterypack:read'
+    - 'urn:vandebron:batterypack:write'
 
 pop_postgres:
   enabled: true
@@ -97,15 +97,15 @@ pop_kafka:
 pop_server:
   enabled: true
   behaviors:
-    - path: "/organizations/byReference/232323"
-      method: "GET"
+    - path: '/organizations/byReference/232323'
+      method: 'GET'
       status: 200
-      content_type: "application/json"
-      body_file: "./resources/pop-server/vehicle-management/ecedo-register-customer.json"
-    - path: "/"
-      method: "POST"
+      content_type: 'application/json'
+      body_file: './resources/pop-server/vehicle-management/ecedo-register-customer.json'
+    - path: '/'
+      method: 'POST'
       status: 200
-      content_type: "application/x-www-form-urlencoded"
-      body_file: "./resources/pop-server/vehicle-management/eon-success.json"
+      content_type: 'application/x-www-form-urlencoded'
+      body_file: './resources/pop-server/vehicle-management/eon-success.json'
       
         

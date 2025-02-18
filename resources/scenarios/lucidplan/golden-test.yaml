@@ -16,19 +16,19 @@
 # along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
 pop_services:
-  - id: "lucidplan"
-    dir: "$HOME/Ontwikkeling/Persoonlijk/lucidplan"
-    base_url: "http://localhost:50025"
+  - id: 'lucidplan'
+    dir: '$HOME/Ontwikkeling/Persoonlijk/lucidplan'
+    base_url: 'http://localhost:50025'
     start_cmd_args:
       - 'guix shell -m manifest.scm -- art work'
     health_check:
-      path: "/"
+      path: '/'
       patience_seconds: 30
 
 pop_actions:
-  - name: "Check that the projects endpoint works fine"
-    assert_url: "/projects"
+  - name: 'Check that the projects endpoint works fine'
+    assert_url: '/projects'
     assert_code: 200
-    service_id: "lucidplan"
+    service_id: 'lucidplan'
     html_body_patterns:
-      - "h2"
+      - 'h2'

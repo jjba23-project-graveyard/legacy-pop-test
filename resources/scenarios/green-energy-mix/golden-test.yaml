@@ -16,38 +16,38 @@
 # along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
 pop_services:
-  - id: "green-energy-mix"
-    dir: "$HOME/Ontwikkeling/Werk/Vandebron"
-    base_url: "http://localhost:50000"
+  - id: 'green-energy-mix'
+    dir: '$HOME/Ontwikkeling/Werk/Vandebron'
+    base_url: 'http://localhost:50000'
     start_cmd_args:
       - 'sbt "greenEnergyMix/run"'
     env_vars:
-      NATIONAAL_ENERGIE_DASHBOARD_TOKEN: "002b9a99a4d98cdee8aabf3abb0778cb649126ffbffc1bcde516884797809ce9"
+      NATIONAAL_ENERGIE_DASHBOARD_TOKEN: '002b9a99a4d98cdee8aabf3abb0778cb649126ffbffc1bcde516884797809ce9'
     health_check:
-      path: "/health"
+      path: '/health'
       patience_seconds: 120
 
 pop_actions:
-  - name: "Check that the forecast endpoint returns a 200 with correct data, with load and solar"
-    assert_url: "/api/v1/forecast"
-    service_id: "green-energy-mix"
+  - name: 'Check that the forecast endpoint returns a 200 with correct data, with load and solar'
+    assert_url: '/api/v1/forecast'
+    service_id: 'green-energy-mix'
     json_body_patterns:
-      - pattern: '"meta""forecastDate"'
+      - pattern: 'meta.forecastDate'
         condition: 'non-empty-str'
-      - pattern: '"data"[0]"load"'
-        condition: "> 0"
-      - pattern: '"data"[0]"solar"'
-        condition: ">= 0"
-        
-  - name: "Check that the window endpoint returns a 200 with correct data"
-    assert_url: "/api/v1/window"
-    service_id: "green-energy-mix"
-    json_body_patterns:
-      - pattern: '"greenPercentage"'
+      - pattern: 'data.[0].load'
+        condition: '> 0'
+      - pattern: 'data.[0].solar'
         condition: '>= 0'
-      - pattern: '"windowStartUtc"'
-        condition: "non-empty-str"
-      - pattern: '"windowStartAms"'
-        condition: "non-empty-str"        
+        
+  - name: 'Check that the window endpoint returns a 200 with correct data'
+    assert_url: '/api/v1/window'
+    service_id: 'green-energy-mix'
+    json_body_patterns:
+      - pattern: 'greenPercentage'
+        condition: '>= 0'
+      - pattern: 'windowStartUtc'
+        condition: 'non-empty-str'
+      - pattern: 'windowStartAms'
+        condition: 'non-empty-str' 
 
 
