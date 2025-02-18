@@ -78,7 +78,7 @@ More checks are possible (and encouraged), including PostgreSQL rows existence, 
     - name: 'Check that the forecast endpoint returns a 200 with a correct data, with load and solar'
       assert_url: '/api/v1/forecast'
       service_id: 'green-energy-mix'
-      json_body_patterns:
+      json_patterns:
         - pattern: 'meta.forecastDate'
           condition: 'non-empty-str'
         - pattern: 'data.[0].load'

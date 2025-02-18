@@ -32,8 +32,8 @@ pub async fn run_http_assertion(
     expected_code: Option<u16>,
     assert_url: String,
     service_url: String,
-    json_body_patterns: Option<Vec<BodyPattern>>,
-    html_body_patterns: Option<Vec<String>>,
+    json_patterns: Option<Vec<BodyPattern>>,
+    html_patterns: Option<Vec<String>>,
     bearer_token: Option<String>,
 ) -> Result<(), String> {
     let url = format!("{}{}", service_url, assert_url);
@@ -74,10 +74,10 @@ pub async fn run_http_assertion(
 
             debug!("\n{}", body_str);
 
-            match (json_body_patterns, html_body_patterns) {
-                (None, Some(html_patterns)) => {
+            match (json_patterns, html_patterns) {
+                (None, Some(the_html_patterns)) => {
                     let document: Html = Html::parse_document(body_str.as_str());
-                    for p in html_patterns {
+                    for p in the_html_patterns {
                         let selector = Selector::parse(&p).unwrap();
                         let m: Vec<ElementRef> = document.select(&selector).collect();
                         info!("found {} elements that match pattern", m.len());
@@ -85,10 +85,10 @@ pub async fn run_http_assertion(
 
                     Ok(())
                 }
-                (Some(json_patterns), None) => {
+                (Some(the_json_patterns), None) => {
                     let body: Value =
                         serde_json::from_slice(body_bytes).map_err(|e| e.to_string())?;
-                    let res = json_patterns
+                    let res = the_json_patterns
                         .iter()
                         .map(|pattern| eval_json_condition(&body, pattern.clone()));
                     let collected: Result<(), String> = res.into_iter().collect();

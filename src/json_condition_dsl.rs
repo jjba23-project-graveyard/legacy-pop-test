@@ -22,22 +22,19 @@ use log::info;
 use serde_json::Value;
 
 fn translate_pattern(p: String) -> String {
-    let x: Vec<String> = p.split(".").map(|s| s.to_string()).collect();
-    info!("{:?}", x);
-    let xx: Vec<String> = x
-        .into_iter()
+    let fragments: Vec<String> = p
+        .split(".")
+        .map(|s| s.to_string())
         .map(|fragment| {
             if fragment.starts_with("[") {
                 fragment.to_string()
             } else {
-                let pp = format!("\"{}\"", fragment);
-                pp.clone()
+                format!("\"{}\"", fragment)
             }
         })
         .collect();
-    info!("{:?}", xx);
 
-    xx.join("")
+    fragments.join("")
 }
 
 pub fn eval_json_condition(body: &Value, pattern: BodyPattern) -> Result<(), String> {

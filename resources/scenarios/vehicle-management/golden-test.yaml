@@ -69,7 +69,6 @@ pop_actions:
     assert_expressions:
       - '[0] ((non-empty-str)(non-empty-str)(non-empty-str)(non-empty-str)(non-empty-str)'      
     
-    
   - name: 'Check calling the registered URL works and returns the proper JSON body'
     with_keycloak_user_token: true
     assert_url: '/api/v1/status?customerReference=232323'

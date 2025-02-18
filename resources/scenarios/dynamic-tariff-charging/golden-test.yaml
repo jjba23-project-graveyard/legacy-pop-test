@@ -48,7 +48,7 @@ pop_actions:
     assert_url: '/api/v1/registeredChargepoints/b53f212f-77e4-4591-964a-c46fd479ee18'
     service_id: 'dynamic-tariff-charging'
     delay_seconds: 5
-    json_body_patterns:
+    json_patterns:
       - pattern: 'data.vehicleId'
         condition: 'non-empty-str'
 
