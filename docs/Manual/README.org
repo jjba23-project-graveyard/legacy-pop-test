@@ -188,13 +188,11 @@ This DSL is present in JSON body checks and in SQL database checks, supported co
 
 ~<= 0~ (ensures the field is non-positive)
 
- ~uuid~ (ensures it's a valid uuid)
+~uuid~ (ensures it's a valid uuid)
 
- ~nil~ (ensures it's a nil/null value - note: only applicable for SQL row DSL)
+~nil~ (ensures it's a nil/null value - note: only applicable for SQL row DSL)
 
-💡 TODO
-
- ~true/false~ (ensures it's a bool true or false)
+~true/false~ (ensures it's a bool true or false)
 
 
 -----

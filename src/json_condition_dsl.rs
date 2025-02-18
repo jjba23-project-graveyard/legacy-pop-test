@@ -56,7 +56,17 @@ pub fn eval_json_condition(raw_target: &Value, pattern: BodyPattern) -> Result<(
             }
             info!("condition successful: {} {}", target, pattern.condition);
         }
-
+        // bool checks
+        "true" => {
+            if target.as_bool() != Some(true) {
+                return Err("boolean condition was not matched".to_string());
+            }
+        }
+        "false" => {
+            if target.as_bool() != Some(false) {
+                return Err("boolean condition was not matched".to_string());
+            }
+        }
         // match should be valid uuid
         "uuid" => {
             let maybe_parsed = Uuid::parse_str(target.as_str().unwrap_or(""));
@@ -249,6 +259,12 @@ mod tests {
     #[test]
     fn check_non_empty_string_pat_handles_happy_case() {
         run_check_pat_test("sut", "non-empty-str", json!({"sut": "something"}), Ok(()));
+    }
+
+    #[test]
+    fn check_bool_pat_handles_happy_case() {
+        run_check_pat_test("sut", "false", json!({"sut": false}), Ok(()));
+        run_check_pat_test("sut", "true", json!({"sut": true}), Ok(()));
     }
 
     #[test]
