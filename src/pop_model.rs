@@ -79,46 +79,63 @@ pub struct BodyPattern {
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+pub struct HttpAssertion {
+    pub name: Option<String>,
+    pub delay_seconds: Option<u64>,
+    pub assert_code: Option<u16>,
+    pub assert_url: String,
+    pub service_id: String,
+    pub json_patterns: Option<Vec<BodyPattern>>,
+    pub html_patterns: Option<Vec<String>>,
+    pub with_keycloak_user_token: Option<bool>,
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+pub struct HttpCall {
+    pub name: Option<String>,
+    pub delay_seconds: Option<u64>,
+    pub action_url: String,
+    pub service_id: String,
+    pub with_keycloak_user_token: Option<bool>,
+    pub method: String,
+    pub message_file_path: Option<String>,
+    pub message: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+pub struct KafkaProduce {
+    pub name: Option<String>,
+    pub delay_seconds: Option<u64>,
+    pub kafka_topic: String,
+    pub message_file_path: Option<String>,
+    pub message: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+pub struct KafkaCheck {
+    pub name: Option<String>,
+    pub delay_seconds: Option<u64>,
+    pub kafka_topic: String,
+    pub check: String,
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+pub struct PostgresAssertion {
+    pub name: Option<String>,
+    pub delay_seconds: Option<u64>,
+    pub postgres_query: String,
+    pub assert_row_count: Option<i32>,
+    pub assert_expressions: Option<Vec<String>>,
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 #[serde(untagged)]
 pub enum PopAction {
-    HttpAssertion {
-        name: Option<String>,
-        assert_code: Option<u16>,
-        assert_url: String,
-        service_id: String,
-        delay_seconds: Option<u64>,
-        json_body_patterns: Option<Vec<BodyPattern>>,
-        html_body_patterns: Option<Vec<String>>,
-        with_keycloak_user_token: Option<bool>,
-    },
-    HttpAction {
-        name: Option<String>,
-        action_url: String,
-        service_id: String,
-        delay_seconds: Option<u64>,
-        with_keycloak_user_token: Option<bool>,
-        method: String,
-        message_file_path: String,
-    },
-    KafkaProduceFromFileAction {
-        name: Option<String>,
-        delay_seconds: Option<u64>,
-        message_file_path: String,
-        kafka_topic: String,
-    },
-    KafkaCheck {
-        name: Option<String>,
-        delay_seconds: Option<u64>,
-        kafka_topic: String,
-        check: String,
-    },
-    PostgresAssertion {
-        name: Option<String>,
-        postgres_query: String,
-        assert_row_count: Option<i32>,
-        assert_expressions: Option<Vec<String>>,
-        delay_seconds: Option<u64>,
-    },
+    HttpAssertion(HttpAssertion),
+    HttpCall(HttpCall),
+    KafkaProduce(KafkaProduce),
+    KafkaCheck(KafkaCheck),
+    PostgresAssertion(PostgresAssertion),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

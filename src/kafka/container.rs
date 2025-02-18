@@ -24,7 +24,6 @@ use std::time::Duration;
 use testcontainers::ContainerAsync;
 use testcontainers::{runners::AsyncRunner, ImageExt};
 use testcontainers_modules::kafka::{Kafka, KAFKA_PORT};
-use tokio::fs;
 
 // pub async fn check_topic(
 //     bootstrap_server: String,
@@ -64,7 +63,7 @@ pub async fn check_consumer_group_offsets(bootstrap_server: String) -> Result<()
 
 pub async fn produce_kafka_message(
     bootstrap_server: String,
-    file_path: String,
+    msg: String,
     topic: String,
 ) -> Result<(), String> {
     let mut producer = Producer::from_hosts(vec![bootstrap_server])
@@ -73,12 +72,8 @@ pub async fn produce_kafka_message(
         .create()
         .map_err(|e| e.to_string())?;
 
-    let d = fs::read_to_string(file_path)
-        .await
-        .map_err(|e| e.to_string())?;
-
     producer
-        .send(&Record::from_value(topic.as_str(), d.as_bytes()))
+        .send(&Record::from_value(topic.as_str(), msg.as_bytes()))
         .map_err(|e| e.to_string())
 }
 

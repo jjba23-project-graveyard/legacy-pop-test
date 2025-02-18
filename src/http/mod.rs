@@ -15,7 +15,7 @@
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
-use std::{fs, str::FromStr};
+use std::str::FromStr;
 
 use crate::pop_model::BodyPattern;
 use scraper::{ElementRef, Html, Selector};
@@ -108,7 +108,7 @@ pub async fn run_http_action(
     service_url: String,
     bearer_token: Option<String>,
     method: String,
-    message_file_path: String,
+    msg: String,
 ) -> Result<(), String> {
     let url = format!("{}{}", service_url, assert_url);
 
@@ -119,9 +119,8 @@ pub async fn run_http_action(
             HeaderValue::from_str(format!("Bearer {}", tok).as_str()).map_err(|e| e.to_string())?,
         );
     }
-    let d = fs::read_to_string(message_file_path).unwrap_or("".to_string());
 
-    info!("sending request body: {}", d);
+    info!("sending request body: {}", msg);
 
     let c = Client::builder()
         .default_headers(headers)
@@ -131,7 +130,7 @@ pub async fn run_http_action(
             Method::from_str(method.as_str()).unwrap_or(Method::POST),
             url,
         )
-        .body(d);
+        .body(msg);
 
     let maybe_response = c.send().await;
 
