@@ -45,20 +45,25 @@ pop_actions:
       {"start": "2025-02-18T00:00:00Z", "end": "2025-02-18T22:00:00Z"}
 
   - name: 'Check that the steering schedule got recorded in the database'
-    delay_seconds: 10
+    delay_seconds: 8
     postgres_query: |
-      SELECT id, steering_group_id, start, "end", priority, value
+      SELECT id, steering_group_id, start, "end",
+          priority, value, created_at,
+          cancelled_at, overrides_id
       FROM steering_schedules
       ORDER BY created_at DESC 
     assert_row_count: 1
     assert_expressions:
       - |
-        [0] ((non-empty-str)
-             (non-empty-str)
+        [0] ((uuid)
+             (uuid)
              (== 2025-02-18T00:00:00+00:00)
              (== 2025-02-18T22:00:00+00:00)
              (== 1)
-             (== 0))
+             (== 0)
+             (non-empty-str)
+             (nil)
+             (nil))
 
 pop_keycloak:
   enabled: true

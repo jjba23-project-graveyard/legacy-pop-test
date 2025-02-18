@@ -77,14 +77,16 @@ pub fn make_checker_from_expression(
             debug!("working with column type: {}", col_type);
             match col_type {
                 "uuid" => {
-                    let maybe_uuid: Result<Uuid, String> = ro.try_get(i).map_err(|e| e.to_string());
-                    match maybe_uuid {
-                        Ok(uuid) => {
+                    let uid: Result<Option<Uuid>, String> =
+                        ro.try_get(i).map_err(|e| e.to_string());
+                    match uid {
+                        Ok(Some(uuid)) => {
                             let mut u = Uuid::encode_buffer();
                             let aa = uuid.hyphenated().encode_lower(&mut u);
                             parsed_row.push(aa.to_owned());
                             debug!("{}", aa.to_owned());
                         }
+                        Ok(None) => parsed_row.push("nil".to_string()),
                         Err(e) => {
                             error!("{}", e);
                             parsed_row.push("ERROR".to_string())
@@ -92,21 +94,24 @@ pub fn make_checker_from_expression(
                     }
                 }
                 "varchar" => {
-                    let maybe_str: Result<String, String> =
+                    let maybe_str: Result<Option<String>, String> =
                         ro.try_get(i).map_err(|e| e.to_string());
                     match maybe_str {
-                        Ok(val) => {
+                        Ok(Some(val)) => {
                             parsed_row.push(val.to_owned());
                         }
+                        Ok(None) => parsed_row.push("nil".to_string()),
                         Err(e) => error!("{}", e),
                     }
                 }
                 "int4" => {
-                    let maybe_str: Result<i32, String> = ro.try_get(i).map_err(|e| e.to_string());
-                    match maybe_str {
-                        Ok(val) => {
+                    let maybe_i: Result<Option<i32>, String> =
+                        ro.try_get(i).map_err(|e| e.to_string());
+                    match maybe_i {
+                        Ok(Some(val)) => {
                             parsed_row.push(val.to_string().to_owned());
                         }
+                        Ok(None) => parsed_row.push("nil".to_string()),
                         Err(e) => {
                             error!("{}", e);
                             parsed_row.push("ERROR".to_string())
@@ -114,11 +119,13 @@ pub fn make_checker_from_expression(
                     }
                 }
                 "bool" => {
-                    let maybe_str: Result<bool, String> = ro.try_get(i).map_err(|e| e.to_string());
-                    match maybe_str {
-                        Ok(val) => {
+                    let maybe_bool: Result<Option<bool>, String> =
+                        ro.try_get(i).map_err(|e| e.to_string());
+                    match maybe_bool {
+                        Ok(Some(val)) => {
                             parsed_row.push(val.to_string().to_owned());
                         }
+                        Ok(None) => parsed_row.push("nil".to_string()),
                         Err(e) => {
                             error!("{}", e);
                             parsed_row.push("ERROR".to_string())
@@ -126,13 +133,14 @@ pub fn make_checker_from_expression(
                     }
                 }
                 "timestamp" => {
-                    let maybe_str: Result<SystemTime, String> =
+                    let ts: Result<Option<SystemTime>, String> =
                         ro.try_get(i).map_err(|e| e.to_string());
-                    match maybe_str {
-                        Ok(st) => {
+                    match ts {
+                        Ok(Some(st)) => {
                             let dt: DateTime<Utc> = st.into();
                             parsed_row.push(dt.to_rfc3339());
                         }
+                        Ok(None) => parsed_row.push("nil".to_string()),
                         Err(e) => {
                             error!("{}", e);
                             parsed_row.push("ERROR".to_string())
@@ -141,12 +149,14 @@ pub fn make_checker_from_expression(
                 }
                 _ => {
                     debug!("other column type: {}", col_type);
-                    let x: Result<String, String> = ro.try_get(i).map_err(|e| e.to_string());
+                    let x: Result<Option<String>, String> =
+                        ro.try_get(i).map_err(|e| e.to_string());
                     match x {
-                        Ok(got) => {
+                        Ok(Some(got)) => {
                             debug!("test on other: {:?}", got);
                             parsed_row.push(got.to_owned());
                         }
+                        Ok(None) => parsed_row.push("nil".to_string()),
                         Err(e) => {
                             error!("{}", e);
                             parsed_row.push("ERROR".to_string())

@@ -15,6 +15,8 @@
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
+use uuid::Uuid;
+
 pub fn eval_row_condition(
     target: String,
     condition: String,
@@ -32,6 +34,20 @@ pub fn eval_row_condition(
                 return Err("expectation not met of match to be empty".to_string());
             }
         }
+        // match should be nil
+        "nil" => {
+            if target != "nil" {
+                return Err("expected item to be nil".to_string());
+            }
+        }
+        // match should be valid uuid
+        "uuid" => {
+            let maybe_parsed = Uuid::parse_str(&target);
+            if maybe_parsed.is_err() {
+                return Err(format!("invalid uuid {:?}", maybe_parsed));
+            }
+        }
+
         // match should be different than
         cond if cond.starts_with("!= ") => {
             // TODO handle col_type here, add int support
@@ -169,6 +185,37 @@ mod tests {
             "varchar".to_string()
         )
         .is_ok()); // Test extra spaces
+    }
+
+    #[test]
+    fn test_uuid() {
+        assert!(eval_row_condition(
+            "96e980a8-94c6-4ce4-8dd4-eff32146467c".to_string(),
+            "uuid".to_string(),
+            "uuid".to_string()
+        )
+        .is_ok());
+
+        assert!(eval_row_condition(
+            "94c6-4ce4-8dd4-eff32146467c".to_string(),
+            "uuid".to_string(),
+            "uuid".to_string()
+        )
+        .is_err());
+    }
+
+    #[test]
+    fn test_nil() {
+        assert!(
+            eval_row_condition("nil".to_string(), "nil".to_string(), "varchar".to_string()).is_ok()
+        );
+
+        assert!(eval_row_condition(
+            "123456".to_string(),
+            "nil".to_string(),
+            "timestamp".to_string()
+        )
+        .is_err());
     }
 
     #[test]
