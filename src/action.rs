@@ -124,7 +124,7 @@ pub async fn do_postgres_assertion(
             }
             crate::row_dsl::RowExpressionQuantifier::First => {
                 if !rows.is_empty() {
-                    info!("reading first row: {:#?}", rows[0]);
+                    info!("reading first row");
                     let is_valid_row = row_checker(&rows[0]);
                     info!("is valid row {}, {:#?}", is_valid_row, &rows[0]);
                 } else {
@@ -133,13 +133,13 @@ pub async fn do_postgres_assertion(
             }
             crate::row_dsl::RowExpressionQuantifier::Last => {
                 let pos = rows.len();
-                info!("reading last row: {:#?}", rows[pos]);
+                info!("reading last row");
                 let is_valid_row = row_checker(&rows[pos]);
                 info!("is valid row {}, {:#?}", is_valid_row, &rows[pos]);
             }
             crate::row_dsl::RowExpressionQuantifier::Position(p) => {
                 let pos = p as usize;
-                info!("reading row at pos {}: {:#?}", pos, rows[pos]);
+                info!("reading row at pos {}", pos);
                 let is_valid_row = row_checker(&rows[pos]);
                 info!("is valid row {}, {:#?}", is_valid_row, &rows[pos]);
             }

@@ -43,6 +43,11 @@ pop_actions:
     kafka_topic: 'negative-tariff-periods'
     message: |
       {"start": "2025-02-18T00:00:00Z", "end": "2025-02-18T22:00:00Z"}
+      
+  - name: 'Publish another Kafka message to the negative tariff topic'
+    kafka_topic: 'negative-tariff-periods'
+    message: |
+      {"start": "2025-02-19T11:00:00Z", "end": "2025-02-20T22:00:00Z"}      
 
   - name: 'Check that the steering schedule got recorded in the database'
     delay_seconds: 8
@@ -51,6 +56,7 @@ pop_actions:
           priority, value, created_at,
           cancelled_at, overrides_id
       FROM steering_schedules
+      WHERE start = '2025-02-18T00:00:00Z'
       ORDER BY created_at DESC 
     assert_row_count: 1
     assert_expressions:
@@ -64,6 +70,28 @@ pop_actions:
              (non-empty-str)
              (nil)
              (nil))
+             
+  - name: 'Check that the other steering schedule got recorded in the database'
+    delay_seconds: 8
+    postgres_query: |
+      SELECT id, steering_group_id, start, "end",
+          priority, value, created_at,
+          cancelled_at, overrides_id
+      FROM steering_schedules
+      WHERE start = '2025-02-19T11:00:00Z'
+      ORDER BY created_at DESC 
+    assert_row_count: 1
+    assert_expressions:
+      - |
+        [0] ((uuid)
+             (uuid)
+             (== 2025-02-19T11:00:00+00:00)
+             (== 2025-02-20T22:00:00+00:00)
+             (== 1)
+             (== 0)
+             (non-empty-str)
+             (nil)
+             (nil))             
 
 pop_keycloak:
   enabled: true
