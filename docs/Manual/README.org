@@ -190,7 +190,7 @@ This DSL is present in JSON body checks and in SQL database checks, supported co
 
  ~uuid~ (ensures it's a valid uuid)
 
- ~nil~ (ensures it's a nil/null value)
+ ~nil~ (ensures it's a nil/null value - note: only applicable for SQL row DSL)
 
 💡 TODO
 

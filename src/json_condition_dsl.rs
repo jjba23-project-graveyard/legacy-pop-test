@@ -20,6 +20,7 @@ use crate::pop_model::BodyPattern;
 use jql_runner::runner::raw;
 use log::info;
 use serde_json::Value;
+use uuid::Uuid;
 
 fn translate_pattern(p: String) -> String {
     let fragments: Vec<String> = p
@@ -37,33 +38,42 @@ fn translate_pattern(p: String) -> String {
     fragments.join("")
 }
 
-pub fn eval_json_condition(body: &Value, pattern: BodyPattern) -> Result<(), String> {
+pub fn eval_json_condition(raw_target: &Value, pattern: BodyPattern) -> Result<(), String> {
     let t_pattern = translate_pattern(pattern.pattern);
-    let good_match = raw(&t_pattern, body).map_err(|e| e.to_string())?;
+    let target = raw(&t_pattern, raw_target).map_err(|e| e.to_string())?;
 
     match pattern.condition.as_str() {
         // match should not be empty
         "non-empty-str" => {
-            if good_match.as_str() == Some("") {
+            if target.as_str() == Some("") {
                 return Err("expectation not met of match to be non-empty".to_string());
             }
-            info!("condition successful: {} {}", good_match, pattern.condition);
+            info!("condition successful: {} {}", target, pattern.condition);
         }
         "empty-str" => {
-            if good_match.as_str() != Some("") {
+            if target.as_str() != Some("") {
                 return Err("expectation not met of match to be empty".to_string());
             }
-            info!("condition successful: {} {}", good_match, pattern.condition);
+            info!("condition successful: {} {}", target, pattern.condition);
+        }
+
+        // match should be valid uuid
+        "uuid" => {
+            let maybe_parsed = Uuid::parse_str(target.as_str().unwrap_or(""));
+            if maybe_parsed.is_err() {
+                return Err(format!("invalid uuid {:?}", maybe_parsed));
+            }
+            info!("condition successful: {} {}", target, pattern.condition);
         }
         // match should be different than
-        cond if cond.starts_with("!= ") => match good_match {
+        cond if cond.starts_with("!= ") => match target {
             Value::String(ref s) => {
                 if s == cond.strip_prefix("!= ").unwrap_or("".trim()) {
                     return Err(
                         "expectation not met of match to be different to value ".to_string()
                     );
                 }
-                info!("condition successful: {} {}", good_match, pattern.condition);
+                info!("condition successful: {} {}", target, pattern.condition);
             }
             Value::Number(ref n) => {
                 let nn: f64 = cond
@@ -76,17 +86,17 @@ pub fn eval_json_condition(body: &Value, pattern: BodyPattern) -> Result<(), Str
                         "the numbers should be different but were found to be equal".to_string()
                     );
                 }
-                info!("condition successful: {} {}", good_match, pattern.condition);
+                info!("condition successful: {} {}", target, pattern.condition);
             }
             _ => return Err("could not apply condition checking to type".to_string()),
         },
         // match should be equal to
-        cond if cond.starts_with("== ") => match good_match {
+        cond if cond.starts_with("== ") => match target {
             Value::String(ref s) => {
                 if s != cond.strip_prefix("== ").unwrap_or("".trim()) {
                     return Err("expectation not met of match to be equal to value ".to_string());
                 }
-                info!("condition successful: {} {}", good_match, pattern.condition);
+                info!("condition successful: {} {}", target, pattern.condition);
             }
             Value::Number(ref n) => {
                 let nn: f64 = cond
@@ -99,17 +109,17 @@ pub fn eval_json_condition(body: &Value, pattern: BodyPattern) -> Result<(), Str
                         "the numbers should be equal but were found to be different".to_string()
                     );
                 }
-                info!("condition successful: {} {}", good_match, pattern.condition);
+                info!("condition successful: {} {}", target, pattern.condition);
             }
             _ => return Err("could not apply condition checking to type".to_string()),
         },
         // match should be greater or smaller than x
         cond if cond.starts_with("> ") || cond.starts_with("< ") => {
             let exp: f64 = cond[2..].parse().map_err(|e| format!("{}", e))?;
-            let the_num = good_match
+            let the_num = target
                 .as_number()
                 .and_then(|n| n.as_f64())
-                .ok_or_else(|| format!("expected numeric value, got: {:?}", good_match))?;
+                .ok_or_else(|| format!("expected numeric value, got: {:?}", target))?;
 
             let is_greater = pattern.condition.starts_with("> ");
             if (is_greater && the_num <= exp) || (!is_greater && the_num >= exp) {
@@ -118,15 +128,15 @@ pub fn eval_json_condition(body: &Value, pattern: BodyPattern) -> Result<(), Str
                     the_num, pattern.condition
                 ));
             }
-            info!("condition successful: {} {}", good_match, pattern.condition);
+            info!("condition successful: {} {}", target, pattern.condition);
         }
         // match should be greater or equal or smaller or equal than x
         cond if cond.starts_with(">= ") || cond.starts_with("<= ") => {
             let exp: f64 = cond[3..].parse().map_err(|e| format!("{}", e))?;
-            let the_num = good_match
+            let the_num = target
                 .as_number()
                 .and_then(|n| n.as_f64())
-                .ok_or_else(|| format!("expected numeric value, got: {:?}", good_match))?;
+                .ok_or_else(|| format!("expected numeric value, got: {:?}", target))?;
 
             let is_greater = pattern.condition.starts_with(">= ");
             if (is_greater && the_num < exp) || (!is_greater && the_num > exp) {
@@ -135,7 +145,7 @@ pub fn eval_json_condition(body: &Value, pattern: BodyPattern) -> Result<(), Str
                     the_num, pattern.condition
                 ));
             }
-            info!("condition successful: {} {}", good_match, pattern.condition);
+            info!("condition successful: {} {}", target, pattern.condition);
         }
         // unknown conditions should result in error
         cond => {
@@ -214,6 +224,16 @@ mod tests {
     #[test]
     fn check_greater_than_pat_handles_happy_case() {
         run_check_pat_test("sut", "> 0", json!({"sut": 1}), Ok(()));
+    }
+
+    #[test]
+    fn check_uuid_pat_handles_happy_case() {
+        run_check_pat_test(
+            "sut",
+            "uuid",
+            json!({"sut": "28185d4e-82ee-4618-bcdd-7f55acebaa68"}),
+            Ok(()),
+        );
     }
 
     #[test]
