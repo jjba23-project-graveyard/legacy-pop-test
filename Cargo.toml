@@ -47,7 +47,7 @@ uuid = {version = "1.13.1", features = [
     "macro-diagnostics", 
 ]}
 scraper = "0.22.0"
-
+schemars = "1.0.0-alpha.17"
 
 # could be interesting futurely
 # rust_lisp = "0.18.0"

@@ -24,6 +24,10 @@ fmt:
 test: fmt
 	RUST_LOG=debug nix develop -c cargo test
 
+# generate-json-schema
+generate-json-schema: fmt
+	RUST_LOG=debug nix develop -c cargo run -- --generate-json-schema=true
+
 # publish-manual: Generates and publishes the manual from Org files using Emacs.
 publish-manual:
 	cd docs/Manual/ && emacs -Q --batch \

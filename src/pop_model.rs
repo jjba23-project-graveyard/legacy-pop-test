@@ -15,19 +15,19 @@
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
+use crate::keycloak::client::KeycloakClient;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-use crate::keycloak::client::KeycloakClient;
-
-#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone, JsonSchema)]
 #[serde(untagged)]
 pub enum PopServiceHealthAction {
     Http { path: String, patience_seconds: i32 },
     Dummy { always_healthy: bool },
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, JsonSchema)]
 pub struct PopServicePostgres {
     pub enabled: Option<bool>,
     pub host_var: Option<String>,
@@ -37,26 +37,26 @@ pub struct PopServicePostgres {
     pub pass_var: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, JsonSchema)]
 pub struct PopServiceKafka {
     pub enabled: Option<bool>,
     pub bootstrap_server_var: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, JsonSchema)]
 pub struct PopServicePopServer {
     pub enabled: Option<bool>,
     pub url_vars: Option<Vec<String>>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, JsonSchema)]
 pub struct PopServiceKeycloak {
     pub enabled: Option<bool>,
     pub url_var: Option<String>,
     pub realm_var: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, JsonSchema)]
 pub struct PopService {
     pub id: String,
     pub name: Option<String>,
@@ -72,13 +72,13 @@ pub struct PopService {
     pub keycloak: Option<PopServiceKeycloak>,
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone, JsonSchema)]
 pub struct BodyPattern {
     pub pattern: String,
     pub condition: String,
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone, JsonSchema)]
 pub struct HttpAssertion {
     pub name: Option<String>,
     pub delay_seconds: Option<u64>,
@@ -90,7 +90,7 @@ pub struct HttpAssertion {
     pub with_keycloak_user_token: Option<bool>,
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone, JsonSchema)]
 pub struct HttpCall {
     pub name: Option<String>,
     pub delay_seconds: Option<u64>,
@@ -102,7 +102,7 @@ pub struct HttpCall {
     pub message: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone, JsonSchema)]
 pub struct KafkaProduce {
     pub name: Option<String>,
     pub delay_seconds: Option<u64>,
@@ -111,7 +111,7 @@ pub struct KafkaProduce {
     pub message: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone, JsonSchema)]
 pub struct KafkaCheck {
     pub name: Option<String>,
     pub delay_seconds: Option<u64>,
@@ -119,7 +119,7 @@ pub struct KafkaCheck {
     pub check: String,
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone, JsonSchema)]
 pub struct PostgresAssertion {
     pub name: Option<String>,
     pub delay_seconds: Option<u64>,
@@ -128,7 +128,7 @@ pub struct PostgresAssertion {
     pub assert_expressions: Option<Vec<String>>,
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone, JsonSchema)]
 #[serde(untagged)]
 pub enum PopAction {
     HttpAssertion(HttpAssertion),
@@ -138,21 +138,21 @@ pub enum PopAction {
     PostgresAssertion(PostgresAssertion),
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, JsonSchema)]
 pub struct PopPostgres {
     pub enabled: Option<bool>,
     pub image_name: Option<String>,
     pub image_tag: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, JsonSchema)]
 pub struct PopKafka {
     pub enabled: Option<bool>,
     pub image_name: Option<String>,
     pub image_tag: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, JsonSchema)]
 pub struct PopKeycloak {
     pub enabled: Option<bool>,
     pub image_name: Option<String>,
@@ -167,7 +167,7 @@ pub struct PopKeycloak {
     pub scopes: Option<Vec<String>>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, JsonSchema)]
 pub struct PopServerBehavior {
     pub path: String,
     pub method: String,
@@ -176,7 +176,7 @@ pub struct PopServerBehavior {
     pub body_file: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, JsonSchema)]
 pub struct PopServer {
     pub enabled: Option<bool>,
     pub image_name: Option<String>,
@@ -184,7 +184,7 @@ pub struct PopServer {
     pub behaviors: Option<Vec<PopServerBehavior>>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, JsonSchema)]
 pub struct PopScenario {
     pub pop_services: Option<Vec<PopService>>,
     pub pop_actions: Option<Vec<PopAction>>,

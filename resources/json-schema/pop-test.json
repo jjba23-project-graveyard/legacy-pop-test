@@ -1,0 +1,717 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PopScenario",
+  "type": "object",
+  "properties": {
+    "pop_services": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "#/$defs/PopService"
+      }
+    },
+    "pop_actions": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "#/$defs/PopAction"
+      }
+    },
+    "pop_postgres": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PopPostgres"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "pop_kafka": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PopKafka"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "pop_server": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PopServer"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "pop_keycloak": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PopKeycloak"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "$defs": {
+    "PopService": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "dir": {
+          "type": "string"
+        },
+        "base_url": {
+          "type": "string"
+        },
+        "shell_path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "start_cmd_args": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "env_vars": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "health_check": {
+          "$ref": "#/$defs/PopServiceHealthAction"
+        },
+        "postgres": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PopServicePostgres"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "kafka": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PopServiceKafka"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pop_server": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PopServicePopServer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "keycloak": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PopServiceKeycloak"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "dir",
+        "base_url",
+        "start_cmd_args",
+        "health_check"
+      ]
+    },
+    "PopServiceHealthAction": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "path": {
+              "type": "string"
+            },
+            "patience_seconds": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "required": [
+            "path",
+            "patience_seconds"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "always_healthy": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "always_healthy"
+          ]
+        }
+      ]
+    },
+    "PopServicePostgres": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "host_var": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "port_var": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "db_var": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "user_var": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "pass_var": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "PopServiceKafka": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "bootstrap_server_var": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "PopServicePopServer": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "url_vars": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "PopServiceKeycloak": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "url_var": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "realm_var": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "PopAction": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/HttpAssertion"
+        },
+        {
+          "$ref": "#/$defs/HttpCall"
+        },
+        {
+          "$ref": "#/$defs/KafkaProduce"
+        },
+        {
+          "$ref": "#/$defs/KafkaCheck"
+        },
+        {
+          "$ref": "#/$defs/PostgresAssertion"
+        }
+      ]
+    },
+    "HttpAssertion": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "delay_seconds": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0
+        },
+        "assert_code": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint16",
+          "minimum": 0
+        },
+        "assert_url": {
+          "type": "string"
+        },
+        "service_id": {
+          "type": "string"
+        },
+        "json_patterns": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/$defs/BodyPattern"
+          }
+        },
+        "html_patterns": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "with_keycloak_user_token": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "assert_url",
+        "service_id"
+      ]
+    },
+    "BodyPattern": {
+      "type": "object",
+      "properties": {
+        "pattern": {
+          "type": "string"
+        },
+        "condition": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "pattern",
+        "condition"
+      ]
+    },
+    "HttpCall": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "delay_seconds": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0
+        },
+        "action_url": {
+          "type": "string"
+        },
+        "service_id": {
+          "type": "string"
+        },
+        "with_keycloak_user_token": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "method": {
+          "type": "string"
+        },
+        "message_file_path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "message": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "action_url",
+        "service_id",
+        "method"
+      ]
+    },
+    "KafkaProduce": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "delay_seconds": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0
+        },
+        "kafka_topic": {
+          "type": "string"
+        },
+        "message_file_path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "message": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "kafka_topic"
+      ]
+    },
+    "KafkaCheck": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "delay_seconds": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0
+        },
+        "kafka_topic": {
+          "type": "string"
+        },
+        "check": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kafka_topic",
+        "check"
+      ]
+    },
+    "PostgresAssertion": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "delay_seconds": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0
+        },
+        "postgres_query": {
+          "type": "string"
+        },
+        "assert_row_count": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "int32"
+        },
+        "assert_expressions": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "postgres_query"
+      ]
+    },
+    "PopPostgres": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "image_name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "image_tag": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "PopKafka": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "image_name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "image_tag": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "PopServer": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "image_name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "image_tag": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "behaviors": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/$defs/PopServerBehavior"
+          }
+        }
+      }
+    },
+    "PopServerBehavior": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "method": {
+          "type": "string"
+        },
+        "status": {
+          "type": "integer",
+          "format": "uint16",
+          "minimum": 0
+        },
+        "content_type": {
+          "type": "string"
+        },
+        "body_file": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "method",
+        "status",
+        "content_type",
+        "body_file"
+      ]
+    },
+    "PopKeycloak": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "image_name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "image_tag": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "realm": {
+          "type": "string"
+        },
+        "client_id": {
+          "type": "string"
+        },
+        "client_secret": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "roles": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "scopes": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "realm",
+        "client_id",
+        "client_secret",
+        "email",
+        "username",
+        "password"
+      ]
+    }
+  }
+}

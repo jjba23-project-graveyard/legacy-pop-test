@@ -15,6 +15,7 @@
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
+use json_schema::generate_json_schema;
 use log::{error, info};
 use pop_model::PopScenario;
 use scenario::play_scenario;
@@ -46,13 +47,18 @@ mod pop_server;
 #[path = "postgres/mod.rs"]
 mod postgres;
 
+#[path = "json_schema/mod.rs"]
+mod json_schema;
+
 use clap::Parser;
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct Args {
     #[arg(short('p'), long("path"))]
-    path: String,
+    path: Option<String>,
+    #[arg(short('g'), long("generate-json-schema"))]
+    generate_json_schema: Option<bool>,
 }
 
 #[tokio::main]
@@ -63,30 +69,40 @@ async fn main() -> Result<(), String> {
     info!("parsing command-line arguments");
     let args = Args::parse();
 
-    info!("gathering scenario files in desired path");
-    let file_paths = gather_file_paths(args.path.clone());
-    info!("gathered files: {:#?}", file_paths);
+    if let Some(path) = args.path {
+        info!("gathering scenario files in desired path");
+        let file_paths = gather_file_paths(path.clone());
+        info!("gathered files: {:#?}", file_paths);
 
-    async {
-        for f in &file_paths {
-            info!("scenario file read successfully to string");
+        async {
+            for f in &file_paths {
+                info!("scenario file read successfully to string");
 
-            do_with_file_data(
-                f.split(".").last().unwrap_or("yaml").to_string(),
-                f.to_string(),
-            )
-            .await
-            .map_err(|e| {
-                error!("{}", e);
-                "scenario failed to run"
-            })?;
+                do_with_file_data(
+                    f.split(".").last().unwrap_or("yaml").to_string(),
+                    f.to_string(),
+                )
+                .await
+                .map_err(|e| {
+                    error!("{}", e);
+                    "scenario failed to run"
+                })?;
 
-            info!("✅ ran scenario successfully");
+                info!("✅ ran scenario successfully");
+            }
+            info!("done running {} scenarios", &file_paths.len());
+            Ok(())
         }
-        info!("done running {} scenarios", &file_paths.len());
-        Ok(())
+        .await
+    } else if args.generate_json_schema.is_some() {
+        let r = generate_json_schema().await;
+        if r.is_ok() {
+            info!("successfully generated JSON schema for pop-scenario")
+        };
+        r
+    } else {
+        async { Err("could not start pop-test since CLI arguments were invalid".to_string()) }.await
     }
-    .await
 }
 
 pub async fn do_with_file_data(file_type: String, scenario_path: String) -> Result<(), String> {
