@@ -157,6 +157,14 @@ Unless otherwise stated, the YAML representation of the Scenario DSL will be use
 
 The tool supports YAML, TOML and JSON file formats seamlessly.
 
+I highly recommend that you use the JSON schema for scenarios (~PopScenario~). This will help you write correct YAML/JSON, and catch errors early.
+
+You can find it in the resources folder, with latest here:
+
+https://codeberg.org/jjba23/pop-test/raw/branch/trunk/resources/json-schema/pop-test.json
+
+Since scenarios are plain data, one can opt to write scenarios in one's favourite programming language, and then serialize that to JSON/YAML and run with pop-test from there.
+
 
 -----
 
