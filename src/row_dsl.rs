@@ -85,17 +85,44 @@ pub fn make_checker_from_expression(
                             parsed_row.push(aa.to_owned());
                             debug!("{}", aa.to_owned());
                         }
-                        Err(e) => error!("{}", e),
+                        Err(e) => {
+                            error!("{}", e);
+                            parsed_row.push("ERROR".to_string())
+                        }
                     }
                 }
                 "varchar" => {
                     let maybe_str: Result<String, String> =
                         ro.try_get(i).map_err(|e| e.to_string());
                     match maybe_str {
-                        Ok(str_val) => {
-                            parsed_row.push(str_val.to_owned());
+                        Ok(val) => {
+                            parsed_row.push(val.to_owned());
                         }
                         Err(e) => error!("{}", e),
+                    }
+                }
+                "int4" => {
+                    let maybe_str: Result<i32, String> = ro.try_get(i).map_err(|e| e.to_string());
+                    match maybe_str {
+                        Ok(val) => {
+                            parsed_row.push(val.to_string().to_owned());
+                        }
+                        Err(e) => {
+                            error!("{}", e);
+                            parsed_row.push("ERROR".to_string())
+                        }
+                    }
+                }
+                "bool" => {
+                    let maybe_str: Result<bool, String> = ro.try_get(i).map_err(|e| e.to_string());
+                    match maybe_str {
+                        Ok(val) => {
+                            parsed_row.push(val.to_string().to_owned());
+                        }
+                        Err(e) => {
+                            error!("{}", e);
+                            parsed_row.push("ERROR".to_string())
+                        }
                     }
                 }
                 "timestamp" => {
@@ -104,9 +131,12 @@ pub fn make_checker_from_expression(
                     match maybe_str {
                         Ok(st) => {
                             let dt: DateTime<Utc> = st.into();
-                            parsed_row.push(dt.to_string());
+                            parsed_row.push(dt.to_rfc3339());
                         }
-                        Err(e) => error!("{}", e),
+                        Err(e) => {
+                            error!("{}", e);
+                            parsed_row.push("ERROR".to_string())
+                        }
                     }
                 }
                 _ => {
@@ -117,7 +147,10 @@ pub fn make_checker_from_expression(
                             debug!("test on other: {:?}", got);
                             parsed_row.push(got.to_owned());
                         }
-                        Err(e) => error!("{}", e),
+                        Err(e) => {
+                            error!("{}", e);
+                            parsed_row.push("ERROR".to_string())
+                        }
                     }
                 }
             }
