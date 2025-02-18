@@ -85,7 +85,7 @@ More checks are possible (and encouraged), including PostgreSQL rows existence, 
 
 * 🖥️ How to run it
 
-If you received a binary from a friend, in most systems you can just add it to ~~/.local/bin/~ or ~/usr/local/bin~ or somewhere in your ~$PATH~.
+If you downloaded or received a binary from a friend, in most systems you can just add it to ~~/.local/bin/~ or ~/usr/local/bin~ or somewhere in your ~$PATH~.
 
 I also provide container images frequently: https://hub.docker.com/repository/docker/jjba23/pop-test/general
 
@@ -158,9 +158,9 @@ The tool supports YAML, TOML and JSON file formats seamlessly.
 
 This DSL is present in JSON body checks and in SQL database checks, supported conditions include:
 
-~non-empty-str~ (ensures the field is not empty)
+~non-empty-str~ (ensures the string is not empty)
 
-~empty-str~ (ensures the field is empty)
+~empty-str~ (ensures the string is empty)
 
 ~== x~ (ensures the field is x)
 

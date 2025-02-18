@@ -41,10 +41,7 @@ fn translate_pattern(p: String) -> String {
 }
 
 pub fn eval_json_condition(body: &Value, pattern: BodyPattern) -> Result<(), String> {
-    info!("BEFORE TRANSLATE");
     let t_pattern = translate_pattern(pattern.pattern);
-    info!("{:?}", t_pattern);
-
     let good_match = raw(&t_pattern, body).map_err(|e| e.to_string())?;
 
     match pattern.condition.as_str() {
