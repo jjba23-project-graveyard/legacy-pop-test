@@ -34,10 +34,6 @@ pop-tests as we affectionately call them, can range from small scope integration
 
 ---------------
 
-pop-test - /your test orchestration master of puppets/
-
-[[file:../../resources/img/pop-test-readme.png]]
-
 
 * Terminology and symbols
 
@@ -47,7 +43,7 @@ pop-test - /your test orchestration master of puppets/
 
 💡 stands for ~todo/idea~ and will be used when describing and documenting future improvements or TODO's
 
-
+-----
 
 * ⚙️ A simple test, using the DSL
 
@@ -550,8 +546,9 @@ With pop-test, you gain more than just a testing tool—you gain a strategic adv
 
 pop-test is not just about testing—it’s about enabling better engineering.
 
+pop-test - /your test orchestration master of puppets/
 
-[[file:../../resources/img/wp10992149-modified.png]]
+[[file:../../resources/img/pop-test-readme.png]]
 
 Aside:
 
