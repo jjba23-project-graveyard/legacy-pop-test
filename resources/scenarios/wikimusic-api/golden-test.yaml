@@ -30,27 +30,30 @@ pop_actions:
     # pass:
     # zEqpuZ_msxbM4m9ry8JkMWiAEa
     sqlite_action: |
-      INSERT INTO "users" ("identifier", "display_name", "email_address",
-          "password_hash", "password_reset_token", "latest_login_at", "latest_login_device",
-          "avatar_url", "created_at", "last_edited_at", "auth_token", "description")
+      INSERT INTO users (identifier, display_name, email_address,
+          password_hash, password_reset_token, latest_login_at,
+          latest_login_device, avatar_url, created_at,
+          last_edited_at, auth_token, description)
       VALUES ('cab727b8-37fb-46c0-947a-44a2b576bf9c', 'root', 'root@root.com',
       '$2b$10$2moV5phx3eI881t1VrB4.Obzsjp1357w4FHAzqvOgLRPdFAiUTXHm',
       NULL, NULL, NULL, NULL, '2023-07-15 20:02:32.687', '2024-11-03 23:57:40.196446562',
       'ab92eaef-83b2-483b-8ebe-be4cf7bf2c18',
       NULL);
       
-      INSERT INTO "user_roles" ("identifier", "user_identifier", "role_id", "created_at")
+      INSERT INTO user_roles (identifier, user_identifier, role_id, created_at)
       VALUES ('bbb72ccc-37fb-46c0-947a-44a2b576bf9c', 'cab727b8-37fb-46c0-947a-44a2b576bf9c',
       'wm::superuser', '2023-07-15 20:02:32.687+00');
       
   - name: 'Check that a user is properly created'
     sqlite_query: |
-      SELECT identifier, display_name, email_address FROM users
-      WHERE identifier = 'cab727b8-37fb-46c0-947a-44a2b576bf9c'
+      SELECT identifier, display_name, email_address, password_hash,
+          password_reset_token
+          FROM users
+          WHERE identifier = 'cab727b8-37fb-46c0-947a-44a2b576bf9c'
     assert_row_count: 1
     assert_expressions:
       - |
-        [first] ((uuid)(non-empty-str)(non-empty-str))
+        [first] ((uuid)(== root)(== root@root.com)(non-empty-str)(nil))
     
 
 pop_sqlite:

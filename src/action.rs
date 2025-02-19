@@ -150,8 +150,17 @@ pub async fn do_postgres_assertion(
 fn extract_row(row: &Row, col_count: usize) -> Vec<String> {
     (0..col_count)
         .map(|i| {
-            row.get::<usize, String>(i)
-                .unwrap_or_else(|_| "".to_string())
+            let x: Result<Option<String>, String> = row
+                .get::<usize, Option<String>>(i)
+                .map_err(|e| e.to_string());
+            match x {
+                Ok(Some(val)) => val,
+                Ok(None) => "nil".to_string(),
+                Err(e) => {
+                    error!("{}", e);
+                    "ERROR".to_string()
+                }
+            }
         })
         .collect()
 }
