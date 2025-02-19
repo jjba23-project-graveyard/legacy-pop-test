@@ -109,7 +109,7 @@ pub async fn run_http_action(
     bearer_token: Option<String>,
     method: String,
     msg: String,
-    extra_headers: Option<HashMap<String, String>>,
+    extra_headers: &HashMap<String, String>,
 ) -> Result<(), String> {
     let url = format!("{}{}", service_url, assert_url);
 
@@ -121,9 +121,7 @@ pub async fn run_http_action(
         );
     }
 
-    let x2 = extra_headers.clone().unwrap_or(HashMap::new());
-
-    let xtra: HashMap<&str, &String> = x2.clone().iter().map(|(k, v)| (k.as_str(), v)).collect();
+    let xh = extra_headers.clone();
 
     let xhh: Vec<(&str, HeaderValue)> = xtra
         .iter()

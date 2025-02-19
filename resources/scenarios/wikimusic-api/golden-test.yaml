@@ -59,7 +59,7 @@ pop_actions:
     assert_url: '/songs'
     service_id: 'wikimusic-api'
     delay_seconds: 2
-    with_headers:
+    extra_headers:
       x-wikimusic-auth: "cab727b8-37fb-46c0-947a-44a2b576bf9c"
 
 pop_sqlite:

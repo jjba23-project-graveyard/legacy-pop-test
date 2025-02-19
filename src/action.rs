@@ -30,6 +30,7 @@ use crate::sqlite::sqlite_checker_from_expression;
 use log::{debug, error, info};
 use rusqlite::fallible_streaming_iterator::FallibleStreamingIterator;
 use rusqlite::{Connection, Row};
+use std::collections::HashMap;
 use std::time::Duration;
 use tokio::fs;
 use tokio::time::sleep;
@@ -380,12 +381,15 @@ pub async fn do_http_call(
             (None, Some(msg_file)) => fs::read_to_string(msg_file).await.unwrap_or("".to_string()),
         };
 
+        let hs = http_call.extra_headers.clone().unwrap_or(HashMap::new());
+
         run_http_action(
             http_call.action_url.clone(),
             service.base_url.clone(),
             tok,
             http_call.method.to_string(),
             msg,
+            &hs,
         )
         .await
     } else {

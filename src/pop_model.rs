@@ -88,7 +88,7 @@ pub struct HttpAssertion {
     pub json_patterns: Option<Vec<BodyPattern>>,
     pub html_patterns: Option<Vec<String>>,
     pub with_keycloak_user_token: Option<bool>,
-    pub with_headers: Option<HashMap<String, String>>,
+    pub extra_headers: Option<HashMap<String, String>>,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone, JsonSchema)]
@@ -98,7 +98,7 @@ pub struct HttpCall {
     pub action_url: String,
     pub service_id: String,
     pub with_keycloak_user_token: Option<bool>,
-    pub with_headers: Option<HashMap<String, String>>,
+    pub extra_headers: Option<HashMap<String, String>>,
     pub method: String,
     pub message_file_path: Option<String>,
     pub message: Option<String>,
