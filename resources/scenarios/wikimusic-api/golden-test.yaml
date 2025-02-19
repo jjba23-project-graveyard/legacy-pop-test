@@ -27,7 +27,6 @@ pop_services:
 
 pop_actions:
   - name: 'Insert a root user into the database'
-    delay_seconds: 5
     # pass:
     # zEqpuZ_msxbM4m9ry8JkMWiAEa
     sqlite_action: |

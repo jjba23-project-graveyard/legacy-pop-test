@@ -26,7 +26,7 @@ use crate::pop_model::{
 };
 use crate::postgres::checker::postgres_checker_from_expression;
 use crate::row_dsl::get_row_expression_quantifier;
-use log::{error, info};
+use log::{debug, error, info};
 use rusqlite::fallible_streaming_iterator::FallibleStreamingIterator;
 use rusqlite::Connection;
 use std::time::Duration;
@@ -214,10 +214,22 @@ pub async fn do_sqlite_action(
     )
     .map_err(|e| e.to_string())?;
 
-    let qs = sqlite_action.sqlite_action.split(";");
+    let qs: Vec<String> = sqlite_action
+        .sqlite_action
+        .split(";")
+        .map(|s| {
+            let ss = s.replace("\n", " ");
+            ss.clone().trim().to_string()
+        })
+        .filter(|s| !s.is_empty())
+        .collect();
+
+    debug!("query vec: {:?}", qs);
+
     for q in qs {
-        let mut stmt = conn.prepare(q).map_err(|e| e.to_string())?;
-        let _ = stmt.execute([]).map_err(|e| e.to_string())?;
+        debug!("query: {}", q);
+        let r = conn.execute(q.as_str(), []).map_err(|e| e.to_string())?;
+        debug!("result: {}", r);
     }
 
     Ok(())
