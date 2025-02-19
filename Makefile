@@ -78,5 +78,6 @@ golden-test-consumer-solar-steering:
 golden-test-lucidplan:
 	$(call pop-test-golden-test-example,"lucidplan")
 golden-test-wikimusic-api:
-	pkill wikimusic-api
+	@-pkill wikimusic-api
 	$(call pop-test-golden-test-example,"wikimusic-api")
+	@-pkill wikimusic-api

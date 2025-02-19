@@ -128,14 +128,13 @@ pub fn postgres_checker_from_expression(
             }
         }
 
-        info!("{:#?}", parsed_row);
+        info!("parsed row: {:#?}", parsed_row);
 
         for (i, clause) in cs.clone() {
             if ro.columns().len() >= i && parsed_row.len() >= i {
                 let col_type = ro.columns()[i].type_().name();
                 let eval_result =
                     eval_row_condition(parsed_row[i].clone(), clause.clone(), col_type.to_string());
-                info!("{:#?}", eval_result);
             }
         }
 

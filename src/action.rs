@@ -29,7 +29,7 @@ use crate::row_dsl::get_row_expression_quantifier;
 use crate::sqlite::sqlite_checker_from_expression;
 use log::{debug, error, info};
 use rusqlite::fallible_streaming_iterator::FallibleStreamingIterator;
-use rusqlite::Connection;
+use rusqlite::{Connection, Row};
 use std::time::Duration;
 use tokio::fs;
 use tokio::time::sleep;
@@ -147,6 +147,15 @@ pub async fn do_postgres_assertion(
     Ok(())
 }
 
+fn extract_row(row: &Row, col_count: usize) -> Vec<String> {
+    (0..col_count)
+        .map(|i| {
+            row.get::<usize, String>(i)
+                .unwrap_or_else(|_| "".to_string())
+        })
+        .collect()
+}
+
 pub async fn do_sqlite_assertion(
     pop_env: &PopEnv,
     sqlite_assertion: &SqliteAssertion,
@@ -172,11 +181,12 @@ pub async fn do_sqlite_assertion(
         .prepare(&sqlite_assertion.sqlite_query)
         .map_err(|e| e.to_string())?;
 
-    let cols = stmt.column_count();
-    let rows = stmt.query([]).map_err(|e| e.to_string())?;
-
-    //let n = rows.next().map_err(|e| e.to_string())?;
-    let real_rc = rows.count().map_err(|e| e.to_string())?;
+    let col_co = stmt.column_count();
+    let cc = 0..col_co;
+    let real_rc = stmt
+        .query_map([], |ro| Ok(extract_row(ro, col_co)))
+        .map_err(|e| e.to_string())?
+        .count();
 
     if let Some(rc) = sqlite_assertion.assert_row_count {
         if real_rc != (rc.to_owned() as usize) {
@@ -186,11 +196,23 @@ pub async fn do_sqlite_assertion(
         }
     }
 
+    let mut xx = stmt
+        .query_map([], |ro| Ok(extract_row(ro, col_co)))
+        .map_err(|e| e.to_string())?;
+
+    let mut results = Vec::new();
+    while let Some(Ok(v)) = xx.next() {
+        results.push(v);
+    }
+
+    info!("row results: {:?}", results);
+
     for assert_expression in sqlite_assertion
         .assert_expressions
         .clone()
         .unwrap_or_default()
     {
+        let rc = results.clone();
         let q = get_row_expression_quantifier(assert_expression.clone())?;
         info!("row expression quantifier: {:#?}", q);
 
@@ -202,11 +224,8 @@ pub async fn do_sqlite_assertion(
             crate::row_dsl::RowExpressionQuantifier::First => {
                 if real_rc != 0_usize {
                     info!("reading first row");
-
-                    // n.map(|nn| {
-                    //     let is_valid_row = row_checker(nn);
-                    //     info!("is valid row {}", is_valid_row);
-                    // });
+                    let is_valid_row = row_checker(rc[0].clone());
+                    info!("is valid row {}", is_valid_row);
                 } else {
                     error!("no rows were found for your query")
                 }

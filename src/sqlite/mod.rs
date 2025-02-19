@@ -15,21 +15,24 @@
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
-
-
 use crate::row_dsl::extract_checker_clauses;
 use log::info;
-use rusqlite::Row;
 
 pub fn sqlite_checker_from_expression(
     expression: String,
-) -> Result<Box<dyn Fn(&Row) -> bool>, String> {
+) -> Result<Box<dyn Fn(Vec<String>) -> bool>, String> {
     let clauses = extract_checker_clauses(expression.as_str());
     info!("found checker clauses: {:#?}", clauses);
 
-    let fun = move |ro: &Row| {
-        let parsed_row: Vec<String> = Vec::new();
+    let fun = move |ro: Vec<String>| {
+        let mut parsed_row: Vec<String> = Vec::new();
         let cs = clauses.iter().enumerate().clone();
+
+        for (i, c) in cs {
+            parsed_row.push(ro[i].clone());
+        }
+
+        info!("parsed row: {:#?}", parsed_row);
 
         true
     };
