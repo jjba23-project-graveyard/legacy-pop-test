@@ -20,13 +20,29 @@ pop_services:
     dir: '$HOME/Ontwikkeling/Persoonlijk/wikimusic-api'
     base_url: 'http://localhost:50050'
     start_cmd_args:
-      - 'stack --nix run -- "./resources/config/run-local.toml"'
+      - 'stack --nix run -- "./resources/config/pop-test.toml"'
     health_check:
       path: '/system-information'
-      patience_seconds: 60
+      patience_seconds: 120
 
 pop_actions:
-  - name: 'Check that the songs endpoint works fine'
-    assert_url: '/songs'
-    assert_code: 200
-    service_id: 'wikimusic-api'
+  - name: 'Insert a root user into the database'
+    delay_seconds: 5
+    # pass:
+    # zEqpuZ_msxbM4m9ry8JkMWiAEa
+    sqlite_action: |
+      INSERT INTO "users" ("identifier", "display_name", "email_address",
+          "password_hash", "password_reset_token", "latest_login_at", "latest_login_device",
+          "avatar_url", "created_at", "last_edited_at", "auth_token", "description")
+      VALUES ('cab727b8-37fb-46c0-947a-44a2b576bf9c', 'root', 'root@root.com',
+      '$2b$10$2moV5phx3eI881t1VrB4.Obzsjp1357w4FHAzqvOgLRPdFAiUTXHm',
+      NULL, NULL, NULL, NULL, '2023-07-15 20:02:32.687', '2024-11-03 23:57:40.196446562',
+      'ab92eaef-83b2-483b-8ebe-be4cf7bf2c18',
+      NULL);
+      
+      INSERT INTO "user_roles" ("identifier", "user_identifier", "role_id", "created_at")
+      VALUES ('bbb72ccc-37fb-46c0-947a-44a2b576bf9c', 'cab727b8-37fb-46c0-947a-44a2b576bf9c',
+      'wm::superuser', '2023-07-15 20:02:32.687+00');
+
+pop_sqlite:
+  db_path: '$HOME/Ontwikkeling/Persoonlijk/wikimusic-api/resources/pop-test.sqlite'

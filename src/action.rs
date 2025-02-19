@@ -22,7 +22,7 @@ use crate::keycloak::client::{
 };
 use crate::pop_model::{
     HttpAssertion, HttpCall, KafkaCheck, KafkaProduce, PopAction, PopEnv, PopKeycloak, PopService,
-    PostgresAssertion, SqliteAssertion,
+    PostgresAssertion, SqliteAction, SqliteAssertion,
 };
 use crate::postgres::checker::postgres_checker_from_expression;
 use crate::row_dsl::get_row_expression_quantifier;
@@ -180,6 +180,44 @@ pub async fn do_sqlite_assertion(
         } else {
             info!("found expected amount of rows in the table")
         }
+    }
+
+    Ok(())
+}
+
+pub async fn do_sqlite_action(
+    pop_env: &PopEnv,
+    sqlite_action: &SqliteAction,
+) -> Result<(), String> {
+    if let Some(delay) = sqlite_action.delay_seconds {
+        sleep(Duration::from_secs(delay)).await;
+    }
+
+    sqlite_action
+        .name
+        .clone()
+        .inspect(|n| info!("starting action: {}", n));
+
+    info!(
+        "{}",
+        pop_env
+            .sqlite_db_path
+            .clone()
+            .unwrap_or("./pop-test.sqlite".to_string())
+    );
+
+    let conn = Connection::open(
+        pop_env
+            .sqlite_db_path
+            .clone()
+            .unwrap_or("./pop-test.sqlite".to_string()),
+    )
+    .map_err(|e| e.to_string())?;
+
+    let qs = sqlite_action.sqlite_action.split(";");
+    for q in qs {
+        let mut stmt = conn.prepare(q).map_err(|e| e.to_string())?;
+        let _ = stmt.execute([]).map_err(|e| e.to_string())?;
     }
 
     Ok(())
@@ -346,6 +384,7 @@ pub async fn run_action(
         PopAction::SqliteAssertion(sqlite_assertion) => {
             do_sqlite_assertion(pop_env, sqlite_assertion).await
         }
+        PopAction::SqliteAction(sqlite_action) => do_sqlite_action(pop_env, sqlite_action).await,
         PopAction::KafkaProduce(kafka_produce) => do_kafka_produce(pop_env, kafka_produce).await,
         PopAction::HttpCall(http_call) => {
             do_http_call(pop_env, services, keycloak, http_call).await

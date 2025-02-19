@@ -138,6 +138,13 @@ pub struct SqliteAssertion {
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone, JsonSchema)]
+pub struct SqliteAction {
+    pub name: Option<String>,
+    pub delay_seconds: Option<u64>,
+    pub sqlite_action: String,
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone, JsonSchema)]
 #[serde(untagged)]
 pub enum PopAction {
     HttpAssertion(HttpAssertion),
@@ -146,6 +153,7 @@ pub enum PopAction {
     KafkaCheck(KafkaCheck),
     PostgresAssertion(PostgresAssertion),
     SqliteAssertion(SqliteAssertion),
+    SqliteAction(SqliteAction),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema)]

@@ -15,6 +15,8 @@
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
+use std::env;
+
 use crate::action::run_action;
 use crate::containers::{maybe_terminate_container, setup_container_logging};
 use crate::environment::setup_environment;
@@ -30,6 +32,7 @@ use log::{error, info};
 
 use testcontainers_modules::kafka::KAFKA_PORT;
 
+use tokio::process::Command;
 use tokio::task::JoinSet;
 
 pub async fn play_scenario(scenario: PopScenario) -> Result<(), String> {
@@ -74,6 +77,29 @@ pub async fn play_scenario(scenario: PopScenario) -> Result<(), String> {
         None => None,
     };
 
+    let user_home = env::var("HOME").unwrap();
+    let sq_path = scenario
+        .pop_sqlite
+        .clone()
+        .map(|sq| str::replace(&sq.db_path, "$HOME", &user_home));
+
+    if let Some(sq) = sq_path.clone() {
+        let arg: Vec<String> = vec![
+            "-c".to_string(),
+            format!(
+                "rm -fv {} && rm -fv {}-shm && rm -fv {}-wal && touch {} && sqlite3 {} 'PRAGMA journal_mode=WAL;'",
+                sq, sq, sq, sq, sq
+            ),
+        ];
+
+        let o = Command::new("bash")
+            .args(arg)
+            .output()
+            .await
+            .map_err(|e| e.to_string())?;
+        info!("{:?}", o);
+    }
+
     for pop_service in scenario.pop_services.clone().unwrap_or_default() {
         info!("registering service: {}", pop_service.id);
         h_set.spawn(start_health_check(pop_service.clone()));
@@ -112,7 +138,7 @@ pub async fn play_scenario(scenario: PopScenario) -> Result<(), String> {
         kafka_bootstrap_server = fmt;
     }
 
-    let mut postgres_conn = "".to_string();
+    let mut postgres_conn = None;
     if let Some(p) = &maybe_postgres_container {
         let host = p.get_host().await.unwrap().to_string();
         let port = p
@@ -126,7 +152,7 @@ pub async fn play_scenario(scenario: PopScenario) -> Result<(), String> {
             "host={} port={} user=postgres password=postgres dbname=postgres",
             host, port
         );
-        postgres_conn = fmt;
+        postgres_conn = Some(fmt);
     }
 
     let mut keycloak_client = None;
@@ -146,8 +172,8 @@ pub async fn play_scenario(scenario: PopScenario) -> Result<(), String> {
     let pop_env = crate::pop_model::PopEnv {
         kafka_bootstrap_server: Some(kafka_bootstrap_server),
         keycloak_client,
-        postgres_conn_string: Some(postgres_conn),
-        sqlite_db_path: scenario.pop_sqlite.map(|sq| sq.db_path),
+        postgres_conn_string: postgres_conn,
+        sqlite_db_path: sq_path,
     };
 
     info!("{:#?}", pop_env);
