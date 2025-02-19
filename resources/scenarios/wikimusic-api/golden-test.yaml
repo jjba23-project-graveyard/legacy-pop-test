@@ -55,3 +55,4 @@ pop_actions:
 
 pop_sqlite:
   db_path: '$HOME/Ontwikkeling/Persoonlijk/wikimusic-api/resources/pop-test.sqlite'
+  

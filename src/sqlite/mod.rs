@@ -15,7 +15,7 @@
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
-use crate::row_dsl::extract_checker_clauses;
+use crate::{row_condition_dsl::eval_row_condition, row_dsl::extract_checker_clauses};
 use log::info;
 
 pub fn sqlite_checker_from_expression(
@@ -28,13 +28,22 @@ pub fn sqlite_checker_from_expression(
         let mut parsed_row: Vec<String> = Vec::new();
         let cs = clauses.iter().enumerate().clone();
 
-        for (i, c) in cs {
+        for (i, c) in cs.clone() {
             parsed_row.push(ro[i].clone());
         }
 
         info!("parsed row: {:#?}", parsed_row);
 
-        true
+        let mut re: Vec<Result<(), String>> = Vec::new();
+        for (i, c) in cs.clone() {
+            if parsed_row.len() >= i {
+                let eval_result = eval_row_condition(parsed_row[i].clone(), c.clone());
+                re.push(eval_result);
+            }
+        }
+
+        let all_re: Result<(), String> = re.into_iter().collect();
+        all_re.is_ok()
     };
 
     Ok(Box::new(fun))

@@ -60,6 +60,16 @@
           "type": "null"
         }
       ]
+    },
+    "pop_sqlite": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PopSqlite"
+        },
+        {
+          "type": "null"
+        }
+      ]
     }
   },
   "$defs": {
@@ -302,6 +312,12 @@
         },
         {
           "$ref": "#/$defs/PostgresAssertion"
+        },
+        {
+          "$ref": "#/$defs/SqliteAssertion"
+        },
+        {
+          "$ref": "#/$defs/SqliteAction"
         }
       ]
     },
@@ -539,6 +555,72 @@
         "postgres_query"
       ]
     },
+    "SqliteAssertion": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "delay_seconds": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0
+        },
+        "sqlite_query": {
+          "type": "string"
+        },
+        "assert_row_count": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "int32"
+        },
+        "assert_expressions": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "sqlite_query"
+      ]
+    },
+    "SqliteAction": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "delay_seconds": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0
+        },
+        "sqlite_action": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "sqlite_action"
+      ]
+    },
     "PopPostgres": {
       "type": "object",
       "properties": {
@@ -711,6 +793,17 @@
         "email",
         "username",
         "password"
+      ]
+    },
+    "PopSqlite": {
+      "type": "object",
+      "properties": {
+        "db_path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "db_path"
       ]
     }
   }
