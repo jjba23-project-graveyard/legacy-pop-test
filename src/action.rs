@@ -22,10 +22,13 @@ use crate::keycloak::client::{
 };
 use crate::pop_model::{
     HttpAssertion, HttpCall, KafkaCheck, KafkaProduce, PopAction, PopEnv, PopKeycloak, PopService,
-    PostgresAssertion,
+    PostgresAssertion, SqliteAssertion,
 };
-use crate::row_dsl::{get_row_expression_quantifier, make_checker_from_expression};
+use crate::postgres::checker::postgres_checker_from_expression;
+use crate::row_dsl::get_row_expression_quantifier;
 use log::{error, info};
+use rusqlite::fallible_streaming_iterator::FallibleStreamingIterator;
+use rusqlite::Connection;
 use std::time::Duration;
 use tokio::fs;
 use tokio::time::sleep;
@@ -79,22 +82,16 @@ pub async fn do_postgres_assertion(
     .await
     .map_err(|e| e.to_string())?;
 
-    // The connection object performs the actual communication with the database,
-    // so spawn it off to run on its own.
     tokio::spawn(async move {
         if let Err(e) = connection.await {
             error!("connection error: {}", e);
         }
     });
 
-    //.query("SELECT $1::TEXT", &[&"hello world"])
-
     let rows = client
         .query(&postgres_assertion.postgres_query, &[])
         .await
         .map_err(|e| e.to_string())?;
-
-    info!("postgres rows: {:#?}", rows);
 
     if let Some(rc) = postgres_assertion.assert_row_count {
         if rows.len() != (rc.to_owned() as usize) {
@@ -112,7 +109,7 @@ pub async fn do_postgres_assertion(
         let q = get_row_expression_quantifier(assert_expression.clone())?;
         info!("row expression quantifier: {:#?}", q);
 
-        let row_checker = make_checker_from_expression(assert_expression.clone())?;
+        let row_checker = postgres_checker_from_expression(assert_expression.clone())?;
 
         match q {
             crate::row_dsl::RowExpressionQuantifier::All => {
@@ -144,6 +141,45 @@ pub async fn do_postgres_assertion(
                 info!("is valid row {}", is_valid_row);
             }
         };
+    }
+
+    Ok(())
+}
+
+pub async fn do_sqlite_assertion(
+    pop_env: &PopEnv,
+    sqlite_assertion: &SqliteAssertion,
+) -> Result<(), String> {
+    if let Some(delay) = sqlite_assertion.delay_seconds {
+        sleep(Duration::from_secs(delay)).await;
+    }
+
+    sqlite_assertion
+        .name
+        .clone()
+        .inspect(|n| info!("starting action: {}", n));
+
+    let conn = Connection::open(
+        pop_env
+            .sqlite_db_path
+            .clone()
+            .unwrap_or("./pop-test.sqlite".to_string()),
+    )
+    .map_err(|e| e.to_string())?;
+
+    let mut stmt = conn
+        .prepare(&sqlite_assertion.sqlite_query)
+        .map_err(|e| e.to_string())?;
+
+    let rows = stmt.query([]).map_err(|e| e.to_string())?;
+    let real_rc = rows.count().map_err(|e| e.to_string())?;
+
+    if let Some(rc) = sqlite_assertion.assert_row_count {
+        if real_rc != (rc.to_owned() as usize) {
+            error!("found an unexpected amount of rows in the table")
+        } else {
+            info!("found expected amount of rows in the table")
+        }
     }
 
     Ok(())
@@ -306,6 +342,9 @@ pub async fn run_action(
         PopAction::KafkaCheck(kafka_check) => do_kafka_check(pop_env, kafka_check).await,
         PopAction::PostgresAssertion(postgres_assertion) => {
             do_postgres_assertion(pop_env, postgres_assertion).await
+        }
+        PopAction::SqliteAssertion(sqlite_assertion) => {
+            do_sqlite_assertion(pop_env, sqlite_assertion).await
         }
         PopAction::KafkaProduce(kafka_produce) => do_kafka_produce(pop_env, kafka_produce).await,
         PopAction::HttpCall(http_call) => {

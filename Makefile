@@ -15,21 +15,30 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
+# pop-test-log-info: Logs informational messages in custom format with highlight.
+define pop-test-log-info
+	@printf "\n\033[1m[INFO] $(shell date --rfc-3339=seconds) - %s\033[0m\n" $(1)
+endef
+
 fmt:
+	$(call pop-test-log-info,"formatting Rust source code")
 	nix develop -c cargo fix --allow-dirty --bin "pop-test"
 	nix develop -c cargo clippy --fix --allow-dirty
 	nix develop -c find . -maxdepth 8 -path target -prune -name "*.rs" -type f -exec rustfmt --edition 2021 {} \;
 
 # test: run unit and integration tests for pop-test's implementation itself
 test: fmt
+	$(call pop-test-log-info,"running Rust unit and integration tests")
 	RUST_LOG=debug nix develop -c cargo test
 
 # generate-json-schema
 generate-json-schema: fmt
+	$(call pop-test-log-info,"generating JSON schema for pop-test")
 	RUST_LOG=debug nix develop -c cargo run -- --generate-json-schema=true
 
 # publish-manual: Generates and publishes the manual from Org files using Emacs.
 publish-manual:
+	$(call pop-test-log-info,"generating manual for pop-test")
 	cd docs/Manual/ && emacs -Q --batch \
 		-l $(shell realpath ./src/manual/pop-test-manual.el) \
 		--funcall pop-test/publish-manual && cd ../../	
@@ -38,6 +47,7 @@ publish-manual:
 # container management
 #
 container-build:
+	$(call pop-test-log-info,"building container for pop-test")
 	podman build -t jjba23/pop-test:$(CONTAINER_TAG) .
 container-run:
 	podman run jjba23/pop-test:$(CONTAINER_TAG)
@@ -47,36 +57,25 @@ container-push:
 
 #
 # example runs
-# 
+#
 
-test-green-energy-mix: fmt
+define pop-test-golden-test-example
+	@-make fmt
+	$(call pop-test-log-info,"running scenario for: $(1)")
 	TESTCONTAINERS_COMMAND=keep \
-	RUST_LOG=debug \
-	nix develop -c time -p cargo run -- -p ./resources/scenarios/green-energy-mix/golden-test.yaml
+		RUST_LOG=debug \
+		nix develop -c time -p cargo run -- -p ./resources/scenarios/$(1)/golden-test.yaml
+endef
 
-test-vehicle-management: fmt
-	TESTCONTAINERS_COMMAND=keep \
-	RUST_LOG=debug \
-	nix develop -c time -p cargo run -- -p ./resources/scenarios/vehicle-management/golden-test.yaml
-
-test-dynamic-tariff-charging: fmt
-	TESTCONTAINERS_COMMAND=keep \
-	RUST_LOG=debug \
-	nix develop -c time -p cargo run -- -p ./resources/scenarios/dynamic-tariff-charging/golden-test.yaml
-
-test-consumer-solar-steering: fmt
-	TESTCONTAINERS_COMMAND=keep \
-	RUST_LOG=debug \
-	nix develop -c time -p cargo run -- -p ./resources/scenarios/consumer-solar-steering/golden-test.yaml
-
-
-test-lucidplan: fmt
-	TESTCONTAINERS_COMMAND=keep \
-	RUST_LOG=debug \
-	nix develop -c time -p cargo run -- -p ./resources/scenarios/lucidplan/golden-test.yaml
-
-test-all: fmt
-	TESTCONTAINERS_COMMAND=keep \
-	RUST_LOG=debug \
-	nix develop -c time -p cargo run -- -p ./resources/scenarios
-
+golden-test-green-energy-mix:
+	$(call pop-test-golden-test-example,"green-energy-mix")
+golden-test-vehicle-management:
+	$(call pop-test-golden-test-example,"vehicle-management")
+golden-test-dynamic-tariff-charging:
+	$(call pop-test-golden-test-example,"dynamic-tariff-charging")
+golden-test-consumer-solar-steering:
+	$(call pop-test-golden-test-example,"consumer-solar-steering")
+golden-test-lucidplan:
+	$(call pop-test-golden-test-example,"lucidplan")
+golden-test-wikimusic-api:
+	$(call pop-test-golden-test-example,"wikimusic-api")

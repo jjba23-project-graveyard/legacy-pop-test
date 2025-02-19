@@ -129,6 +129,15 @@ pub struct PostgresAssertion {
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone, JsonSchema)]
+pub struct SqliteAssertion {
+    pub name: Option<String>,
+    pub delay_seconds: Option<u64>,
+    pub sqlite_query: String,
+    pub assert_row_count: Option<i32>,
+    pub assert_expressions: Option<Vec<String>>,
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone, JsonSchema)]
 #[serde(untagged)]
 pub enum PopAction {
     HttpAssertion(HttpAssertion),
@@ -136,6 +145,7 @@ pub enum PopAction {
     KafkaProduce(KafkaProduce),
     KafkaCheck(KafkaCheck),
     PostgresAssertion(PostgresAssertion),
+    SqliteAssertion(SqliteAssertion),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema)]
@@ -150,6 +160,11 @@ pub struct PopKafka {
     pub enabled: Option<bool>,
     pub image_name: Option<String>,
     pub image_tag: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, JsonSchema)]
+pub struct PopSqlite {
+    pub db_path: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema)]
@@ -192,6 +207,7 @@ pub struct PopScenario {
     pub pop_kafka: Option<PopKafka>,
     pub pop_server: Option<PopServer>,
     pub pop_keycloak: Option<PopKeycloak>,
+    pub pop_sqlite: Option<PopSqlite>,
 }
 
 #[derive(Debug, Clone)]
@@ -199,4 +215,5 @@ pub struct PopEnv {
     pub kafka_bootstrap_server: Option<String>,
     pub keycloak_client: Option<KeycloakClient>,
     pub postgres_conn_string: Option<String>,
+    pub sqlite_db_path: Option<String>,
 }

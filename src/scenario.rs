@@ -147,6 +147,7 @@ pub async fn play_scenario(scenario: PopScenario) -> Result<(), String> {
         kafka_bootstrap_server: Some(kafka_bootstrap_server),
         keycloak_client,
         postgres_conn_string: Some(postgres_conn),
+        sqlite_db_path: scenario.pop_sqlite.map(|sq| sq.db_path),
     };
 
     info!("{:#?}", pop_env);
