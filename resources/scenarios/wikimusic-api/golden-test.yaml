@@ -54,7 +54,13 @@ pop_actions:
     assert_expressions:
       - |
         [first] ((uuid)(== root)(== root@root.com)(non-empty-str)(nil))
-    
+
+  - name: 'Check calling the songs endpoint returns a proper JSON body'
+    assert_url: '/songs'
+    service_id: 'wikimusic-api'
+    delay_seconds: 2
+    with_headers:
+      x-wikimusic-auth: "cab727b8-37fb-46c0-947a-44a2b576bf9c"
 
 pop_sqlite:
   db_path: '$HOME/Ontwikkeling/Persoonlijk/wikimusic-api/resources/pop-test.sqlite'

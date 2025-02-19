@@ -15,7 +15,7 @@
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
-use std::str::FromStr;
+use std::{collections::HashMap, str::FromStr};
 
 use crate::pop_model::BodyPattern;
 use scraper::{ElementRef, Html, Selector};
@@ -24,7 +24,7 @@ use serde_json::Value;
 use crate::json_condition_dsl::eval_json_condition;
 use log::{debug, error, info};
 use reqwest::{
-    header::{self, HeaderValue},
+    header::{self, HeaderMap, HeaderValue},
     Client, Method,
 };
 
@@ -109,15 +109,34 @@ pub async fn run_http_action(
     bearer_token: Option<String>,
     method: String,
     msg: String,
+    extra_headers: Option<HashMap<String, String>>,
 ) -> Result<(), String> {
     let url = format!("{}{}", service_url, assert_url);
 
-    let mut headers = header::HeaderMap::new();
+    let mut headers: HeaderMap = header::HeaderMap::new();
     if let Some(tok) = bearer_token {
         headers.insert(
             "Authorization",
             HeaderValue::from_str(format!("Bearer {}", tok).as_str()).map_err(|e| e.to_string())?,
         );
+    }
+
+    let x2 = extra_headers.clone().unwrap_or(HashMap::new());
+
+    let xtra: HashMap<&str, &String> = x2.clone().iter().map(|(k, v)| (k.as_str(), v)).collect();
+
+    let xhh: Vec<(&str, HeaderValue)> = xtra
+        .iter()
+        .map(|(k, v)| {
+            let hv = HeaderValue::from_str(&v)
+                .map_err(|e| e.to_string())
+                .unwrap();
+            (*k, hv)
+        })
+        .collect();
+
+    for (k, v) in xhh {
+        headers.insert(k.as_str(), v.clone());
     }
 
     info!("sending request body: {}", msg);
