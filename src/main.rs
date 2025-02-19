@@ -47,6 +47,9 @@ mod pop_server;
 #[path = "postgres/mod.rs"]
 mod postgres;
 
+#[path = "sqlite/mod.rs"]
+mod sqlite;
+
 #[path = "json_schema/mod.rs"]
 mod json_schema;
 
