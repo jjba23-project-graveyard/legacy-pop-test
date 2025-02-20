@@ -39,7 +39,7 @@ pop_actions:
     method: 'POST'
     extra_headers:
       x-enode-delivery: "c876e59d-443e-4ac4-897e-fd0b2a93db91"
-      x-enode-signature: "*||*" 
+      x-enode-signature: "${BODY_SHA1}" 
     message: |
       [{
           "event": "user:vehicle:updated",

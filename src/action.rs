@@ -27,12 +27,19 @@ use crate::pop_model::{
 use crate::postgres::checker::postgres_checker_from_expression;
 use crate::row_dsl::get_row_expression_quantifier;
 use crate::sqlite::sqlite_checker_from_expression;
+use hex::encode;
+use hmac::{Hmac, Mac};
 use log::{debug, error, info};
 use rusqlite::{Connection, Row};
+use sha1::Sha1;
+use std::collections::HashMap;
 use std::time::Duration;
 use tokio::fs;
 use tokio::time::sleep;
 use tokio_postgres::NoTls;
+
+// Define an alias for HMAC-SHA1
+type HmacSha1 = Hmac<Sha1>;
 
 pub async fn do_kafka_check(pop_env: &PopEnv, kafka_check: &KafkaCheck) -> Result<(), String> {
     if let Some(delay) = kafka_check.delay_seconds {
@@ -379,13 +386,41 @@ pub async fn do_http_call(
         };
 
         let hs = http_call.extra_headers.clone().unwrap_or_default();
+        let hss: HashMap<String, String> = hs
+            .iter()
+            .map(|(k, v)| {
+                if v.starts_with("${") && v.ends_with("}") {
+                    let key = b"mysecret";
+
+                    // Create a new HMAC instance
+                    let mut mac =
+                        HmacSha1::new_from_slice(key).expect("HMAC can take key of any size");
+
+                    // Input the message
+                    mac.update(&msg.clone().into_bytes());
+
+                    // Get the final HMAC result
+                    let result = mac.finalize();
+                    let code_bytes = result.into_bytes();
+
+                    // Convert to hexadecimal string
+                    let hex_result = encode(code_bytes);
+
+                    println!("HMAC-SHA1: {}", hex_result);
+
+                    (k.clone(), hex_result.clone())
+                } else {
+                    (k.clone(), v.clone())
+                }
+            })
+            .collect();
 
         run_http_action(
             http_call.action_url.clone(),
             service.base_url.clone(),
             tok,
             http_call.method.to_string(),
-            &hs,
+            &hss,
             msg,
         )
         .await
