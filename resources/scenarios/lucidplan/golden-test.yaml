@@ -28,6 +28,7 @@ pop_services:
 pop_actions:
   - name: 'Check that the projects endpoint works fine'
     assert_url: '/projects'
+    method: 'GET'    
     assert_code: 200
     service_id: 'lucidplan'
     html_patterns:

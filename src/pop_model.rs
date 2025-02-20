@@ -85,9 +85,13 @@ pub struct HttpAssertion {
     pub assert_code: Option<u16>,
     pub assert_url: String,
     pub service_id: String,
+    pub method: String,
     pub json_patterns: Option<Vec<BodyPattern>>,
     pub html_patterns: Option<Vec<String>>,
     pub with_keycloak_user_token: Option<bool>,
+    pub message_file_path: Option<String>,
+    pub message: Option<String>,
+    pub extra_headers: Option<HashMap<String, String>>,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone, JsonSchema)]

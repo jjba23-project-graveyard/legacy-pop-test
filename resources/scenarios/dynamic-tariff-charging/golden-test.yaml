@@ -57,6 +57,7 @@ pop_actions:
   - name: 'Check calling the registered chargepoints URL works and returns the proper JSON body'
     with_keycloak_user_token: true
     assert_url: '/api/v1/registeredChargepoints/b53f212f-77e4-4591-964a-c46fd479ee18'
+    method: 'GET'    
     service_id: 'dynamic-tariff-charging'
     delay_seconds: 5
     json_patterns:

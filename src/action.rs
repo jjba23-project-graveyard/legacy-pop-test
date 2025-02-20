@@ -389,26 +389,22 @@ pub async fn do_http_call(
         let hss: HashMap<String, String> = hs
             .iter()
             .map(|(k, v)| {
-                if v.starts_with("${") && v.ends_with("}") {
+                if v == "${BODY_SHA1}" {
                     let key = b"mysecret";
 
-                    // Create a new HMAC instance
                     let mut mac =
                         HmacSha1::new_from_slice(key).expect("HMAC can take key of any size");
 
-                    // Input the message
                     mac.update(&msg.clone().into_bytes());
 
-                    // Get the final HMAC result
                     let result = mac.finalize();
                     let code_bytes = result.into_bytes();
 
-                    // Convert to hexadecimal string
                     let hex_result = encode(code_bytes);
 
-                    println!("HMAC-SHA1: {}", hex_result);
+                    info!("HMAC-SHA1: {}", format!("sha1={}", hex_result));
 
-                    (k.clone(), hex_result.clone())
+                    (k.clone(), format!("sha1={}", hex_result.clone()))
                 } else {
                     (k.clone(), v.clone())
                 }
@@ -464,6 +460,43 @@ pub async fn do_http_assertion(
 
     if let Some(service) = services.iter().find(|s| s.id == http_assertion.service_id) {
         info!("running http assertion: {:#?}", http_assertion);
+
+        let msg: String = match (
+            http_assertion.message.clone(),
+            http_assertion.message_file_path.clone(),
+        ) {
+            (None, None) => "".to_string(),
+            (Some(msg), None) => msg,
+            (Some(msg), Some(_)) => msg,
+            (None, Some(msg_file)) => fs::read_to_string(msg_file).await.unwrap_or("".to_string()),
+        };
+
+        let hs = http_assertion.extra_headers.clone().unwrap_or_default();
+        let hss: HashMap<String, String> = hs
+            .iter()
+            .map(|(k, v)| {
+                if v == "${BODY_SHA1}" {
+                    let key = b"mysecret";
+
+                    let mut mac =
+                        HmacSha1::new_from_slice(key).expect("HMAC can take key of any size");
+
+                    mac.update(&msg.clone().into_bytes());
+
+                    let result = mac.finalize();
+                    let code_bytes = result.into_bytes();
+
+                    let hex_result = encode(code_bytes);
+
+                    info!("HMAC-SHA1: {}", format!("sha1={}", hex_result));
+
+                    (k.clone(), format!("sha1={}", hex_result.clone()))
+                } else {
+                    (k.clone(), v.clone())
+                }
+            })
+            .collect();
+
         run_http_assertion(
             http_assertion.assert_code,
             http_assertion.assert_url.clone(),
@@ -471,6 +504,9 @@ pub async fn do_http_assertion(
             http_assertion.json_patterns.clone(),
             http_assertion.html_patterns.clone(),
             tok,
+            http_assertion.method.to_string(),
+            &hss,
+            msg,
         )
         .await
     } else {

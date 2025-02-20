@@ -185,7 +185,7 @@ pub async fn play_scenario(scenario: PopScenario) -> Result<(), String> {
         let action_result =
             run_action(&pop_env, services, action, scenario.pop_keycloak.clone()).await;
         match action_result {
-            Ok(_) => info!("ran action successfully: {:#?}", action),
+            Ok(_) => (),
             Err(e) => error!("{}", e),
         }
     }

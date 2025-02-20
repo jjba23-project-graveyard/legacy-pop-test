@@ -32,11 +32,37 @@ pop_services:
 
 
 pop_actions:
-  - name: 'Send user:vehicle:updated event'
-    with_keycloak_user_token: true
-    action_url: '/api/v1/enode/events'
+  - name: 'Service should return 400 due to missing header'
     service_id: 'vehicle-events-hub'
     method: 'POST'
+    assert_code: 400
+    assert_url: '/api/v1/enode/events'
+    message: |
+      [{
+          "event": "user:vehicle:updated",
+          "version": "2024-01-01",
+          "createdAt": "2023-12-21T16:14:48.849030+01:00" 
+      }]
+  - name: 'Service should return 401 due to invalid signature'
+    service_id: 'vehicle-events-hub'
+    method: 'POST'
+    assert_code: 401
+    assert_url: '/api/v1/enode/events'
+    extra_headers:
+      x-enode-delivery: "c876e59d-443e-4ac4-897e-fd0b2a93db91"
+      x-enode-signature: "some-sha1"     
+    message: |
+      [{
+          "event": "user:vehicle:updated",
+          "version": "2024-01-01",
+          "createdAt": "2023-12-21T16:14:48.849030+01:00" 
+      }]      
+      
+  - name: 'Service should accept user:vehicle:updated event'
+    service_id: 'vehicle-events-hub'
+    method: 'POST'
+    assert_code: 200
+    assert_url: '/api/v1/enode/events'
     extra_headers:
       x-enode-delivery: "c876e59d-443e-4ac4-897e-fd0b2a93db91"
       x-enode-signature: "${BODY_SHA1}" 

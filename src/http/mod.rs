@@ -35,6 +35,9 @@ pub async fn run_http_assertion(
     json_patterns: Option<Vec<BodyPattern>>,
     html_patterns: Option<Vec<String>>,
     bearer_token: Option<String>,
+    method: String,
+    extra_headers: &HashMap<String, String>,
+    msg: String,
 ) -> Result<(), String> {
     let url = format!("{}{}", service_url, assert_url);
 
@@ -46,11 +49,22 @@ pub async fn run_http_assertion(
         );
     }
 
+    for (k, v) in extra_headers.clone() {
+        headers.insert(
+            HeaderName::from_str(&k).map_err(|e| e.to_string())?,
+            HeaderValue::from_str(&v).map_err(|e| e.to_string())?,
+        );
+    }
+
     let c = Client::builder()
         .default_headers(headers)
         .build()
         .map_err(|e| e.to_string())?
-        .get(url);
+        .request(
+            Method::from_str(method.as_str()).unwrap_or(Method::GET),
+            url,
+        )
+        .body(msg);
 
     let maybe_response = c.send().await;
 
@@ -126,7 +140,6 @@ pub async fn run_http_action(
             HeaderName::from_str(&k).map_err(|e| e.to_string())?,
             HeaderValue::from_str(&v).map_err(|e| e.to_string())?,
         );
-        
     }
 
     info!("sending request body: {}", msg);
