@@ -28,7 +28,6 @@ use crate::postgres::checker::postgres_checker_from_expression;
 use crate::row_dsl::get_row_expression_quantifier;
 use crate::sqlite::sqlite_checker_from_expression;
 use log::{debug, error, info};
-use rusqlite::fallible_streaming_iterator::FallibleStreamingIterator;
 use rusqlite::{Connection, Row};
 use std::time::Duration;
 use tokio::fs;
@@ -191,7 +190,6 @@ pub async fn do_sqlite_assertion(
         .map_err(|e| e.to_string())?;
 
     let col_co = stmt.column_count();
-    let cc = 0..col_co;
     let real_rc = stmt
         .query_map([], |ro| Ok(extract_row(ro, col_co)))
         .map_err(|e| e.to_string())?
