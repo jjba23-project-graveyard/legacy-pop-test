@@ -120,7 +120,6 @@ pub struct KafkaProduce {
 pub struct KafkaCheck {
     pub name: Option<String>,
     pub delay_seconds: Option<u64>,
-    pub kafka_topic: String,
     pub check: String,
 }
 

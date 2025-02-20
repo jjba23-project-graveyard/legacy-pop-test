@@ -76,7 +76,6 @@ pop_actions:
 
   - name: 'Check offsets in Kafka topic'
     delay_seconds: 3
-    kafka_topic: 'vehicle.registration-state'
     check: 'check-offsets'
 
 
