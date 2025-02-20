@@ -65,6 +65,37 @@ async fn prepare_keycloak_token(
         .map(|t| t.0)
 }
 
+async fn prepare_headers(
+    extra_headers: Option<HashMap<String, String>>,
+    body: String,
+) -> HashMap<String, String> {
+    let hs = extra_headers.unwrap_or_default();
+    let hss: HashMap<String, String> = hs
+        .iter()
+        .map(|(k, v)| {
+            if v == "${BODY_SHA1}" {
+                let key = b"mysecret";
+
+                let mut mac = HmacSha1::new_from_slice(key).expect("HMAC can take key of any size");
+
+                mac.update(&body.clone().into_bytes());
+
+                let result = mac.finalize();
+                let code_bytes = result.into_bytes();
+
+                let hex_result = encode(code_bytes);
+
+                info!("HMAC-SHA1: {}", format!("sha1={}", hex_result));
+
+                (k.clone(), format!("sha1={}", hex_result.clone()))
+            } else {
+                (k.clone(), v.clone())
+            }
+        })
+        .collect();
+    hss
+}
+
 pub async fn do_http_call(
     pop_env: &PopEnv,
     services: &[PopService],
@@ -96,31 +127,7 @@ pub async fn do_http_call(
             (None, Some(msg_file)) => fs::read_to_string(msg_file).await.unwrap_or("".to_string()),
         };
 
-        let hs = http_call.extra_headers.clone().unwrap_or_default();
-        let hss: HashMap<String, String> = hs
-            .iter()
-            .map(|(k, v)| {
-                if v == "${BODY_SHA1}" {
-                    let key = b"mysecret";
-
-                    let mut mac =
-                        HmacSha1::new_from_slice(key).expect("HMAC can take key of any size");
-
-                    mac.update(&msg.clone().into_bytes());
-
-                    let result = mac.finalize();
-                    let code_bytes = result.into_bytes();
-
-                    let hex_result = encode(code_bytes);
-
-                    info!("HMAC-SHA1: {}", format!("sha1={}", hex_result));
-
-                    (k.clone(), format!("sha1={}", hex_result.clone()))
-                } else {
-                    (k.clone(), v.clone())
-                }
-            })
-            .collect();
+        let hss = prepare_headers(http_call.extra_headers.clone(), msg.clone()).await;
 
         run_http_action(
             http_call.action_url.clone(),
@@ -128,7 +135,7 @@ pub async fn do_http_call(
             tok,
             http_call.method.to_string(),
             &hss,
-            msg,
+            msg.clone(),
         )
         .await
     } else {
@@ -167,31 +174,7 @@ pub async fn do_http_assertion(
             (None, Some(msg_file)) => fs::read_to_string(msg_file).await.unwrap_or("".to_string()),
         };
 
-        let hs = http_assertion.extra_headers.clone().unwrap_or_default();
-        let hss: HashMap<String, String> = hs
-            .iter()
-            .map(|(k, v)| {
-                if v == "${BODY_SHA1}" {
-                    let key = b"mysecret";
-
-                    let mut mac =
-                        HmacSha1::new_from_slice(key).expect("HMAC can take key of any size");
-
-                    mac.update(&msg.clone().into_bytes());
-
-                    let result = mac.finalize();
-                    let code_bytes = result.into_bytes();
-
-                    let hex_result = encode(code_bytes);
-
-                    info!("HMAC-SHA1: {}", format!("sha1={}", hex_result));
-
-                    (k.clone(), format!("sha1={}", hex_result.clone()))
-                } else {
-                    (k.clone(), v.clone())
-                }
-            })
-            .collect();
+        let hss = prepare_headers(http_assertion.extra_headers.clone(), msg.clone()).await;
 
         run_http_assertion(
             http_assertion.assert_code,
