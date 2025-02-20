@@ -100,6 +100,7 @@ pub struct HttpCall {
     pub method: String,
     pub message_file_path: Option<String>,
     pub message: Option<String>,
+    pub extra_headers: Option<HashMap<String, String>>,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone, JsonSchema)]

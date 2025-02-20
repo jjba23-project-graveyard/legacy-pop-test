@@ -49,6 +49,9 @@ uuid = {version = "1.13.1", features = [
 scraper = "0.22.0"
 schemars = "1.0.0-alpha.17"
 rusqlite = { version = "0.33.0", features = ["bundled"] }
+hmac = "0.12"
+sha1 = "0.10"
+hex = "0.4"
 
 # could be interesting futurely
 # rust_lisp = "0.18.0"

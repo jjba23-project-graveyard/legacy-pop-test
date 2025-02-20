@@ -378,11 +378,14 @@ pub async fn do_http_call(
             (None, Some(msg_file)) => fs::read_to_string(msg_file).await.unwrap_or("".to_string()),
         };
 
+        let hs = http_call.extra_headers.clone().unwrap_or_default();
+
         run_http_action(
             http_call.action_url.clone(),
             service.base_url.clone(),
             tok,
             http_call.method.to_string(),
+            &hs,
             msg,
         )
         .await

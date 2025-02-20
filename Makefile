@@ -71,6 +71,8 @@ golden-test-green-energy-mix:
 	$(call pop-test-golden-test-example,"green-energy-mix")
 golden-test-vehicle-management:
 	$(call pop-test-golden-test-example,"vehicle-management")
+golden-test-vehicle-events-hub:
+	$(call pop-test-golden-test-example,"vehicle-events-hub")
 golden-test-dynamic-tariff-charging:
 	$(call pop-test-golden-test-example,"dynamic-tariff-charging")
 golden-test-consumer-solar-steering:

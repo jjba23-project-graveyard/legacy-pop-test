@@ -15,7 +15,7 @@
 // You should have received a copy of the Lesser GNU General Public License
 // along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
-use std::str::FromStr;
+use std::{collections::HashMap, str::FromStr};
 
 use crate::pop_model::BodyPattern;
 use scraper::{ElementRef, Html, Selector};
@@ -24,7 +24,7 @@ use serde_json::Value;
 use crate::json_condition_dsl::eval_json_condition;
 use log::{debug, error, info};
 use reqwest::{
-    header::{self, HeaderValue},
+    header::{self, HeaderName, HeaderValue},
     Client, Method,
 };
 
@@ -108,6 +108,7 @@ pub async fn run_http_action(
     service_url: String,
     bearer_token: Option<String>,
     method: String,
+    extra_headers: &HashMap<String, String>,
     msg: String,
 ) -> Result<(), String> {
     let url = format!("{}{}", service_url, assert_url);
@@ -118,6 +119,14 @@ pub async fn run_http_action(
             "Authorization",
             HeaderValue::from_str(format!("Bearer {}", tok).as_str()).map_err(|e| e.to_string())?,
         );
+    }
+
+    for (k, v) in extra_headers.clone() {
+        headers.insert(
+            HeaderName::from_str(&k).map_err(|e| e.to_string())?,
+            HeaderValue::from_str(&v).map_err(|e| e.to_string())?,
+        );
+        
     }
 
     info!("sending request body: {}", msg);
