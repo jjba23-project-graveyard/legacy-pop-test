@@ -61,7 +61,6 @@ pop_actions:
           "timestamp": "2025-02-11T18:24:12Z"
       }
 
-
   - name: 'Check offsets in Kafka topic'
     delay_seconds: 3
     check: 'check-offsets'

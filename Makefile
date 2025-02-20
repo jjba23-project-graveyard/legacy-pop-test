@@ -73,6 +73,10 @@ golden-test-vehicle-management:
 	$(call pop-test-golden-test-example,"vehicle-management")
 golden-test-vehicle-events-hub:
 	$(call pop-test-golden-test-example,"vehicle-events-hub")
+e2e-enode-flow:
+	cd ~/Ontwikkeling/Werk/Vandebron && sbt "vehicleEventsHub/stage"
+	cd ~/Ontwikkeling/Werk/Vandebron && sbt "dynamicTariffCharging/stage"
+	$(call pop-test-golden-test-example,"e2e-enode-flow")
 golden-test-dynamic-tariff-charging:
 	$(call pop-test-golden-test-example,"dynamic-tariff-charging")
 golden-test-consumer-solar-steering:
