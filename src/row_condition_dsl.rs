@@ -17,11 +17,7 @@
 
 use uuid::Uuid;
 
-pub fn eval_row_condition(
-    target: String,
-    condition: String,
-    col_type: String,
-) -> Result<(), String> {
+pub fn eval_row_condition(target: String, condition: String) -> Result<(), String> {
     match condition.as_str() {
         // match should not be empty
         "non-empty-str" => {
@@ -107,98 +103,43 @@ mod tests {
 
     #[test]
     fn test_non_empty_str() {
-        assert!(eval_row_condition(
-            "hello".to_string(),
-            "non-empty-str".to_string(),
-            "varchar".to_string()
-        )
-        .is_ok());
-        assert!(eval_row_condition(
-            " ".to_string(),
-            "non-empty-str".to_string(),
-            "varchar".to_string()
-        )
-        .is_ok());
-        assert!(eval_row_condition(
-            "".to_string(),
-            "non-empty-str".to_string(),
-            "varchar".to_string()
-        )
-        .is_err());
+        assert!(eval_row_condition("hello".to_string(), "non-empty-str".to_string()).is_ok());
+        assert!(eval_row_condition(" ".to_string(), "non-empty-str".to_string()).is_ok());
+        assert!(eval_row_condition("".to_string(), "non-empty-str".to_string()).is_err());
     }
 
     #[test]
     fn test_empty_str() {
-        assert!(eval_row_condition(
-            "".to_string(),
-            "empty-str".to_string(),
-            "varchar".to_string()
-        )
-        .is_ok());
-        assert!(eval_row_condition(
-            "hello".to_string(),
-            "empty-str".to_string(),
-            "varchar".to_string()
-        )
-        .is_err());
+        assert!(eval_row_condition("".to_string(), "empty-str".to_string()).is_ok());
+        assert!(eval_row_condition("hello".to_string(), "empty-str".to_string()).is_err());
     }
 
     #[test]
     fn test_not_equal_str() {
-        assert!(eval_row_condition(
-            "foo".to_string(),
-            "!= bar".to_string(),
-            "varchar".to_string()
-        )
-        .is_ok());
-        assert!(eval_row_condition(
-            "bar".to_string(),
-            "!= bar".to_string(),
-            "varchar".to_string()
-        )
-        .is_err());
-        assert!(eval_row_condition(
-            "bar".to_string(),
-            "!=  bar ".to_string(),
-            "varchar".to_string()
-        )
-        .is_err()); // Test extra spaces
+        assert!(eval_row_condition("foo".to_string(), "!= bar".to_string()).is_ok());
+        assert!(eval_row_condition("bar".to_string(), "!= bar".to_string()).is_err());
+        assert!(eval_row_condition("bar".to_string(), "!=  bar ".to_string()).is_err());
+        // Test extra spaces
     }
 
     #[test]
     fn test_equal_str() {
-        assert!(eval_row_condition(
-            "bar".to_string(),
-            "== bar".to_string(),
-            "varchar".to_string()
-        )
-        .is_ok());
-        assert!(eval_row_condition(
-            "foo".to_string(),
-            "== bar".to_string(),
-            "varchar".to_string()
-        )
-        .is_err());
-        assert!(eval_row_condition(
-            "bar".to_string(),
-            "==  bar ".to_string(),
-            "varchar".to_string()
-        )
-        .is_ok()); // Test extra spaces
+        assert!(eval_row_condition("bar".to_string(), "== bar".to_string()).is_ok());
+        assert!(eval_row_condition("foo".to_string(), "== bar".to_string()).is_err());
+        assert!(eval_row_condition("bar".to_string(), "==  bar ".to_string()).is_ok());
+        // Test extra spaces
     }
 
     #[test]
     fn test_uuid() {
         assert!(eval_row_condition(
             "96e980a8-94c6-4ce4-8dd4-eff32146467c".to_string(),
-            "uuid".to_string(),
             "uuid".to_string()
         )
         .is_ok());
 
         assert!(eval_row_condition(
             "94c6-4ce4-8dd4-eff32146467c".to_string(),
-            "uuid".to_string(),
             "uuid".to_string()
         )
         .is_err());
@@ -206,96 +147,51 @@ mod tests {
 
     #[test]
     fn test_nil() {
-        assert!(
-            eval_row_condition("nil".to_string(), "nil".to_string(), "varchar".to_string()).is_ok()
-        );
+        assert!(eval_row_condition("nil".to_string(), "nil".to_string()).is_ok());
 
-        assert!(eval_row_condition(
-            "123456".to_string(),
-            "nil".to_string(),
-            "timestamp".to_string()
-        )
-        .is_err());
+        assert!(eval_row_condition("123456".to_string(), "nil".to_string(),).is_err());
     }
 
     #[test]
     fn test_greater_than_numeric() {
-        assert!(
-            eval_row_condition("10".to_string(), "> 5".to_string(), "number".to_string()).is_ok()
-        );
-        assert!(
-            eval_row_condition("5".to_string(), "> 5".to_string(), "number".to_string()).is_err()
-        );
-        assert!(
-            eval_row_condition("4".to_string(), "> 5".to_string(), "number".to_string()).is_err()
-        );
+        assert!(eval_row_condition("10".to_string(), "> 5".to_string()).is_ok());
+        assert!(eval_row_condition("5".to_string(), "> 5".to_string()).is_err());
+        assert!(eval_row_condition("4".to_string(), "> 5".to_string()).is_err());
     }
 
     #[test]
     fn test_less_than_numeric() {
-        assert!(
-            eval_row_condition("3".to_string(), "< 5".to_string(), "number".to_string()).is_ok()
-        );
-        assert!(
-            eval_row_condition("5".to_string(), "< 5".to_string(), "number".to_string()).is_err()
-        );
-        assert!(
-            eval_row_condition("6".to_string(), "< 5".to_string(), "number".to_string()).is_err()
-        );
+        assert!(eval_row_condition("3".to_string(), "< 5".to_string()).is_ok());
+        assert!(eval_row_condition("5".to_string(), "< 5".to_string()).is_err());
+        assert!(eval_row_condition("6".to_string(), "< 5".to_string()).is_err());
     }
 
     #[test]
     fn test_greater_than_or_equal_numeric() {
-        assert!(
-            eval_row_condition("10".to_string(), ">= 5".to_string(), "number".to_string()).is_ok()
-        );
-        assert!(
-            eval_row_condition("5".to_string(), ">= 5".to_string(), "number".to_string()).is_ok()
-        );
-        assert!(
-            eval_row_condition("4".to_string(), ">= 5".to_string(), "number".to_string()).is_err()
-        );
+        assert!(eval_row_condition("10".to_string(), ">= 5".to_string()).is_ok());
+        assert!(eval_row_condition("5".to_string(), ">= 5".to_string()).is_ok());
+        assert!(eval_row_condition("4".to_string(), ">= 5".to_string()).is_err());
     }
 
     #[test]
     fn test_less_than_or_equal_numeric() {
-        assert!(
-            eval_row_condition("3".to_string(), "<= 5".to_string(), "number".to_string()).is_ok()
-        );
-        assert!(
-            eval_row_condition("5".to_string(), "<= 5".to_string(), "number".to_string()).is_ok()
-        );
-        assert!(
-            eval_row_condition("6".to_string(), "<= 5".to_string(), "number".to_string()).is_err()
-        );
+        assert!(eval_row_condition("3".to_string(), "<= 5".to_string()).is_ok());
+        assert!(eval_row_condition("5".to_string(), "<= 5".to_string()).is_ok());
+        assert!(eval_row_condition("6".to_string(), "<= 5".to_string()).is_err());
     }
 
     #[test]
     fn test_invalid_number_parsing() {
-        assert!(
-            eval_row_condition("abc".to_string(), "> 5".to_string(), "number".to_string()).is_err()
-        );
-        assert!(
-            eval_row_condition("5".to_string(), "> abc".to_string(), "number".to_string()).is_err()
-        );
-        assert!(eval_row_condition(
-            "abc".to_string(),
-            "<= xyz".to_string(),
-            "number".to_string()
-        )
-        .is_err());
+        assert!(eval_row_condition("abc".to_string(), "> 5".to_string()).is_err());
+        assert!(eval_row_condition("5".to_string(), "> abc".to_string()).is_err());
+        assert!(eval_row_condition("abc".to_string(), "<= xyz".to_string(),).is_err());
     }
 
     #[test]
     fn test_unknown_condition() {
-        assert!(eval_row_condition(
-            "test".to_string(),
-            "some-random-condition".to_string(),
-            "varchar".to_string()
-        )
-        .is_err());
         assert!(
-            eval_row_condition("123".to_string(), "??".to_string(), "varchar".to_string()).is_err()
+            eval_row_condition("test".to_string(), "some-random-condition".to_string(),).is_err()
         );
+        assert!(eval_row_condition("123".to_string(), "??".to_string()).is_err());
     }
 }

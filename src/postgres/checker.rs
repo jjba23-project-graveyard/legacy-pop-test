@@ -130,15 +130,16 @@ pub fn postgres_checker_from_expression(
 
         info!("parsed row: {:#?}", parsed_row);
 
+        let mut re: Vec<Result<(), String>> = Vec::new();
         for (i, clause) in cs.clone() {
             if ro.columns().len() >= i && parsed_row.len() >= i {
-                let col_type = ro.columns()[i].type_().name();
-                let eval_result =
-                    eval_row_condition(parsed_row[i].clone(), clause.clone(), col_type.to_string());
+                let eval_result = eval_row_condition(parsed_row[i].clone(), clause.clone());
+                re.push(eval_result);
             }
         }
 
-        true
+        let all_re: Result<(), String> = re.into_iter().collect();
+        all_re.is_ok()
     };
 
     Ok(Box::new(fun))
