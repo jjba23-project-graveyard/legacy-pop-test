@@ -37,8 +37,33 @@ use std::time::Duration;
 use tokio::fs;
 use tokio::time::sleep;
 
-// Define an alias for HMAC-SHA1
 type HmacSha1 = Hmac<Sha1>;
+
+async fn prepare_keycloak_token(
+    pop_env: &PopEnv,
+    keycloak: Option<PopKeycloak>,
+    with_keycloak_user_token: Option<bool>,
+) -> Option<String> {
+    if with_keycloak_user_token != Some(true) {
+        return None;
+    }
+
+    let kclient = pop_env.keycloak_client.clone()?;
+    let kk = keycloak?;
+
+    kclient
+        .clone()
+        .get_user_token(
+            KeycloakRealm(kk.realm),
+            KeycloakClientId(kk.client_id),
+            KeycloakClientSecret(kk.client_secret),
+            KeycloakUsername(kk.username),
+            KeycloakPassword(kk.password),
+        )
+        .await
+        .ok()
+        .map(|t| t.0)
+}
 
 pub async fn do_http_call(
     pop_env: &PopEnv,
@@ -55,23 +80,7 @@ pub async fn do_http_call(
         .clone()
         .inspect(|n| info!("starting action: {}", n));
 
-    let mut tok = None;
-    if http_call.with_keycloak_user_token == Some(true) {
-        if let Some(mut kclient) = pop_env.keycloak_client.clone() {
-            if let Some(kk) = keycloak {
-                let maybe_tok = kclient
-                    .get_user_token(
-                        KeycloakRealm(kk.realm),
-                        KeycloakClientId(kk.client_id),
-                        KeycloakClientSecret(kk.client_secret),
-                        KeycloakUsername(kk.username),
-                        KeycloakPassword(kk.password),
-                    )
-                    .await;
-                let _ = maybe_tok.inspect(|t| tok = Some(t.clone().0));
-            }
-        }
-    }
+    let tok = prepare_keycloak_token(pop_env, keycloak, http_call.with_keycloak_user_token).await;
 
     if let Some(service) = services.iter().find(|s| s.id == http_call.service_id) {
         info!("found service to check: {:#?}", service);
@@ -142,23 +151,8 @@ pub async fn do_http_assertion(
         .clone()
         .inspect(|n| info!("starting action: {}", n));
 
-    let mut tok = None;
-    if http_assertion.with_keycloak_user_token == Some(true) {
-        if let Some(mut kclient) = pop_env.keycloak_client.clone() {
-            if let Some(kk) = keycloak {
-                let maybe_tok = kclient
-                    .get_user_token(
-                        KeycloakRealm(kk.realm),
-                        KeycloakClientId(kk.client_id),
-                        KeycloakClientSecret(kk.client_secret),
-                        KeycloakUsername(kk.username),
-                        KeycloakPassword(kk.password),
-                    )
-                    .await;
-                let _ = maybe_tok.inspect(|t| tok = Some(t.clone().0));
-            }
-        }
-    }
+    let tok =
+        prepare_keycloak_token(pop_env, keycloak, http_assertion.with_keycloak_user_token).await;
 
     if let Some(service) = services.iter().find(|s| s.id == http_assertion.service_id) {
         info!("running http assertion: {:#?}", http_assertion);
