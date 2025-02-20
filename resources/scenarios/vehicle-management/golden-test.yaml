@@ -64,7 +64,6 @@ pop_actions:
 
   - name: 'Check offsets in Kafka topic'
     delay_seconds: 3
-    kafka_topic: 'vehicle.registration-state'
     check: 'check-offsets'
 
   - name: 'Check that the customer got recorded in the database'
@@ -76,6 +75,7 @@ pop_actions:
   - name: 'Check calling the registered URL works and returns the proper JSON body'
     with_keycloak_user_token: true
     assert_url: '/api/v1/status?customerReference=232323'
+    method: 'GET'
     service_id: 'vehicle-management'
     delay_seconds: 5
 

@@ -352,6 +352,9 @@
         "service_id": {
           "type": "string"
         },
+        "method": {
+          "type": "string"
+        },
         "json_patterns": {
           "type": [
             "array",
@@ -375,11 +378,33 @@
             "boolean",
             "null"
           ]
+        },
+        "message_file_path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "message": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "extra_headers": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": {
+            "type": "string"
+          }
         }
       },
       "required": [
         "assert_url",
-        "service_id"
+        "service_id",
+        "method"
       ]
     },
     "BodyPattern": {
@@ -440,6 +465,15 @@
             "string",
             "null"
           ]
+        },
+        "extra_headers": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": {
+            "type": "string"
+          }
         }
       },
       "required": [
@@ -502,15 +536,11 @@
           "format": "uint64",
           "minimum": 0
         },
-        "kafka_topic": {
-          "type": "string"
-        },
         "check": {
           "type": "string"
         }
       },
       "required": [
-        "kafka_topic",
         "check"
       ]
     },

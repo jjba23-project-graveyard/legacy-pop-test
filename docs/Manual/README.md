@@ -1,41 +1,41 @@
 
 # Table of Contents
 
--   [Why pop-test?](#orgff32ff8)
--   [Terminology and symbols](#orgd78a09e)
--   [⚙️ A simple test, using the DSL](#orgba81ff7)
--   [🖥️ How to run it](#orgb62f35e)
--   [🐒 Motivation](#org1cddc46)
--   [🈴  The Scenario DSL (Domain Specific Language)](#orgc3f8c2f)
-    -   [Condition DSL](#org22ffc43)
-    -   [Row DSL](#org6a42023)
-        -   [Quantifiers](#org9c5331d)
-        -   [Conditions](#orgc01bffb)
--   [🌳 pop-test primitives](#org48e780f)
-    -   [pop services](#org2dc91cf)
-        -   [❤️ service health check](#org4bd19ab)
-        -   [🐘 service postgres](#org5dcf55a)
-        -   [🌐 service kafka](#org88b7598)
-        -   [🗝️ service keycloak](#org0e73a13)
-        -   [🧞 service pop<sub>server</sub>](#org95bd365)
-    -   [pop actions](#org7e7481c)
-        -   [🔗 an http assertion](#org7fd32ba)
-        -   [🔗 an http call action](#org8652e51)
-        -   [🌐 a kafka produce action](#orgee96256)
-        -   [🌐 a kafka check 🚧](#org8a71cb2)
-        -   [🐘 a postgresql assertion](#org1cba52f)
--   [🎵 orchestrated services](#org1f527c7)
-    -   [🌐 pop kafka](#org0bdd901)
-    -   [🧞 pop-server](#org04cafae)
-    -   [🐘 pop postgres](#orgd621ecd)
-    -   [🗝️ pop keycloak](#org8f0ab1c)
--   [🫶🏼Why pop-test can be a Game-Changer](#org3651277)
-    -   [🏗️ High-level overview and understanding of a system - self-documenting tests](#org0b8b8d9)
-    -   [💚 Engineering Freedom and Confidence](#orgec451f8)
-    -   [🦸 Faster Development and Easier Maintenance](#org2666a18)
-    -   [💲 More Business Value and Reduced Risks](#org787a329)
--   [🎶  Conclusion](#org6340466)
--   [📖 Glossary](#orgba5acd8)
+-   [Why pop-test?](#org34f7f9c)
+-   [Terminology and symbols](#org68f60a6)
+-   [⚙️ A simple test, using the DSL](#org98b73ab)
+-   [🖥️ How to run it](#orgb11923d)
+-   [🐒 Motivation](#orgbe4ff51)
+-   [🈴  The Scenario DSL (Domain Specific Language)](#org850e219)
+    -   [Condition DSL](#org4e29cad)
+    -   [Row DSL](#org23a42e4)
+        -   [Quantifiers](#org9d78fc3)
+        -   [Conditions](#org6850965)
+-   [🌳 pop-test primitives](#orgcbc2037)
+    -   [pop services](#orgf416658)
+        -   [❤️ service health check](#orgcab213a)
+        -   [🐘 service postgres](#org08e3c4c)
+        -   [🌐 service kafka](#orga543e92)
+        -   [🗝️ service keycloak](#org52320ed)
+        -   [🧞 service pop<sub>server</sub>](#orgaddc153)
+    -   [pop actions](#org8a05e15)
+        -   [🔗 an http assertion](#org3ce21aa)
+        -   [🔗 an http call action](#org7c3b8f9)
+        -   [🌐 a kafka produce action](#org1334865)
+        -   [🌐 a kafka check 🚧](#org3b4505d)
+        -   [🐘 a postgresql assertion](#orgdafdb41)
+-   [🎵 orchestrated services](#orgdb4ace4)
+    -   [🌐 pop kafka](#orgd5dee7a)
+    -   [🧞 pop-server](#org72f8cc5)
+    -   [🐘 pop postgres](#org55f6a34)
+    -   [🗝️ pop keycloak](#org05c8094)
+-   [🫶🏼Why pop-test can be a Game-Changer](#org25e647f)
+    -   [🏗️ High-level overview and understanding of a system - self-documenting tests](#org84fc8ab)
+    -   [💚 Engineering Freedom and Confidence](#org54dc1e7)
+    -   [🦸 Faster Development and Easier Maintenance](#org89f6e55)
+    -   [💲 More Business Value and Reduced Risks](#org20471d1)
+-   [🎶  Conclusion](#orgc89d551)
+-   [📖 Glossary](#org8a975c5)
 
 ![img](https://jointhefreeworld.org/static-assets/badges/Rust-1.84-d0730f.png) ![img](https://jointhefreeworld.org/static-assets/badges/Nix-Flake-118ea1.png) ![img](https://jointhefreeworld.org/static-assets/badges/Kafka-6.1.1-501a2d.png) ![img](https://jointhefreeworld.org/static-assets/badges/PostgreSQL-17.2-0f3f4f.png) ![img](https://jointhefreeworld.org/static-assets/badges/Keycloak-26.1-412f4f.png) ![img](https://jointhefreeworld.org/static-assets/badges/PopServer-0.3.0-4e3930.png)
 
@@ -56,7 +56,7 @@ pop-tests as we affectionately call them, can range from small scope integration
 ---
 
 
-<a id="orgff32ff8"></a>
+<a id="org34f7f9c"></a>
 
 # Why pop-test?
 
@@ -70,7 +70,7 @@ pop-tests as we affectionately call them, can range from small scope integration
 ---
 
 
-<a id="orgd78a09e"></a>
+<a id="org68f60a6"></a>
 
 # Terminology and symbols
 
@@ -83,7 +83,7 @@ pop-tests as we affectionately call them, can range from small scope integration
 ---
 
 
-<a id="orgba81ff7"></a>
+<a id="org98b73ab"></a>
 
 # ⚙️ A simple test, using the DSL
 
@@ -126,7 +126,7 @@ More checks are possible (and encouraged), including PostgreSQL rows existence, 
 ---
 
 
-<a id="orgb62f35e"></a>
+<a id="orgb11923d"></a>
 
 # 🖥️ How to run it
 
@@ -159,7 +159,7 @@ This is how I usually run in development mode:
 ---
 
 
-<a id="org1cddc46"></a>
+<a id="orgbe4ff51"></a>
 
 # 🐒 Motivation
 
@@ -186,7 +186,7 @@ In short, pop-tests make engineers happier, business people more certain of what
 ---
 
 
-<a id="orgc3f8c2f"></a>
+<a id="org850e219"></a>
 
 # 🈴  The Scenario DSL (Domain Specific Language)
 
@@ -209,7 +209,7 @@ Since scenarios are plain data, one can opt to write scenarios in one's favourit
 ---
 
 
-<a id="org22ffc43"></a>
+<a id="org4e29cad"></a>
 
 ## Condition DSL
 
@@ -240,7 +240,7 @@ This DSL is present in JSON body checks and in SQL database checks, supported co
 ---
 
 
-<a id="org6a42023"></a>
+<a id="org23a42e4"></a>
 
 ## Row DSL
 
@@ -251,7 +251,7 @@ Nullable fields are seamlessly supported. For example if you want to check a nul
     [0] ((non-empty-str)(>= 12)(== en_GB)(non-empty-str)(true)(uuid))
 
 
-<a id="org9c5331d"></a>
+<a id="org9d78fc3"></a>
 
 ### Quantifiers
 
@@ -264,7 +264,7 @@ Nullable fields are seamlessly supported. For example if you want to check a nul
 `[n]` with n being a positive integer, means the check should be applied to the nth row in the result set
 
 
-<a id="orgc01bffb"></a>
+<a id="org6850965"></a>
 
 ### Conditions
 
@@ -273,14 +273,14 @@ The rest of the clause is a tuple-based variant of the condition DSL, in order o
 ---
 
 
-<a id="org48e780f"></a>
+<a id="orgcbc2037"></a>
 
 # 🌳 pop-test primitives
 
 See <../../src/pop_model.rs> for more. Below follows a detailed, as up-to-date as possible overview of pop-test's own data models.
 
 
-<a id="org2dc91cf"></a>
+<a id="orgf416658"></a>
 
 ## pop services
 
@@ -303,7 +303,7 @@ A service is defined by:
 ---
 
 
-<a id="org4bd19ab"></a>
+<a id="orgcab213a"></a>
 
 ### ❤️ service health check
 
@@ -324,7 +324,7 @@ HTTP health check:
 ---
 
 
-<a id="org5dcf55a"></a>
+<a id="org08e3c4c"></a>
 
 ### 🐘 service postgres
 
@@ -345,7 +345,7 @@ Defines how PostgreSQL is used in the service. Field is `postgres`, an optional 
 ---
 
 
-<a id="org88b7598"></a>
+<a id="orga543e92"></a>
 
 ### 🌐 service kafka
 
@@ -358,7 +358,7 @@ Defines how Kafka is used in the service. Field is `kafka`, an optional object.
 ---
 
 
-<a id="org0e73a13"></a>
+<a id="org52320ed"></a>
 
 ### 🗝️ service keycloak
 
@@ -371,7 +371,7 @@ Defines how Kafka is used in the service. Field is `kafka`, an optional object.
 ---
 
 
-<a id="org95bd365"></a>
+<a id="orgaddc153"></a>
 
 ### 🧞 service pop<sub>server</sub>
 
@@ -382,7 +382,7 @@ Defines how Kafka is used in the service. Field is `kafka`, an optional object.
 ---
 
 
-<a id="org7e7481c"></a>
+<a id="org8a05e15"></a>
 
 ## pop actions
 
@@ -393,7 +393,7 @@ there are many types of pop action, see the following sections.
 ---
 
 
-<a id="org7fd32ba"></a>
+<a id="org3ce21aa"></a>
 
 ### 🔗 an http assertion
 
@@ -409,6 +409,14 @@ there are many types of pop action, see the following sections.
 
 `with_keycloak_user_token` (optional, bool) - Whether to use Keycloak and include a Bearer token in the HTTP assertion call
 
+`method` (required, string) - HTTP method to be used in the call
+
+`message` (optional, string) - the message to be sent in the request body
+
+`message_file_path` (optional, string) - the file containing the message to be sent in the request body
+
+`extra_headers` (optional, map of string-string) - additional headers to be sent in the request
+
 `html_patterns` (optional, list of strings) - 🚧 A list of CSS selectors that are expected to be present in the response body
 
 `json_patterns` (optional, list of objects) – A list of conditions that must be met within the JSON response body. Each pattern defines a JSON field to inspect and a condition that must be satisfied.
@@ -422,7 +430,7 @@ Each JSON body pattern entry includes:
 ---
 
 
-<a id="org8652e51"></a>
+<a id="org7c3b8f9"></a>
 
 ### 🔗 an http call action
 
@@ -444,10 +452,12 @@ Perform an HTTP call
 
 `message_file_path` (optional, string) - the file containing the message to be sent in the request body
 
+`extra_headers` (optional, map of string-string) - additional headers to be sent in the request
+
 ---
 
 
-<a id="orgee96256"></a>
+<a id="org1334865"></a>
 
 ### 🌐 a kafka produce action
 
@@ -466,14 +476,14 @@ A kafka produce action is defined by:
 ---
 
 
-<a id="org8a71cb2"></a>
+<a id="org3b4505d"></a>
 
 ### 🌐 a kafka check 🚧
 
 ---
 
 
-<a id="org1cba52f"></a>
+<a id="orgdafdb41"></a>
 
 ### 🐘 a postgresql assertion
 
@@ -490,12 +500,12 @@ A kafka produce action is defined by:
 ---
 
 
-<a id="org1f527c7"></a>
+<a id="orgdb4ace4"></a>
 
 # 🎵 orchestrated services
 
 
-<a id="org0bdd901"></a>
+<a id="orgd5dee7a"></a>
 
 ## 🌐 pop kafka
 
@@ -510,7 +520,7 @@ You can use Kafka in pop-tests easily.
 ---
 
 
-<a id="org04cafae"></a>
+<a id="org72f8cc5"></a>
 
 ## 🧞 pop-server
 
@@ -545,7 +555,7 @@ You can then  have it prepared with certain behaviors (under `behaviors` ):
 ---
 
 
-<a id="orgd621ecd"></a>
+<a id="org55f6a34"></a>
 
 ## 🐘 pop postgres
 
@@ -560,7 +570,7 @@ You can use PostgreSQL in pop-tests easily.
 ---
 
 
-<a id="org8f0ab1c"></a>
+<a id="org05c8094"></a>
 
 ## 🗝️ pop keycloak
 
@@ -591,7 +601,7 @@ You can use Keycloak in pop-tests easily and have it auto-setup.
 ---
 
 
-<a id="org3651277"></a>
+<a id="org25e647f"></a>
 
 # 🫶🏼Why pop-test can be a Game-Changer
 
@@ -602,7 +612,7 @@ Whether you’re refactoring legacy code, maintaining a complex system, or ensur
 ---
 
 
-<a id="org0b8b8d9"></a>
+<a id="org84fc8ab"></a>
 
 ## 🏗️ High-level overview and understanding of a system - self-documenting tests
 
@@ -611,7 +621,7 @@ Having all data and user flows described in a highly readable, concise and consi
 ---
 
 
-<a id="orgec451f8"></a>
+<a id="org54dc1e7"></a>
 
 ## 💚 Engineering Freedom and Confidence
 
@@ -632,7 +642,7 @@ This approach leads to fewer surprises in production and more stable software re
 ---
 
 
-<a id="org2666a18"></a>
+<a id="org89f6e55"></a>
 
 ## 🦸 Faster Development and Easier Maintenance
 
@@ -643,7 +653,7 @@ Automating these processes saves valuable engineering time, allowing teams to fo
 ---
 
 
-<a id="org787a329"></a>
+<a id="org20471d1"></a>
 
 ## 💲 More Business Value and Reduced Risks
 
@@ -656,7 +666,7 @@ With predictable and repeatable test automation, teams can ship faster with grea
 ---
 
 
-<a id="org6340466"></a>
+<a id="orgc89d551"></a>
 
 # 🎶  Conclusion
 
@@ -677,7 +687,7 @@ With the power of pop-test, and taking profit of the rise of LLMs (Large Languag
 ---
 
 
-<a id="orgba5acd8"></a>
+<a id="org8a975c5"></a>
 
 # 📖 Glossary
 

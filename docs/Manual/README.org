@@ -335,15 +335,25 @@ there are many types of pop action, see the following sections.
 
 ~with_keycloak_user_token~ (optional, bool) - Whether to use Keycloak and include a Bearer token in the HTTP assertion call
 
+~method~ (required, string) - HTTP method to be used in the call
+
+~message~ (optional, string) - the message to be sent in the request body
+
+~message_file_path~ (optional, string) - the file containing the message to be sent in the request body
+
+~extra_headers~ (optional, map of string-string) - additional headers to be sent in the request
+
 ~html_patterns~ (optional, list of strings) - 🚧 A list of CSS selectors that are expected to be present in the response body
 
 ~json_patterns~ (optional, list of objects) – A list of conditions that must be met within the JSON response body. Each pattern defines a JSON field to inspect and a condition that must be satisfied.
+
 
 Each JSON body pattern entry includes:
 
 ~pattern~ (required, string) – A JSON path-like expression that identifies the field in the response body. This uses the Rust ~jql~ library.
 
 ~condition~ (required, string) – A logical condition to be checked.
+
 
 
 
@@ -368,6 +378,8 @@ Perform an HTTP call
 ~message~ (optional, string) - the message to be sent in the request body
 
 ~message_file_path~ (optional, string) - the file containing the message to be sent in the request body
+
+~extra_headers~ (optional, map of string-string) - additional headers to be sent in the request
 
 -----
 
