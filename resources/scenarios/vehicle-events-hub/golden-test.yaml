@@ -70,9 +70,53 @@ pop_actions:
       [{
           "event": "user:vehicle:updated",
           "version": "2024-01-01",
-          "createdAt": "2023-12-21T16:14:48.849030+01:00" 
+          "createdAt": "2023-12-21T16:14:48.849030+01:00",
+          "vehicle": {
+            "id": "fc83e067-77da-4d00-8cf2-d90ebfad9fea",
+            "userId": "3f482623-701f-4402-9eb8-067f54b974f7",
+            "chargeState": {
+              "isPluggedIn": true,
+              "range": 300,
+              "batteryCapacity": 22,
+              "chargeLimit": 100,
+              "batteryLevel": 23
+            },
+            "location": {
+              "id": "ef15ca60-ab40-4ab2-8e6f-70a202aef4c5"
+            }
+          },
+          "updatedFields": ["isPluggedIn"]
       }]
 
+  - name: 'Service should accept a user:vehicle:updated event which doesnt have location'
+    service_id: 'vehicle-events-hub'
+    method: 'POST'
+    assert_code: 200
+    assert_url: '/api/v1/enode/events'
+    extra_headers:
+      x-enode-delivery: "c876e59d-443e-4ac4-897e-fd0b2a93db91"
+      x-enode-signature: "${BODY_SHA1}" 
+    message: |
+      [{
+          "event": "user:vehicle:updated",
+          "version": "2024-01-01",
+          "createdAt": "2023-12-21T17:14:48.849030+01:00",
+          "vehicle": {
+            "id": "460bf2bb-ff4f-4b5d-a5f3-b34461e43373",
+            "userId": "88a6fb4e-d923-4a86-afd1-fde4f19de5e9",
+            "chargeState": {
+              "isPluggedIn": true,
+              "range": 200,
+              "batteryCapacity": 33,
+              "chargeLimit": 80,
+              "batteryLevel": 55
+            },
+            "location": {
+              "id": "fab590c2-2fbe-4b1f-85b0-914e67d908c6"
+            }
+          },
+          "updatedFields": ["isPluggedIn"]
+      }]      
 
   - name: 'Check offsets in Kafka topic'
     delay_seconds: 3

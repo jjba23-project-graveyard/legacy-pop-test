@@ -63,7 +63,7 @@ define pop-test-golden-test-example
 	@-make fmt
 	$(call pop-test-log-info,"running scenario for: $(1)")
 	TESTCONTAINERS_COMMAND=keep \
-		RUST_LOG=debug \
+		RUST_LOG=info \
 		nix develop -c time -p cargo run -- -p ./resources/scenarios/$(1)/golden-test.yaml
 endef
 
