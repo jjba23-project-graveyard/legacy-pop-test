@@ -60,11 +60,14 @@ pub async fn register_pop_server_behavior(
     pop_server_behavior: PopServerBehavior,
 ) -> Result<Response, reqwest::Error> {
     let client = reqwest::Client::new();
-    let body = fs::read_to_string(pop_server_behavior.body_file)
-        .await
-        .unwrap_or("".to_string());
+    let b = match (pop_server_behavior.body_file, pop_server_behavior.body) {
+        (None, None) => "".to_string(),
+        (Some(bf), None) => fs::read_to_string(bf).await.unwrap_or("".to_string()),
+        (None, Some(bod)) => bod,
+        (Some(_), Some(bod)) => bod,
+    };
 
-    info!("for pop_server behavior, return body: {}", body);
+    info!("for pop_server behavior, return body: {}", b);
 
     client
         .post(format!(
@@ -78,7 +81,7 @@ pub async fn register_pop_server_behavior(
             "x-pop-server-content-type",
             pop_server_behavior.content_type,
         )
-        .body(body)
+        .body(b)
         .send()
         .await
 }

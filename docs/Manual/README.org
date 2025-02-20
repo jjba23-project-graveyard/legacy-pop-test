@@ -451,7 +451,9 @@ You can then  have it prepared with certain behaviors (under ~behaviors~ ):
 
 ~content_type~ (required, string) - what content type should be returned as HTTP header
 
-~body_file~ (required, string) - path to the file to load data from, that will be returned as HTTP body
+~body~ (optional, string) - message that will be returned as HTTP body
+
+~body_file~ (optional, string) - path to the file to load data from, that will be returned as HTTP body
 
 -----
 

@@ -196,7 +196,8 @@ pub struct PopServerBehavior {
     pub method: String,
     pub status: u16,
     pub content_type: String,
-    pub body_file: String,
+    pub body_file: Option<String>,
+    pub body: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema)]

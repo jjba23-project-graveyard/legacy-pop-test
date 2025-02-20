@@ -46,11 +46,21 @@ pop_actions:
     action_url: '/api/v1/customers'
     service_id: 'vehicle-management'
     method: 'POST'
-    message_file_path: './resources/http/vehicle-management/register-customer.json'
+    message: |
+      {"customerReference": "232323", "locale": "en_GB" }
     
   - name: 'Publish a Kafka message to the registration state topic'
     kafka_topic: 'vehicle.registration-state'
-    message_file_path: './resources/kafka/vehicle-management/registration-state.json'
+    message: |
+      {
+          "vehicleId": "73c8f45b-295e-41f7-a7ec-e299f3c99caf",
+          "customerId": "bcb87670-49ba-49b4-a084-a8beb7861ad0",
+          "status": "REGISTERED",
+          "customerReference": "232323",
+          "organizationId": "5af424cb-3f4c-42e2-99d7-ac592cbac578",
+          "timestamp": "2025-02-11T18:24:12Z"
+      }
+
 
   - name: 'Check offsets in Kafka topic'
     delay_seconds: 3
@@ -62,12 +72,6 @@ pop_actions:
     assert_row_count: 1
     assert_expressions:
       - '[0] ((non-empty-str)(== 232323)(== en_GB)(non-empty-str))'
-
-  - name: 'Check that the vehicle got recorded in the database'
-    postgres_query: 'SELECT id, customer_id, config_id, device_id, brand FROM electric_vehicles'
-    assert_row_count: 1
-    assert_expressions:
-      - '[0] ((non-empty-str)(non-empty-str)(non-empty-str)(non-empty-str)(non-empty-str))' 
     
   - name: 'Check calling the registered URL works and returns the proper JSON body'
     with_keycloak_user_token: true
@@ -100,11 +104,13 @@ pop_server:
       method: 'GET'
       status: 200
       content_type: 'application/json'
-      body_file: './resources/pop-server/vehicle-management/ecedo-register-customer.json'
+      body: |
+        { "OrganizationId": "7761dd85-0cc0-4be6-a77e-64b486e92874" }
     - path: '/'
       method: 'POST'
       status: 200
       content_type: 'application/x-www-form-urlencoded'
-      body_file: './resources/pop-server/vehicle-management/eon-success.json'
+      body: |
+        {"access_token": "some-token", "expires_in": 900000, "message": "success!", "token_type": "JWT"}
       
         

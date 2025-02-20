@@ -41,7 +41,18 @@ pop_services:
 pop_actions:
   - name: 'Publish a Kafka message to the chargepoint topic'
     kafka_topic: 'ocpp.start-transaction'
-    message_file_path: './resources/kafka/dynamic-tariff-charging/start-transaction.json'
+    message: |
+      {
+          "id": "75ce3030-baee-42c3-a680-4d1263e62431",
+          "chargePointId": "b53f212f-77e4-4591-964a-c46fd479ee18",
+          "ocppId": "123456",
+          "connectorId": 23,
+          "idTag": "some-tag",
+          "timestamp": "2025-02-11T18:20:28Z",
+          "meterStart": 24.0,
+          "transactionId": 2
+      }
+
 
   - name: 'Check calling the registered chargepoints URL works and returns the proper JSON body'
     with_keycloak_user_token: true
