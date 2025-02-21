@@ -113,17 +113,17 @@ pop_kafka:
 pop_server:
   enabled: true
   behaviors:
-    - path: '/organizations/byReference/232323'
-      method: 'GET'
-      status: 200
-      content_type: 'application/json'
-      body: |
+    - request_path: '/organizations/byReference/232323'
+      request_method: 'GET'
+      response_status: 200
+      response_content_type: 'application/json'
+      response_body: |
         { "OrganizationId": "7761dd85-0cc0-4be6-a77e-64b486e92874" }
-    - path: '/'
-      method: 'POST'
-      status: 200
-      content_type: 'application/x-www-form-urlencoded'
-      body: |
+    - request_path: '/'
+      request_method: 'POST'
+      response_status: 200
+      response_content_type: 'application/json'
+      response_body: |
         {"access_token": "some-token", "expires_in": 900000, "message": "success!", "token_type": "JWT"}
       
         
