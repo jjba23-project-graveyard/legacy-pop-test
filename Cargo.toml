@@ -25,7 +25,7 @@ description = "your test orchestration master of puppets"
 readme = "README.org"
 homepage = "https://codeberg.org/jjba23/pop-test"
 repository = "https://codeberg.org/jjba23/pop-test"
-keywords = ["containers", "dsl", "e2e", "http", "jql", "kafka", "keycloak", "postgres", "sqlite", "test"]
+keywords = ["containers", "e2e", "kafka", "postgres", "test"]
 categories = ["command-line-utilities", "development-tools", "development-tools::testing"]
 
 
