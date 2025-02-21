@@ -41,5 +41,5 @@ You can find releases at:
 
 pop-test - *your test orchestration master of puppets*
 
-![img](resources/img/pop-test-readme.png)
+![img](https://jointhefreeworld.org/static-assets/pop-test/img/pop-test-readme.png)
 
