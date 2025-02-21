@@ -41,7 +41,11 @@ publish-manual:
 	$(call pop-test-log-info,"generating manual for pop-test")
 	cd docs/Manual/ && emacs -Q --batch \
 		-l $(shell realpath ./src/manual/pop-test-manual.el) \
-		--funcall pop-test/publish-manual && cd ../../	
+		--funcall pop-test/publish-manual
+	$(call pop-test-log-info,"generating readme for pop-test")
+	emacs -Q --batch \
+		-l $(shell realpath ./src/manual/pop-test-manual.el) \
+		--funcall pop-test/publish-readme
 
 #
 # container management

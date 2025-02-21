@@ -1,0 +1,45 @@
+![img](https://jointhefreeworld.org/static-assets/badges/Rust-1.84-d0730f.png) ![img](https://jointhefreeworld.org/static-assets/badges/Nix-Flake-118ea1.png) ![img](https://jointhefreeworld.org/static-assets/badges/Kafka-6.1.1-501a2d.png) ![img](https://jointhefreeworld.org/static-assets/badges/PostgreSQL-17.2-0f3f4f.png) ![img](https://jointhefreeworld.org/static-assets/badges/Keycloak-26.1-412f4f.png) ![img](https://jointhefreeworld.org/static-assets/badges/PopServer-0.3.0-4e3930.png)
+
+---
+
+pop-test is a tool that helps test computer programs, in integration, e2e, black-box, and other ways, in an easy and future-proof manner that improves reliability and engineering freedom.
+
+pop-test - *your test orchestration master of puppets*
+
+In Dutch 🇳🇱, *pop* means puppet or doll. pop-test simplifies end-to-end testing by providing a powerful orchestration tool and expressive language for your applications and their dependencies.
+
+Define your test scenarios in a DSL (represented in YAML, TOML or JSON) and automate the spinning up (and down) of complex environments involving multiple programs, databases, and services, executing comprehensive tests with ease.
+
+pop-test is built with Rust, enhancing safety, performance and reliability, with a modern and accessible code-base.
+
+pop-tests as we affectionately call them, can range from small scope integration tests to all encompassing end-to-end, black box and golden tests.
+
+I strive to provide proper and extensive documentation on pop-test, in several formats, available at your convenience.
+
+-   Org format <https://codeberg.org/jjba23/pop-test/src/branch/trunk/docs/Manual/README.org>
+
+HTML and Markdown also available at: <https://codeberg.org/jjba23/pop-test/src/branch/trunk/docs/Manual>
+
+You can find releases at:
+
+-   crates.io: <https://crates.io/crates/pop-test>
+-   dockerhub: <https://hub.docker.com/repository/docker/jjba23/pop-test/general>
+
+---
+
+
+# Why pop-test?
+
+-   Frees you and allows you to refactor and test your systems more easily. You can for example completely rewrite a program, even in a different language, and stay certain your implementation works as expected.
+-   Catches mistakes early – Helps find problems before real users do since you test with real dependencies.
+-   Test coverage with a real meaning - test your systems from head to toe
+-   Saves time – No need to test every little part manually, test on higher level.
+-   Easy to use – Just write simple rules, in a comfy DSL and `pop-test` does the rest!
+-   Fast and reliable – Built with Rust, a programming language known for speed and safety.
+
+---
+
+pop-test - *your test orchestration master of puppets*
+
+![img](resources/img/pop-test-readme.png)
+

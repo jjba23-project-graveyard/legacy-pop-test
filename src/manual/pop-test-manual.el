@@ -24,3 +24,10 @@ This assumes that the current directory is docs/Manual/"
   (org-html-export-to-html)
   (org-md-export-to-markdown)
   (message "finished publishing pop-test manual"))
+
+(defun pop-test/publish-readme ()
+  "Publish the POP-TEST readme from Org to several formats.
+This assumes that the current directory is the parent folder"
+  (find-file "README.org")
+  (org-md-export-to-markdown)
+  (message "finished publishing pop-test readme"))
