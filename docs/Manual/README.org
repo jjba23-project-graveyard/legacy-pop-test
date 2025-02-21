@@ -455,22 +455,24 @@ You can use ~pop_server~ in pop-tests easily:
 
 ~image_name~ (optional, string) - Container image for pop-server, by default ~jjba23/pop-server~
 
-~image_tag~ (optional, string) - Container image tag for pop-server, by default ~0.3.0~
+~image_tag~ (optional, string) - Container image tag for pop-server, by default ~0.4.0~
 
 
 You can then  have it prepared with certain behaviors (under ~behaviors~ ):
 
-~path~ (required, string) - what URL path should be called to trigger behavior
+~request_path~ (required, string) - what URL path should be called to trigger behavior
 
-~method~ (required, string) - what HTTP method should be used to trigger behavior
+~request_method~ (required, string) - what HTTP method should be used to trigger behavior
 
-~status~ (required, string) - what HTTP status should be returned
+~response_status~ (required, string) - what HTTP status should be returned
 
-~content_type~ (required, string) - what content type should be returned as HTTP header
+~response_content_type~ (required, string) - what content type should be returned as HTTP header
 
-~body~ (optional, string) - message that will be returned as HTTP body
+~request_content_type~ (optional, string) - what content type is present in the request, e.g. for POST
 
-~body_file~ (optional, string) - path to the file to load data from, that will be returned as HTTP body
+~response_body~ (optional, string) - message that will be returned as HTTP body
+
+~response_body_file~ (optional, string) - path to the file to load data from, that will be returned as HTTP body
 
 -----
 

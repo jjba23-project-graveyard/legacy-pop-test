@@ -196,12 +196,13 @@ pub struct PopKeycloak {
 
 #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema)]
 pub struct PopServerBehavior {
-    pub path: String,
-    pub method: String,
-    pub status: u16,
-    pub content_type: String,
-    pub body_file: Option<String>,
-    pub body: Option<String>,
+    pub request_path: String,
+    pub request_method: String,
+    pub response_status: u16,
+    pub request_content_type: Option<String>,
+    pub response_content_type: String,
+    pub response_body_file: Option<String>,
+    pub response_body: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema)]

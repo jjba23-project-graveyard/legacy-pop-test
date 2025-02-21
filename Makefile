@@ -46,6 +46,7 @@ publish-manual:
 	emacs -Q --batch \
 		-l $(shell realpath ./src/manual/pop-test-manual.el) \
 		--funcall pop-test/publish-readme
+	make generate-json-schema
 
 #
 # container management

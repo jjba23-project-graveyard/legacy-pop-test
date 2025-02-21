@@ -32,7 +32,7 @@ async fn run_pop_server_container(
         pop_server
             .image_name
             .unwrap_or("jjba23/pop-server".to_string()),
-        pop_server.image_tag.unwrap_or("0.3.0".to_string()),
+        pop_server.image_tag.unwrap_or("0.4.0".to_string()),
     )
     .with_exposed_port(ContainerPort::Tcp(50088))
     .with_env_var("RUST_LOG", "debug")
@@ -60,7 +60,10 @@ pub async fn register_pop_server_behavior(
     pop_server_behavior: PopServerBehavior,
 ) -> Result<Response, reqwest::Error> {
     let client = reqwest::Client::new();
-    let b = match (pop_server_behavior.body_file, pop_server_behavior.body) {
+    let b = match (
+        pop_server_behavior.response_body_file,
+        pop_server_behavior.response_body,
+    ) {
         (None, None) => "".to_string(),
         (Some(bf), None) => fs::read_to_string(bf).await.unwrap_or("".to_string()),
         (None, Some(bod)) => bod,
@@ -74,12 +77,27 @@ pub async fn register_pop_server_behavior(
             "{}/api/v2/pop-server/register-behavior",
             pop_server_url
         ))
-        .header("x-pop-server-method", pop_server_behavior.method)
-        .header("x-pop-server-path", pop_server_behavior.path)
-        .header("x-pop-server-status", pop_server_behavior.status)
         .header(
-            "x-pop-server-content-type",
-            pop_server_behavior.content_type,
+            "x-pop-server-request-method",
+            pop_server_behavior.request_method,
+        )
+        .header(
+            "x-pop-server-request-path",
+            pop_server_behavior.request_path,
+        )
+        .header(
+            "x-pop-server-response-status",
+            pop_server_behavior.response_status,
+        )
+        .header(
+            "x-pop-server-response-content-type",
+            pop_server_behavior.response_content_type,
+        )
+        .header(
+            "x-pop-server-request-content-type",
+            pop_server_behavior
+                .request_content_type
+                .unwrap_or("nil".to_string()),
         )
         .body(b)
         .send()

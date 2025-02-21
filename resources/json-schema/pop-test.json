@@ -732,27 +732,33 @@
     "PopServerBehavior": {
       "type": "object",
       "properties": {
-        "path": {
+        "request_path": {
           "type": "string"
         },
-        "method": {
+        "request_method": {
           "type": "string"
         },
-        "status": {
+        "response_status": {
           "type": "integer",
           "format": "uint16",
           "minimum": 0
         },
-        "content_type": {
-          "type": "string"
-        },
-        "body_file": {
+        "request_content_type": {
           "type": [
             "string",
             "null"
           ]
         },
-        "body": {
+        "response_content_type": {
+          "type": "string"
+        },
+        "response_body_file": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "response_body": {
           "type": [
             "string",
             "null"
@@ -760,10 +766,10 @@
         }
       },
       "required": [
-        "path",
-        "method",
-        "status",
-        "content_type"
+        "request_path",
+        "request_method",
+        "response_status",
+        "response_content_type"
       ]
     },
     "PopKeycloak": {
