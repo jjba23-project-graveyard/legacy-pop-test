@@ -17,7 +17,7 @@
 
 [package]
 name = "pop-test"
-version = "0.5.11"
+version = "0.5.12"
 edition = "2021"
 authors = ["Josep Bigorra <jjbigorra@gmail.com>"]
 license = "LGPL-3.0-or-later"
