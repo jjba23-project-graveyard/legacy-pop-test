@@ -577,7 +577,7 @@ pop-test is not just about testing—it’s about enabling better engineering.
 
 pop-test - /your test orchestration master of puppets/
 
-[[file:../../resources/img/pop-test-readme.png]]
+[[https://jointhefreeworld.org/static-assets/pop-test/img/pop-test-readme.png]]
 
 Aside:
 

@@ -31,7 +31,6 @@ You can find releases at:
 - dockerhub: https://hub.docker.com/repository/docker/jjba23/pop-test/general  
 
 
-
 -----
 
 * Why pop-test?
@@ -47,4 +46,4 @@ You can find releases at:
 
 pop-test - /your test orchestration master of puppets/
 
-[[file:resources/img/pop-test-readme.png]]
+[[https://jointhefreeworld.org/static-assets/pop-test/img/pop-test-readme.png]]
