@@ -36,6 +36,7 @@ pop_services:
       url_vars:
         - 'OCPP_FACADE_URL'
         - 'DYNAMIC_TARIFF_SERVICE_URL'
+        - 'VEHICLE_MANAGEMENT_SERVICE_URL' 
 
 
 pop_actions:
