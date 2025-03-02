@@ -27,7 +27,7 @@
     (method . "GET")
     (assert-code . 200)
     (service-id . "wikimusic")
-    (html-patterns . #("h2"))))
+    (html-patterns . #("#welcome-page-title"))))
 
 (define pop-test-scenario
   `((pop-services .

@@ -21,7 +21,7 @@
       "assert_code": 200,
       "service_id": "wikimusic",
       "html_patterns": [
-        "h2"
+        "#welcome-page-title"
       ]
     }
   ]
