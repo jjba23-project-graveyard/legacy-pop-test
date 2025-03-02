@@ -35,21 +35,21 @@ object Serializer {
     }
 
     val filePath = args(0)
-        
+
     var writer: PrintWriter = null
 
     try {
       writer = new PrintWriter(Paths.get(filePath).toFile)
-      writer.write(scenario.asJson.spaces2) 
+      val json: String = scenario.asJson.deepDropNullValues.spaces2
+      writer.write(json)
       println(s"Successfully wrote to file: $filePath")
     } catch {
-      case e: Exception => println(s"An error occurred while writing to file: ${e.getMessage}")
+      case e: Exception =>
+        println(s"An error occurred while writing to file: ${e.getMessage}")
     } finally {
-      if (writer != null) { 
+      if (writer != null) {
         writer.close()
       }
-    }   
+    }
   }
 }
-
-
