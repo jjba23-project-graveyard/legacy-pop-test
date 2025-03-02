@@ -35,8 +35,6 @@ object Serializer {
     }
 
     val filePath = args(0)
-
-    println(scenario.asJson.spaces2)
         
     var writer: PrintWriter = null
 
@@ -51,7 +49,6 @@ object Serializer {
         writer.close()
       }
     }   
-
   }
 }
 

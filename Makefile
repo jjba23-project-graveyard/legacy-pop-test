@@ -111,10 +111,10 @@ define pop-test-scala-test-example
 		./resources/bindings/scala/Bindings.scala \
 		./resources/bindings/scala/Serializer.scala \
 		./resources/scenarios/$(1)/GoldenTest.scala -- ./resources/scenarios/$(1)/golden-test.json
-# cat resources/scenarios/$(1)/golden-test.json
-# TESTCONTAINERS_COMMAND=keep \
-# 	RUST_LOG=debug \
-# 	nix develop -c time -p cargo run -- -p ./resources/scenarios/$(1)/golden-test.json
+	cat resources/scenarios/$(1)/golden-test.json
+	TESTCONTAINERS_COMMAND=keep \
+		RUST_LOG=debug \
+		nix develop -c time -p cargo run -- -p ./resources/scenarios/$(1)/golden-test.json
 endef
 
 
