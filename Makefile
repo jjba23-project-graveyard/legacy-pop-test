@@ -92,3 +92,24 @@ golden-test-wikimusic-api:
 	@-pkill wikimusic-api
 	$(call pop-test-golden-test-example,"wikimusic-api")
 	@-pkill wikimusic-api
+
+define pop-test-guile-test-example
+	@-make fmt
+	$(call pop-test-log-info,"running scenario for: $(1)")
+	TESTCONTAINERS_COMMAND=keep \
+		RUST_LOG=info \
+		nix develop -c time -p cargo run -- -p ./resources/scenarios/$(1)/golden-test.json
+endef
+
+guile-test-wikimusic:
+	$(call pop-test-guile-test-example,"wikimusic")
+
+# Development REPL
+guile-repl:
+	guix shell -m resources/guile/manifest.scm -- guile --fresh-auto-compile -c '((@ (ares server) run-nrepl-server))'
+
+# Target to format source code files according to the style guide
+# Find all .scm files and format them using 'guix style'
+guile-fmt:
+	$(call wikimusic-log-info,"formatting all Scheme files")
+	find . -maxdepth 8 -name "*.scm" -type f -exec guix style -f {} \;
