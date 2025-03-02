@@ -61,6 +61,22 @@ container-push:
 
 
 #
+# Guile Scheme
+#
+
+# Development REPL
+guile-repl:
+	guix shell -m resources/bindings/guile-scheme/manifest.scm -- \
+		guile --fresh-auto-compile -c '((@ (ares server) run-nrepl-server))'
+
+# Target to format source code files according to the style guide
+# Find all .scm files and format them using 'guix style'
+guile-fmt:
+	$(call wikimusic-log-info,"formatting all Scheme files")
+	find . -maxdepth 8 -name "*.scm" -type f -exec guix style -f {} \;
+
+
+#
 # example runs
 #
 
@@ -72,26 +88,6 @@ define pop-test-golden-test-example
 		nix develop -c time -p cargo run -- -p ./resources/scenarios/$(1)/golden-test.yaml
 endef
 
-golden-test-green-energy-mix:
-	$(call pop-test-golden-test-example,"green-energy-mix")
-golden-test-vehicle-management:
-	$(call pop-test-golden-test-example,"vehicle-management")
-golden-test-vehicle-events-hub:
-	$(call pop-test-golden-test-example,"vehicle-events-hub")
-e2e-enode-flow:
-	cd ~/Ontwikkeling/Werk/Vandebron && sbt "vehicleEventsHub/stage"
-	cd ~/Ontwikkeling/Werk/Vandebron && sbt "dynamicTariffCharging/stage"
-	$(call pop-test-golden-test-example,"e2e-enode-flow")
-golden-test-dynamic-tariff-charging:
-	$(call pop-test-golden-test-example,"dynamic-tariff-charging")
-golden-test-consumer-solar-steering:
-	$(call pop-test-golden-test-example,"consumer-solar-steering")
-golden-test-lucidplan:
-	$(call pop-test-golden-test-example,"lucidplan")
-golden-test-wikimusic-api:
-	@-pkill wikimusic-api
-	$(call pop-test-golden-test-example,"wikimusic-api")
-	@-pkill wikimusic-api
 
 define pop-test-guile-test-example
 	$(call pop-test-log-info,"running scenario for: $(1)")
@@ -107,17 +103,35 @@ define pop-test-guile-test-example
 		nix develop -c time -p cargo run -- -p ./resources/scenarios/$(1)/golden-test.json
 endef
 
+define pop-test-scala-test-example
+	$(call pop-test-log-info,"running scenario for: $(1)")
+	rm -rfv ./resources/scenarios/$(1)/golden-test.json
+	touch ./resources/scenarios/$(1)/golden-test.json
+	scala-cli -Ymacro-annotations ./resources/bindings/scala/Bindings.scala ./resources/scenarios/$(1)/GoldenTest.scala
+# cat resources/scenarios/$(1)/golden-test.json
+# TESTCONTAINERS_COMMAND=keep \
+# 	RUST_LOG=debug \
+# 	nix develop -c time -p cargo run -- -p ./resources/scenarios/$(1)/golden-test.json
+endef
+
+
+
+golden-test-green-energy-mix:
+	$(call pop-test-scala-test-example,"green-energy-mix")
+golden-test-vehicle-management:
+	$(call pop-test-golden-test-example,"vehicle-management")
+golden-test-vehicle-events-hub:
+	$(call pop-test-golden-test-example,"vehicle-events-hub")
+e2e-enode-flow:
+	cd ~/Ontwikkeling/Werk/Vandebron && sbt "vehicleEventsHub/stage"
+	cd ~/Ontwikkeling/Werk/Vandebron && sbt "dynamicTariffCharging/stage"
+	$(call pop-test-golden-test-example,"e2e-enode-flow")
+golden-test-dynamic-tariff-charging:
+	$(call pop-test-golden-test-example,"dynamic-tariff-charging")
+golden-test-consumer-solar-steering:
+	$(call pop-test-golden-test-example,"consumer-solar-steering")
+golden-test-lucidplan:
+	$(call pop-test-golden-test-example,"lucidplan")
 guile-test-wikimusic:
 	$(call pop-test-guile-test-example,"wikimusic")
 	pkill art
-
-# Development REPL
-guile-repl:
-	guix shell -m resources/bindings/guile-scheme/manifest.scm -- \
-		guile --fresh-auto-compile -c '((@ (ares server) run-nrepl-server))'
-
-# Target to format source code files according to the style guide
-# Find all .scm files and format them using 'guix style'
-guile-fmt:
-	$(call wikimusic-log-info,"formatting all Scheme files")
-	find . -maxdepth 8 -name "*.scm" -type f -exec guix style -f {} \;
