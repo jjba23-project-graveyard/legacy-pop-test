@@ -32,8 +32,6 @@
     (string-replace-substring (symbol->string obj) "-" "_"))
    (else obj)))
 
-(alist-keys->strings `((testing-somethin . "val")))
-
 (define (main args)
   (if (< (length args) 3)
       (begin
