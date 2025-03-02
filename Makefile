@@ -99,6 +99,7 @@ define pop-test-guile-test-example
 	touch ./resources/scenarios/$(1)/golden-test.json
 	guix shell -m resources/guile/manifest.scm -- \
 		guile --fresh-auto-compile resources/guile/serializer.scm "../scenarios/$(1)/golden-test.scm" "resources/scenarios/$(1)/golden-test.json"
+	cat resources/scenarios/$(1)/golden-test.json
 	TESTCONTAINERS_COMMAND=keep \
 		RUST_LOG=info \
 		nix develop -c time -p cargo run -- -p ./resources/scenarios/$(1)/golden-test.json

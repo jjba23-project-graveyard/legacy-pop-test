@@ -1,1 +1,28 @@
-{"pop_services":[{"id":"wikimusic","dir":"$HOME/Ontwikkeling/Persoonlijk/wikimusic","base-url":"http://localhost:50050","start-cmd-args":["guix shell -m manifest.scm -- art work"],"health-check":{"path":"/","patience-seconds":30}}],"pop_actions":[{"name":"Check that the welcome page works well","assert-url":"/","method":"GET","assert-code":200,"service-id":"wikimusic","html-patterns":["h2"]}]}
+{
+  "pop_services": [
+    {
+      "id": "wikimusic",
+      "dir": "$HOME/Ontwikkeling/Persoonlijk/wikimusic",
+      "base-url": "http://localhost:50050",
+      "start-cmd-args": [
+        "guix shell -m manifest.scm -- art work"
+      ],
+      "health-check": {
+        "path": "/",
+        "patience-seconds": 30
+      }
+    }
+  ],
+  "pop_actions": [
+    {
+      "name": "Check that the welcome page works well",
+      "assert-url": "/",
+      "method": "GET",
+      "assert-code": 200,
+      "service-id": "wikimusic",
+      "html-patterns": [
+        "h2"
+      ]
+    }
+  ]
+}

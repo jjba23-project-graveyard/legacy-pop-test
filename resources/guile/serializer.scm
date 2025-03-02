@@ -32,6 +32,8 @@
     (string-replace-substring (symbol->string obj) "-" "_"))
    (else obj)))
 
+(alist-keys->strings `((testing-somethin . "val")))
+
 (define (main args)
   (if (< (length args) 3)
       (begin
@@ -46,6 +48,6 @@
           (newline)
           (call-with-output-file filename
             (lambda (port)
-              (scm->json (alist-keys->strings pop-test-scenario) port)))))))
+              (scm->json (alist-keys->strings pop-test-scenario) port #:pretty #t)))))))
 
 (main (command-line))
