@@ -53,7 +53,6 @@ object JsonImplicits {
   implicit val popServerBehaviorCodec: Codec[PopServerBehavior] = deriveConfiguredCodec[PopServerBehavior]
   implicit val popServerCodec: Codec[PopServer] = deriveConfiguredCodec[PopServer]
   implicit val popScenarioCodec: Codec[PopScenario] = deriveConfiguredCodec[PopScenario]
-  implicit val popEnvCodec: Codec[PopEnv] = deriveConfiguredCodec[PopEnv]
 }
 
 
