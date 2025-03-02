@@ -3,13 +3,13 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2025-02-21 vr 14:40 -->
+<!-- 2025-03-02 zo 18:08 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>🎶 pop-test manual</title>
-<meta name="author" content="Music Player Daemon (MPD) user" />
+<meta name="author" content="Josep Bigorra" />
 <meta name="generator" content="Org Mode" />
-<style>
+<style type="text/css">
   #content { max-width: 60em; margin: auto; }
   .title  { text-align: center;
              margin-bottom: .2em; }
@@ -201,62 +201,62 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org950fcca">Why pop-test?</a></li>
-<li><a href="#org4c8bf92">Terminology and symbols</a></li>
-<li><a href="#orgfac5c2d">⚙️ A simple test, using the DSL</a></li>
-<li><a href="#org2184ad9">🖥️ How to run it</a></li>
-<li><a href="#org9f46c17">🐒 Motivation</a></li>
-<li><a href="#org0830eea">🈴  The Scenario DSL (Domain Specific Language)</a>
+<li><a href="#org889db28">Why pop-test?</a></li>
+<li><a href="#orgee900d9">Terminology and symbols</a></li>
+<li><a href="#org995b2e6">⚙️ A simple test, using the DSL</a></li>
+<li><a href="#orgf7afa2c">🖥️ How to run it</a></li>
+<li><a href="#orgb086aa8">🐒 Motivation</a></li>
+<li><a href="#org9dbfc76">🈴  The Scenario DSL (Domain Specific Language)</a>
 <ul>
-<li><a href="#org0c8cd9a">Condition DSL</a></li>
-<li><a href="#org489891c">Row DSL</a>
+<li><a href="#org2622147">Condition DSL</a></li>
+<li><a href="#org9c033db">Row DSL</a>
 <ul>
-<li><a href="#orgf6b5c38">Quantifiers</a></li>
-<li><a href="#org845f115">Conditions</a></li>
+<li><a href="#org7158241">Quantifiers</a></li>
+<li><a href="#org3caf9e3">Conditions</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org12f8285">🌳 pop-test primitives</a>
+<li><a href="#orga849ebf">🌳 pop-test primitives</a>
 <ul>
-<li><a href="#org20b641d">pop services</a>
+<li><a href="#org0c29885">pop services</a>
 <ul>
-<li><a href="#orga957fb4">❤️ service health check</a></li>
-<li><a href="#org2eb5e7e">🐘 service postgres</a></li>
-<li><a href="#org4a8dee0">🌐 service kafka</a></li>
-<li><a href="#orgab0ac42">🗝️ service keycloak</a></li>
-<li><a href="#org1e19a4b">🧞 service pop<sub>server</sub></a></li>
+<li><a href="#org7fc973f">❤️ service health check</a></li>
+<li><a href="#org03976b4">🐘 service postgres</a></li>
+<li><a href="#orgaaba908">🌐 service kafka</a></li>
+<li><a href="#orge643eee">🗝️ service keycloak</a></li>
+<li><a href="#orgccf55c0">🧞 service pop<sub>server</sub></a></li>
 </ul>
 </li>
-<li><a href="#org15023fc">pop actions</a>
+<li><a href="#orgabaa3ad">pop actions</a>
 <ul>
-<li><a href="#orgcf0b91d">🔗 an http assertion</a></li>
-<li><a href="#orgc488301">🔗 an http call action</a></li>
-<li><a href="#orgb9511c7">🌐 a kafka produce action</a></li>
-<li><a href="#org4e950fd">🌐 a kafka check 🚧</a></li>
-<li><a href="#orge8e6f30">🐘 a postgresql assertion</a></li>
+<li><a href="#org0eedb99">🔗 an http assertion</a></li>
+<li><a href="#orgd439758">🔗 an http call action</a></li>
+<li><a href="#orga15e47e">🌐 a kafka produce action</a></li>
+<li><a href="#orgb7cbb05">🌐 a kafka check 🚧</a></li>
+<li><a href="#org83e9e78">🐘 a postgresql assertion</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org1b0ae93">🎵 orchestrated services</a>
+<li><a href="#org87129f0">🎵 orchestrated services</a>
 <ul>
-<li><a href="#org4985bae">🌐 pop kafka</a></li>
-<li><a href="#orgc829473">🧞 pop-server</a></li>
-<li><a href="#orge8f54cd">🐘 pop postgres</a></li>
-<li><a href="#orga8cf0ad">🗝️ pop keycloak</a></li>
+<li><a href="#org8dad7d2">🌐 pop kafka</a></li>
+<li><a href="#orge89f06b">🧞 pop-server</a></li>
+<li><a href="#org2843d8e">🐘 pop postgres</a></li>
+<li><a href="#org279222e">🗝️ pop keycloak</a></li>
 </ul>
 </li>
-<li><a href="#org1711899">🫶🏼Why pop-test can be a Game-Changer</a>
+<li><a href="#orgd8f52ab">🫶🏼Why pop-test can be a Game-Changer</a>
 <ul>
-<li><a href="#org15a3050">🏗️ High-level overview and understanding of a system - self-documenting tests</a></li>
-<li><a href="#orgb9a6ec8">💚 Engineering Freedom and Confidence</a></li>
-<li><a href="#org29cf164">🦸 Faster Development and Easier Maintenance</a></li>
-<li><a href="#org0f647ae">💲 More Business Value and Reduced Risks</a></li>
+<li><a href="#org9690966">🏗️ High-level overview and understanding of a system - self-documenting tests</a></li>
+<li><a href="#org270cd47">💚 Engineering Freedom and Confidence</a></li>
+<li><a href="#org89da4ec">🦸 Faster Development and Easier Maintenance</a></li>
+<li><a href="#org903ca15">💲 More Business Value and Reduced Risks</a></li>
 </ul>
 </li>
-<li><a href="#orga19c854">🎶  Conclusion</a></li>
-<li><a href="#org990c556">📖 Glossary</a></li>
+<li><a href="#orgee0c65b">🎶  Conclusion</a></li>
+<li><a href="#org10571b2">📖 Glossary</a></li>
 </ul>
 </div>
 </div>
@@ -280,7 +280,7 @@ In Dutch 🇳🇱, <i>pop</i> means puppet or doll. pop-test simplifies end-to-e
 </p>
 
 <p>
-Define your test scenarios in a DSL (represented in YAML, TOML or JSON) and automate the spinning up (and down) of complex environments involving multiple programs, databases, and services, executing comprehensive tests with ease.
+Define your test scenarios in a DSL (represented in YAML, TOML or JSON) or in a programming language of your choice (including bindings for Rust, Scala, and Guile Scheme) and automate the spinning up (and down) of complex environments involving multiple programs, databases, and services, executing comprehensive tests with ease.
 </p>
 
 <p>
@@ -302,10 +302,9 @@ You can find releases at:
 
 
 <hr />
-
-<div id="outline-container-org950fcca" class="outline-2">
-<h2 id="org950fcca">Why pop-test?</h2>
-<div class="outline-text-2" id="text-org950fcca">
+<div id="outline-container-org889db28" class="outline-2">
+<h2 id="org889db28">Why pop-test?</h2>
+<div class="outline-text-2" id="text-org889db28">
 <ul class="org-ul">
 <li>Frees you and allows you to refactor and test your systems more easily. You can for example completely rewrite a program, even in a different language, and stay certain your implementation works as expected.</li>
 <li>Catches mistakes early – Helps find problems before real users do since you test with real dependencies.</li>
@@ -318,11 +317,9 @@ You can find releases at:
 <hr />
 </div>
 </div>
-
-
-<div id="outline-container-org4c8bf92" class="outline-2">
-<h2 id="org4c8bf92">Terminology and symbols</h2>
-<div class="outline-text-2" id="text-org4c8bf92">
+<div id="outline-container-orgee900d9" class="outline-2">
+<h2 id="orgee900d9">Terminology and symbols</h2>
+<div class="outline-text-2" id="text-orgee900d9">
 <p>
 🚧 stands for <code>work-in-progress</code> and will be used when describing and documenting parts of pop-test which are still under development
 </p>
@@ -338,10 +335,9 @@ You can find releases at:
 <hr />
 </div>
 </div>
-
-<div id="outline-container-orgfac5c2d" class="outline-2">
-<h2 id="orgfac5c2d">⚙️ A simple test, using the DSL</h2>
-<div class="outline-text-2" id="text-orgfac5c2d">
+<div id="outline-container-org995b2e6" class="outline-2">
+<h2 id="org995b2e6">⚙️ A simple test, using the DSL</h2>
+<div class="outline-text-2" id="text-org995b2e6">
 <p>
 For example tests and learning demos, refer to the scenarios directory: <a href="../../resources/scenarios">../../resources/scenarios</a>
 </p>
@@ -398,10 +394,9 @@ pop_actions:
 <hr />
 </div>
 </div>
-
-<div id="outline-container-org2184ad9" class="outline-2">
-<h2 id="org2184ad9">🖥️ How to run it</h2>
-<div class="outline-text-2" id="text-org2184ad9">
+<div id="outline-container-orgf7afa2c" class="outline-2">
+<h2 id="orgf7afa2c">🖥️ How to run it</h2>
+<div class="outline-text-2" id="text-orgf7afa2c">
 <p>
 If you downloaded or received a binary from a friend, in most systems you can just add it to <code>~/.local/bin/</code> or <code>/usr/local/bin</code> or somewhere in your <code>$PATH</code>.
 </p>
@@ -429,7 +424,7 @@ See the <a href="file:///home/joe/Ontwikkeling/Persoonlijk/pop-test/Makefile">Ma
 <p>
 When installed and available as binary, simply run:
 </p>
-<pre class="example" id="org98c4f6f">
+<pre class="example" id="orgb571907">
 TESTCONTAINERS_COMMAND=keep pop-test -p ./path/to/file.yaml
 </pre>
 
@@ -449,17 +444,16 @@ TESTCONTAINERS_COMMAND=keep pop-test -p ./path/to/file.yaml
 <p>
 This is how I usually run in development mode:
 </p>
-<pre class="example" id="org4e58576">
+<pre class="example" id="orgd92a663">
 TESTCONTAINERS_COMMAND=keep RUST_LOG=debug nix develop -c cargo run -- --path ./resources/scenarios
 </pre>
 
 <hr />
 </div>
 </div>
-
-<div id="outline-container-org9f46c17" class="outline-2">
-<h2 id="org9f46c17">🐒 Motivation</h2>
-<div class="outline-text-2" id="text-org9f46c17">
+<div id="outline-container-orgb086aa8" class="outline-2">
+<h2 id="orgb086aa8">🐒 Motivation</h2>
+<div class="outline-text-2" id="text-orgb086aa8">
 <p>
 Imagine you're building a toy robot, but you don't need to understand all the small parts inside the robot to know if it works. You just need to press a button and see if it performs the task correctly.
 </p>
@@ -503,11 +497,9 @@ In short, pop-tests make engineers happier, business people more certain of what
 <hr />
 </div>
 </div>
-
-
-<div id="outline-container-org0830eea" class="outline-2">
-<h2 id="org0830eea">🈴  The Scenario DSL (Domain Specific Language)</h2>
-<div class="outline-text-2" id="text-org0830eea">
+<div id="outline-container-org9dbfc76" class="outline-2">
+<h2 id="org9dbfc76">🈴  The Scenario DSL (Domain Specific Language)</h2>
+<div class="outline-text-2" id="text-org9dbfc76">
 <p>
 In order to provide an expressive and powerful way to describe test scenarios, a lot of care has gone into creating a good domain-specific language, which remains flexible but concise.
 </p>
@@ -543,10 +535,9 @@ Since scenarios are plain data, one can opt to write scenarios in one's favourit
 
 <hr />
 </div>
-
-<div id="outline-container-org0c8cd9a" class="outline-3">
-<h3 id="org0c8cd9a">Condition DSL</h3>
-<div class="outline-text-3" id="text-org0c8cd9a">
+<div id="outline-container-org2622147" class="outline-3">
+<h3 id="org2622147">Condition DSL</h3>
+<div class="outline-text-3" id="text-org2622147">
 <p>
 This DSL is present in JSON body checks and in SQL database checks, supported conditions include:
 </p>
@@ -599,10 +590,9 @@ This DSL is present in JSON body checks and in SQL database checks, supported co
 <hr />
 </div>
 </div>
-
-<div id="outline-container-org489891c" class="outline-3">
-<h3 id="org489891c">Row DSL</h3>
-<div class="outline-text-3" id="text-org489891c">
+<div id="outline-container-org9c033db" class="outline-3">
+<h3 id="org9c033db">Row DSL</h3>
+<div class="outline-text-3" id="text-org9c033db">
 <p>
 This is the DSL used to perform assertions on SQL databases. Currently PostgreSQL supports this.
 </p>
@@ -611,15 +601,13 @@ This is the DSL used to perform assertions on SQL databases. Currently PostgreSQ
 Nullable fields are seamlessly supported. For example if you want to check a nullable UUID field is set, just use <code>uuid</code>. If you want to check it's empty, use <code>nil</code>.
 </p>
 
-<pre class="example" id="org6833da8">
+<pre class="example" id="org2f776e3">
 [0] ((non-empty-str)(&gt;= 12)(== en_GB)(non-empty-str)(true)(uuid))
 </pre>
 </div>
-
-
-<div id="outline-container-orgf6b5c38" class="outline-4">
-<h4 id="orgf6b5c38">Quantifiers</h4>
-<div class="outline-text-4" id="text-orgf6b5c38">
+<div id="outline-container-org7158241" class="outline-4">
+<h4 id="org7158241">Quantifiers</h4>
+<div class="outline-text-4" id="text-org7158241">
 <p>
 <code>[0]</code> or <code>[first]</code> means the check should be applied to the first row in the result set
 </p>
@@ -637,10 +625,9 @@ Nullable fields are seamlessly supported. For example if you want to check a nul
 </p>
 </div>
 </div>
-
-<div id="outline-container-org845f115" class="outline-4">
-<h4 id="org845f115">Conditions</h4>
-<div class="outline-text-4" id="text-org845f115">
+<div id="outline-container-org3caf9e3" class="outline-4">
+<h4 id="org3caf9e3">Conditions</h4>
+<div class="outline-text-4" id="text-org3caf9e3">
 <p>
 The rest of the clause is a tuple-based variant of the condition DSL, in order of selection in a query.
 </p>
@@ -650,18 +637,16 @@ The rest of the clause is a tuple-based variant of the condition DSL, in order o
 </div>
 </div>
 </div>
-
-<div id="outline-container-org12f8285" class="outline-2">
-<h2 id="org12f8285">🌳 pop-test primitives</h2>
-<div class="outline-text-2" id="text-org12f8285">
+<div id="outline-container-orga849ebf" class="outline-2">
+<h2 id="orga849ebf">🌳 pop-test primitives</h2>
+<div class="outline-text-2" id="text-orga849ebf">
 <p>
 See <a href="../../src/pop_model.rs">../../src/pop_model.rs</a> for more. Below follows a detailed, as up-to-date as possible overview of pop-test's own data models.
 </p>
 </div>
-
-<div id="outline-container-org20b641d" class="outline-3">
-<h3 id="org20b641d">pop services</h3>
-<div class="outline-text-3" id="text-org20b641d">
+<div id="outline-container-org0c29885" class="outline-3">
+<h3 id="org0c29885">pop services</h3>
+<div class="outline-text-3" id="text-org0c29885">
 <p>
 <code>pop_services</code> is a list of services to be started for the scenario.
 </p>
@@ -696,10 +681,9 @@ A service is defined by:
 
 <hr />
 </div>
-
-<div id="outline-container-orga957fb4" class="outline-4">
-<h4 id="orga957fb4">❤️ service health check</h4>
-<div class="outline-text-4" id="text-orga957fb4">
+<div id="outline-container-org7fc973f" class="outline-4">
+<h4 id="org7fc973f">❤️ service health check</h4>
+<div class="outline-text-4" id="text-org7fc973f">
 <p>
 Defines how pop-test determines whether the service is healthy. Field is <code>health_check</code>, a required object.
 </p>
@@ -731,10 +715,9 @@ HTTP health check:
 <hr />
 </div>
 </div>
-
-<div id="outline-container-org2eb5e7e" class="outline-4">
-<h4 id="org2eb5e7e">🐘 service postgres</h4>
-<div class="outline-text-4" id="text-org2eb5e7e">
+<div id="outline-container-org03976b4" class="outline-4">
+<h4 id="org03976b4">🐘 service postgres</h4>
+<div class="outline-text-4" id="text-org03976b4">
 <p>
 Defines how PostgreSQL is used in the service. Field is <code>postgres</code>, an optional object.
 </p>
@@ -766,10 +749,9 @@ Defines how PostgreSQL is used in the service. Field is <code>postgres</code>, a
 <hr />
 </div>
 </div>
-
-<div id="outline-container-org4a8dee0" class="outline-4">
-<h4 id="org4a8dee0">🌐 service kafka</h4>
-<div class="outline-text-4" id="text-org4a8dee0">
+<div id="outline-container-orgaaba908" class="outline-4">
+<h4 id="orgaaba908">🌐 service kafka</h4>
+<div class="outline-text-4" id="text-orgaaba908">
 <p>
 Defines how Kafka is used in the service. Field is <code>kafka</code>, an optional object.
 </p>
@@ -785,10 +767,9 @@ Defines how Kafka is used in the service. Field is <code>kafka</code>, an option
 <hr />
 </div>
 </div>
-
-<div id="outline-container-orgab0ac42" class="outline-4">
-<h4 id="orgab0ac42">🗝️ service keycloak</h4>
-<div class="outline-text-4" id="text-orgab0ac42">
+<div id="outline-container-orge643eee" class="outline-4">
+<h4 id="orge643eee">🗝️ service keycloak</h4>
+<div class="outline-text-4" id="text-orge643eee">
 <p>
 <code>enabled</code> (optional, boolean) - Whether to inject environment variables with Kafka details
 </p>
@@ -804,10 +785,9 @@ Defines how Kafka is used in the service. Field is <code>kafka</code>, an option
 <hr />
 </div>
 </div>
-
-<div id="outline-container-org1e19a4b" class="outline-4">
-<h4 id="org1e19a4b">🧞 service pop<sub>server</sub></h4>
-<div class="outline-text-4" id="text-org1e19a4b">
+<div id="outline-container-orgccf55c0" class="outline-4">
+<h4 id="orgccf55c0">🧞 service pop<sub>server</sub></h4>
+<div class="outline-text-4" id="text-orgccf55c0">
 <p>
 <code>enabled</code> (optional, boolean) - Whether to inject environment variables with Kafka details
 </p>
@@ -821,10 +801,9 @@ Defines how Kafka is used in the service. Field is <code>kafka</code>, an option
 </div>
 </div>
 </div>
-
-<div id="outline-container-org15023fc" class="outline-3">
-<h3 id="org15023fc">pop actions</h3>
-<div class="outline-text-3" id="text-org15023fc">
+<div id="outline-container-orgabaa3ad" class="outline-3">
+<h3 id="orgabaa3ad">pop actions</h3>
+<div class="outline-text-3" id="text-orgabaa3ad">
 <p>
 <code>pop_actions</code> is a list of actions that setup state for a test and validate expected responses and behaviours from the services in the scenario. These actions help verify that the services return valid and expected data before proceeding with the scenario execution.
 </p>
@@ -835,10 +814,9 @@ there are many types of pop action, see the following sections.
 
 <hr />
 </div>
-
-<div id="outline-container-orgcf0b91d" class="outline-4">
-<h4 id="orgcf0b91d">🔗 an http assertion</h4>
-<div class="outline-text-4" id="text-orgcf0b91d">
+<div id="outline-container-org0eedb99" class="outline-4">
+<h4 id="org0eedb99">🔗 an http assertion</h4>
+<div class="outline-text-4" id="text-org0eedb99">
 <p>
 <code>name</code> (optional, string) - the name of the assertion to be performed, useful for logging and keeping track
 </p>
@@ -906,10 +884,9 @@ Each JSON body pattern entry includes:
 <hr />
 </div>
 </div>
-
-<div id="outline-container-orgc488301" class="outline-4">
-<h4 id="orgc488301">🔗 an http call action</h4>
-<div class="outline-text-4" id="text-orgc488301">
+<div id="outline-container-orgd439758" class="outline-4">
+<h4 id="orgd439758">🔗 an http call action</h4>
+<div class="outline-text-4" id="text-orgd439758">
 <p>
 Perform an HTTP call
 </p>
@@ -953,10 +930,9 @@ Perform an HTTP call
 <hr />
 </div>
 </div>
-
-<div id="outline-container-orgb9511c7" class="outline-4">
-<h4 id="orgb9511c7">🌐 a kafka produce action</h4>
-<div class="outline-text-4" id="text-orgb9511c7">
+<div id="outline-container-orga15e47e" class="outline-4">
+<h4 id="orga15e47e">🌐 a kafka produce action</h4>
+<div class="outline-text-4" id="text-orga15e47e">
 <p>
 A kafka produce action is defined by:
 </p>
@@ -985,17 +961,15 @@ A kafka produce action is defined by:
 <hr />
 </div>
 </div>
-
-<div id="outline-container-org4e950fd" class="outline-4">
-<h4 id="org4e950fd">🌐 a kafka check 🚧</h4>
-<div class="outline-text-4" id="text-org4e950fd">
+<div id="outline-container-orgb7cbb05" class="outline-4">
+<h4 id="orgb7cbb05">🌐 a kafka check 🚧</h4>
+<div class="outline-text-4" id="text-orgb7cbb05">
 <hr />
 </div>
 </div>
-
-<div id="outline-container-orge8e6f30" class="outline-4">
-<h4 id="orge8e6f30">🐘 a postgresql assertion</h4>
-<div class="outline-text-4" id="text-orge8e6f30">
+<div id="outline-container-org83e9e78" class="outline-4">
+<h4 id="org83e9e78">🐘 a postgresql assertion</h4>
+<div class="outline-text-4" id="text-org83e9e78">
 <p>
 <code>name</code> (optional, string) - the name of the action to be performed, useful for logging and keeping track
 </p>
@@ -1023,15 +997,13 @@ A kafka produce action is defined by:
 </div>
 </div>
 </div>
-
-
-<div id="outline-container-org1b0ae93" class="outline-2">
-<h2 id="org1b0ae93">🎵 orchestrated services</h2>
-<div class="outline-text-2" id="text-org1b0ae93">
+<div id="outline-container-org87129f0" class="outline-2">
+<h2 id="org87129f0">🎵 orchestrated services</h2>
+<div class="outline-text-2" id="text-org87129f0">
 </div>
-<div id="outline-container-org4985bae" class="outline-3">
-<h3 id="org4985bae">🌐 pop kafka</h3>
-<div class="outline-text-3" id="text-org4985bae">
+<div id="outline-container-org8dad7d2" class="outline-3">
+<h3 id="org8dad7d2">🌐 pop kafka</h3>
+<div class="outline-text-3" id="text-org8dad7d2">
 <p>
 You can use Kafka in pop-tests easily.
 </p>
@@ -1052,10 +1024,9 @@ You can use Kafka in pop-tests easily.
 <hr />
 </div>
 </div>
-
-<div id="outline-container-orgc829473" class="outline-3">
-<h3 id="orgc829473">🧞 pop-server</h3>
-<div class="outline-text-3" id="text-orgc829473">
+<div id="outline-container-orge89f06b" class="outline-3">
+<h3 id="orge89f06b">🧞 pop-server</h3>
+<div class="outline-text-3" id="text-orge89f06b">
 <p>
 pop-server is a web-server that helps you simulate behaviours and test integrations with external systems.
 </p>
@@ -1120,10 +1091,9 @@ You can then  have it prepared with certain behaviors (under <code>behaviors</co
 <hr />
 </div>
 </div>
-
-<div id="outline-container-orge8f54cd" class="outline-3">
-<h3 id="orge8f54cd">🐘 pop postgres</h3>
-<div class="outline-text-3" id="text-orge8f54cd">
+<div id="outline-container-org2843d8e" class="outline-3">
+<h3 id="org2843d8e">🐘 pop postgres</h3>
+<div class="outline-text-3" id="text-org2843d8e">
 <p>
 You can use PostgreSQL in pop-tests easily.
 </p>
@@ -1143,10 +1113,9 @@ You can use PostgreSQL in pop-tests easily.
 <hr />
 </div>
 </div>
-
-<div id="outline-container-orga8cf0ad" class="outline-3">
-<h3 id="orga8cf0ad">🗝️ pop keycloak</h3>
-<div class="outline-text-3" id="text-orga8cf0ad">
+<div id="outline-container-org279222e" class="outline-3">
+<h3 id="org279222e">🗝️ pop keycloak</h3>
+<div class="outline-text-3" id="text-org279222e">
 <p>
 You can use Keycloak in pop-tests easily and have it auto-setup.
 </p>
@@ -1200,10 +1169,9 @@ You can use Keycloak in pop-tests easily and have it auto-setup.
 </div>
 </div>
 </div>
-
-<div id="outline-container-org1711899" class="outline-2">
-<h2 id="org1711899">🫶🏼Why pop-test can be a Game-Changer</h2>
-<div class="outline-text-2" id="text-org1711899">
+<div id="outline-container-orgd8f52ab" class="outline-2">
+<h2 id="orgd8f52ab">🫶🏼Why pop-test can be a Game-Changer</h2>
+<div class="outline-text-2" id="text-orgd8f52ab">
 <p>
 Software testing is an essential part of modern engineering, and pop-test takes it to the next level by making end-to-end testing simple, powerful, and reliable.
 </p>
@@ -1214,10 +1182,9 @@ Whether you’re refactoring legacy code, maintaining a complex system, or ensur
 
 <hr />
 </div>
-
-<div id="outline-container-org15a3050" class="outline-3">
-<h3 id="org15a3050">🏗️ High-level overview and understanding of a system - self-documenting tests</h3>
-<div class="outline-text-3" id="text-org15a3050">
+<div id="outline-container-org9690966" class="outline-3">
+<h3 id="org9690966">🏗️ High-level overview and understanding of a system - self-documenting tests</h3>
+<div class="outline-text-3" id="text-org9690966">
 <p>
 Having all data and user flows described in a highly readable, concise and consistent DSL, can help onboard people to projects exponentially faster, it can also help spot architectural problems quicker and it will overall enable you to see the big picture.
 </p>
@@ -1226,10 +1193,9 @@ Having all data and user flows described in a highly readable, concise and consi
 <hr />
 </div>
 </div>
-
-<div id="outline-container-orgb9a6ec8" class="outline-3">
-<h3 id="orgb9a6ec8">💚 Engineering Freedom and Confidence</h3>
-<div class="outline-text-3" id="text-orgb9a6ec8">
+<div id="outline-container-org270cd47" class="outline-3">
+<h3 id="org270cd47">💚 Engineering Freedom and Confidence</h3>
+<div class="outline-text-3" id="text-org270cd47">
 <p>
 pop-test enables fearless refactoring.
 </p>
@@ -1261,10 +1227,9 @@ This approach leads to fewer surprises in production and more stable software re
 <hr />
 </div>
 </div>
-
-<div id="outline-container-org29cf164" class="outline-3">
-<h3 id="org29cf164">🦸 Faster Development and Easier Maintenance</h3>
-<div class="outline-text-3" id="text-org29cf164">
+<div id="outline-container-org89da4ec" class="outline-3">
+<h3 id="org89da4ec">🦸 Faster Development and Easier Maintenance</h3>
+<div class="outline-text-3" id="text-org89da4ec">
 <p>
 Maintaining a large codebase is much easier with pop-test in place. As systems evolve, tests remain valid, preventing accidental breakages and reducing the need for tedious manual verification.
 </p>
@@ -1276,10 +1241,9 @@ Automating these processes saves valuable engineering time, allowing teams to fo
 <hr />
 </div>
 </div>
-
-<div id="outline-container-org0f647ae" class="outline-3">
-<h3 id="org0f647ae">💲 More Business Value and Reduced Risks</h3>
-<div class="outline-text-3" id="text-org0f647ae">
+<div id="outline-container-org903ca15" class="outline-3">
+<h3 id="org903ca15">💲 More Business Value and Reduced Risks</h3>
+<div class="outline-text-3" id="text-org903ca15">
 <p>
 For businesses, software stability is critical. Bugs in production can lead to costly downtime, reputational damage, and loss of user trust.
 </p>
@@ -1296,10 +1260,9 @@ With predictable and repeatable test automation, teams can ship faster with grea
 </div>
 </div>
 </div>
-
-<div id="outline-container-orga19c854" class="outline-2">
-<h2 id="orga19c854">🎶  Conclusion</h2>
-<div class="outline-text-2" id="text-orga19c854">
+<div id="outline-container-orgee0c65b" class="outline-2">
+<h2 id="orgee0c65b">🎶  Conclusion</h2>
+<div class="outline-text-2" id="text-orgee0c65b">
 <p>
 pop-test is designed for modern development teams who need robust testing without complexity. Its expressive DSL, seamless service orchestration, and extensibility make it a long-term solution for ensuring software quality across any technology stack.
 </p>
@@ -1317,7 +1280,7 @@ pop-test - <i>your test orchestration master of puppets</i>
 </p>
 
 
-<div id="org52088ac" class="figure">
+<div id="orgd5c3fa6" class="figure">
 <p><img src="https://jointhefreeworld.org/static-assets/pop-test/img/pop-test-readme.png" alt="pop-test-readme.png" />
 </p>
 </div>
@@ -1333,10 +1296,9 @@ With the power of pop-test, and taking profit of the rise of LLMs (Large Languag
 <hr />
 </div>
 </div>
-
-<div id="outline-container-org990c556" class="outline-2">
-<h2 id="org990c556">📖 Glossary</h2>
-<div class="outline-text-2" id="text-org990c556">
+<div id="outline-container-org10571b2" class="outline-2">
+<h2 id="org10571b2">📖 Glossary</h2>
+<div class="outline-text-2" id="text-org10571b2">
 <p>
 pop-test: A Rust-based test orchestration tool designed for integration, end-to-end (e2e), black-box, and other testing methodologies, using a DSL for defining test scenarios.
 </p>
@@ -1464,8 +1426,8 @@ pop-storage: A storage abstraction in pop-test that allows interacting with temp
 </div>
 </div>
 <div id="postamble" class="status">
-<p class="author">Author: Music Player Daemon (MPD) user</p>
-<p class="date">Created: 2025-02-21 vr 14:40</p>
+<p class="author">Author: Josep Bigorra</p>
+<p class="date">Created: 2025-03-02 zo 18:08</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
