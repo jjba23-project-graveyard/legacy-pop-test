@@ -15,44 +15,58 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with pop-test.  If not, see <https://www.gnu.org/licenses/>.
 
-# pop-test-log-info: Logs informational messages in custom format with highlight.
-define pop-test-log-info
+# pop-test is a tool that helps test computer programs,
+# in integration, e2e, black-box, and other ways,
+# in an easy and future-proof manner that improves reliability and engineering freedom.
+
+# pop-test is your test orchestration master of puppets
+
+# ====== logging ======
+
+# log-info: Logs informational messages in custom format with highlight.
+define log-info
 	@printf "\n\033[1m[INFO] $(shell date --rfc-3339=seconds) - %s\033[0m\n" $(1)
 endef
 
+# ====== formatting ======
+
 fmt:
-	$(call pop-test-log-info,"formatting Rust source code")
+	$(call log-info,"formatting Rust source code")
 	nix develop -c cargo fix --allow-dirty
 	nix develop -c cargo clippy --fix --allow-dirty
 	nix develop -c find . -maxdepth 8 -path target -prune -name "*.rs" -type f -exec rustfmt --edition 2021 {} \;
 
+# ====== unit testing ======
+
 # test: run unit and integration tests for pop-test's implementation itself
 test: fmt
-	$(call pop-test-log-info,"running Rust unit and integration tests")
+	$(call log-info,"running Rust unit and integration tests")
 	RUST_LOG=debug nix develop -c cargo test
 
-# generate-json-schema
+# ====== documentation and manuals ======
+
+# generate-json-schema: Generates a JSON/YAML schema with Rust code, which allows LSP checks in JSON/YAML files
 generate-json-schema: fmt
-	$(call pop-test-log-info,"generating JSON schema for pop-test")
+	$(call log-info,"generating JSON schema for pop-test")
 	RUST_LOG=debug nix develop -c cargo run -- --generate-json-schema=true
 
 # publish-manual: Generates and publishes the manual from Org files using Emacs.
 publish-manual:
-	$(call pop-test-log-info,"generating manual for pop-test")
+	$(call log-info,"generating manual for pop-test")
 	cd docs/Manual/ && emacs -Q --batch \
 		-l $(shell realpath ./src/manual/pop-test-manual.el) \
 		--funcall pop-test/publish-manual
-	$(call pop-test-log-info,"generating readme for pop-test")
+	$(call log-info,"generating README for pop-test")
 	emacs -Q --batch \
 		-l $(shell realpath ./src/manual/pop-test-manual.el) \
 		--funcall pop-test/publish-readme
 	make generate-json-schema
 
-#
-# container management
-#
+
+# ====== container management ======
+
 container-build:
-	$(call pop-test-log-info,"building container for pop-test")
+	$(call log-info,"building container for pop-test")
 	podman build -t jjba23/pop-test:$(CONTAINER_TAG) .
 container-run:
 	podman run jjba23/pop-test:$(CONTAINER_TAG)
@@ -60,13 +74,12 @@ container-push:
 	podman push jjba23/pop-test:$(CONTAINER_TAG)
 
 
-#
-# Guile Scheme
-#
+# ====== Lisp (Guile Scheme) ======
 
 # Development REPL
 guile-repl:
-	guix shell -m resources/bindings/guile-scheme/manifest.scm -- \
+	$(call log-info,"starting Lisp (Guile Scheme) development REPL with ares")
+	guix shell -m bindings/guile-scheme/manifest.scm -- \
 		guile --fresh-auto-compile -c '((@ (ares server) run-nrepl-server))'
 
 # Target to format source code files according to the style guide
@@ -75,66 +88,76 @@ guile-fmt:
 	$(call wikimusic-log-info,"formatting all Scheme files")
 	find . -maxdepth 8 -name "*.scm" -type f -exec guix style -f {} \;
 
+# eval and load the desired Lisp (Guile Scheme) for a scenario and serialize into JSON
+define guile-scheme-serialize
+	$(call log-info,"removing any existing previous serialization outputs")
+	rm -rfv resources/scenarios/$(1)/$(2).json
+	$(call log-info,"eval the Lisp (Guile Scheme) code and serialize the desired scenario")
+	guix shell -m bindings/guile-scheme/manifest.scm -- \
+		guile --fresh-auto-compile bindings/guile-scheme/serializer.scm \
+		../../resources/scenarios/$(1)/$(2).scm \
+		resources/scenarios/$(1)/$(2).json
+endef
 
-#
-# example runs
-#
+# run pop-test by running and parsing Lisp (Guile Scheme) into JSON
+define pop-test-from-guile
+	$(call guile-scheme-serialize,$(1),$(2))
+	$(call pop-test,$(1))
+endef
 
-define pop-test-golden-test-example
-	@-make fmt
-	$(call pop-test-log-info,"running scenario for: $(1)")
+# ====== Scala ======
+
+# eval and load the desired Scala for a scenario and serialize into JSON
+define scala-serialize
+	$(call log-info,"removing any existing previous serialization outputs")
+	rm -rfv resources/scenarios/$(1)/$(2).json
+	$(call log-info,"eval the Scala code and serialize the desired scenario")
+	scala-cli \
+		./bindings/scala/Bindings.scala \
+		./bindings/scala/Serializer.scala \
+		./resources/scenarios/$(1)/$(2).scala -- ./resources/scenarios/$(1)/$(2).json
+endef
+
+# run pop-test by running and parsing Scala into JSON
+define pop-test-from-scala
+	$(call scala-serialize,$(1),$(2))
+	$(call pop-test,$(1))
+endef
+
+# ====== Pop Test runs ======
+
+# pop-test run scenarios from files in directory
+define pop-test
+	$(call log-info,"running scenarios for: $(1)")
 	TESTCONTAINERS_COMMAND=keep \
 		RUST_LOG=info \
-		nix develop -c time -p cargo run -- -p ./resources/scenarios/$(1)/golden-test.yaml
+		nix develop -c time -p cargo run -- -p ./resources/scenarios/$(1)
 endef
 
 
-define pop-test-guile-test-example
-	$(call pop-test-log-info,"running scenario for: $(1)")
-	rm -rfv ./resources/scenarios/$(1)/golden-test.json
-	touch ./resources/scenarios/$(1)/golden-test.json
-	guix shell -m resources/bindings/guile-scheme/manifest.scm -- \
-		guile --fresh-auto-compile resources/bindings/guile-scheme/serializer.scm \
-		"../../scenarios/$(1)/golden-test.scm" \
-		"resources/scenarios/$(1)/golden-test.json"
-	cat resources/scenarios/$(1)/golden-test.json
-	TESTCONTAINERS_COMMAND=keep \
-		RUST_LOG=debug \
-		nix develop -c time -p cargo run -- -p ./resources/scenarios/$(1)/golden-test.json
-endef
+# ====== Golden tests ======
 
-define pop-test-scala-test-example
-	$(call pop-test-log-info,"running scenario for: $(1)")
-	rm -rfv ./resources/scenarios/$(1)/golden-test.json
-	touch ./resources/scenarios/$(1)/golden-test.json
-	scala-cli -Ymacro-annotations \
-		./resources/bindings/scala/Bindings.scala \
-		./resources/bindings/scala/Serializer.scala \
-		./resources/scenarios/$(1)/GoldenTest.scala -- ./resources/scenarios/$(1)/golden-test.json
-	cat resources/scenarios/$(1)/golden-test.json
-	TESTCONTAINERS_COMMAND=keep \
-		RUST_LOG=debug \
-		nix develop -c time -p cargo run -- -p ./resources/scenarios/$(1)/golden-test.json
-endef
+gt-vehicle-management:
+	$(call pop-test,"vehicle-management")
+gt-vehicle-events-hub:
+	$(call pop-test,"vehicle-events-hub")
+gt-dynamic-tariff-charging:
+	$(call pop-test,"dynamic-tariff-charging")
+gt-consumer-solar-steering:
+	$(call pop-test,"consumer-solar-steering")
+gt-lucidplan:
+	$(call pop-test,"lucidplan")
+gt-green-energy-mix:
+	$(call pop-test-from-scala,"green-energy-mix","GoldenTest")
+gt-wikimusic:
+	@-pkill art
+	$(call pop-test-from-guile,"wikimusic","golden-test")
+	@-pkill art
 
 
+# ====== E2E tests ======
 
-golden-test-green-energy-mix:
-	$(call pop-test-scala-test-example,"green-energy-mix")
-golden-test-vehicle-management:
-	$(call pop-test-golden-test-example,"vehicle-management")
-golden-test-vehicle-events-hub:
-	$(call pop-test-golden-test-example,"vehicle-events-hub")
 e2e-enode-flow:
 	cd ~/Ontwikkeling/Werk/Vandebron && sbt "vehicleEventsHub/stage"
 	cd ~/Ontwikkeling/Werk/Vandebron && sbt "dynamicTariffCharging/stage"
-	$(call pop-test-golden-test-example,"e2e-enode-flow")
-golden-test-dynamic-tariff-charging:
-	$(call pop-test-golden-test-example,"dynamic-tariff-charging")
-golden-test-consumer-solar-steering:
-	$(call pop-test-golden-test-example,"consumer-solar-steering")
-golden-test-lucidplan:
-	$(call pop-test-golden-test-example,"lucidplan")
-guile-test-wikimusic:
-	$(call pop-test-guile-test-example,"wikimusic")
-	pkill art
+	$(call pop-test-gt-example,"e2e-enode-flow")

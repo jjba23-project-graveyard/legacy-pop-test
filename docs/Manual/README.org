@@ -156,19 +156,30 @@ In short, pop-tests make engineers happier, business people more certain of what
 
 In order to provide an expressive and powerful way to describe test scenarios, a lot of care has gone into creating a good domain-specific language, which remains flexible but concise.
 
-Here follows an explanation of every individual field and parameter possible, including default or optional ones, as well as some recommendations.
+Unless otherwise stated, the YAML representation of the Scenario DSL will be used.
 
-Unless otherwise stated, the YAML representation of the Scenario DSL will be used. This is the author's preferred file format, as it can be more readable for complex testing scenarios.
+The tool supports *YAML*, *TOML* and *JSON* file formats seamlessly.
 
-The tool supports YAML, TOML and JSON file formats seamlessly.
+This means that we can trivially generate bindings for practically any programming language, and allow you to write your tests in the language of your preference, while the test-running is taken care of by pop-test (blazingly fast in Rust).
 
-I highly recommend that you use the JSON schema for scenarios (~PopScenario~). This will help you write correct YAML/JSON, and catch errors early.
+Since scenarios are plain data, one can opt to write scenarios in one's favourite programming language, and then serialize that to JSON/YAML and run with pop-test from there.
+
+Currently I provide examples and bindings for Lisp (*Guile Scheme*) and for *Scala*.
+
+Additionally you can also use pop-test as a library directly from Rust, and importing it as a crate (we are @ crates.io).
+
+------
+
+** JSON Schema
+
+
+I highly recommend that you use the JSON schema for scenarios (~PopScenario~), with an LSP of your choosing (e.g. yaml-language-server).
+
+This will help you write correct YAML/JSON, and catch errors early.
 
 You can find it in the resources folder, with latest here:
 
 https://codeberg.org/jjba23/pop-test/raw/branch/trunk/resources/json-schema/pop-test.json
-
-Since scenarios are plain data, one can opt to write scenarios in one's favourite programming language, and then serialize that to JSON/YAML and run with pop-test from there.
 
 
 -----
@@ -566,6 +577,18 @@ For businesses, software stability is critical. Bugs in production can lead to c
 pop-test mitigates these risks by catching issues early, before they impact customers.
 
 With predictable and repeatable test automation, teams can ship faster with greater assurance, leading to a more agile and resilient business.
+
+-----
+
+* Additional tips
+
+** On multiple SBT instances
+
+Scala when run with SBT has an absurd limitation of not allowing more than one SBT process to run at the same time.
+
+When using pop-test this means that we cannot run multiple services from the same directory at the same time, using SBT.
+
+We can workaround that by first pre-compiling into JAR or whatever you use, and running the compiled output directly, instead of sbt tasks.
 
 -----
 

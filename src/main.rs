@@ -156,6 +156,9 @@ pub fn gather_file_paths(path: String) -> Vec<String> {
             .unwrap()
             .filter_map(Result::ok)
             .flat_map(|entry| gather_file_paths(entry.path().to_string_lossy().to_string()))
+            .filter(|entry| {
+                entry.ends_with(".json") || entry.ends_with(".yaml") || entry.ends_with(".toml")
+            })
             .collect()
     } else {
         vec![path.to_string()]
