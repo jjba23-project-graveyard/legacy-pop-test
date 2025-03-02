@@ -18,7 +18,7 @@
 (define wikimusic-service
   `((id . "wikimusic") (dir . "$HOME/Ontwikkeling/Persoonlijk/wikimusic")
     (base-url . "http://localhost:50050")
-    (start-cmd-args "guix shell -m manifest.scm -- art work")
+    (start-cmd-args . #("guix shell -m manifest.scm -- art work"))
     (health-check (path . "/")
                   (patience-seconds . 30))))
 
@@ -27,13 +27,13 @@
     (method . "GET")
     (assert-code . 200)
     (service-id . "wikimusic")
-    (html-patterns "h2")))
+    (html-patterns . #("h2"))))
 
 (define pop-test-scenario
-  `((pop-services unquote
-                  (list wikimusic-service))
-    (pop-actions unquote
-                 (list wikimusic-check-welcome))))
+  `((pop-services .
+                  #(,wikimusic-service))
+    (pop-actions .
+                 #(,wikimusic-check-welcome))))
 
 ;;
 
