@@ -13,7 +13,7 @@ pop-test - /your test orchestration master of puppets/
 
 In Dutch 🇳🇱, /pop/ means puppet or doll. pop-test simplifies end-to-end testing by providing a powerful orchestration tool and expressive language for your applications and their dependencies.
 
-Define your test scenarios in a DSL (represented in YAML, TOML or JSON) or in a programming language of your choice (including bindings for Rust, Scala, and Guile Scheme) and automate the spinning up (and down) of complex environments involving multiple programs, databases, and services, executing comprehensive tests with ease.
+Define your test scenarios in a DSL (represented in *YAML*, *TOML* or *JSON*) or in a programming language of your choice (including bindings for *Scala*, and *Lisp - Guile Scheme*, of course also *Rust*) and automate the spinning up (and down) of complex environments involving multiple programs, databases, and services, executing comprehensive tests with ease.
 
 pop-test is built with Rust, enhancing safety, performance and reliability, with a modern and accessible code-base.
 
