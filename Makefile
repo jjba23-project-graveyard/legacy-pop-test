@@ -97,20 +97,24 @@ define pop-test-guile-test-example
 	$(call pop-test-log-info,"running scenario for: $(1)")
 	rm -rfv ./resources/scenarios/$(1)/golden-test.json
 	touch ./resources/scenarios/$(1)/golden-test.json
-	guix shell -m resources/guile/manifest.scm -- \
-		guile --fresh-auto-compile resources/guile/serializer.scm "../scenarios/$(1)/golden-test.scm" "resources/scenarios/$(1)/golden-test.json"
+	guix shell -m resources/bindings/guile-scheme/manifest.scm -- \
+		guile --fresh-auto-compile resources/bindings/guile-scheme/serializer.scm \
+		"../../scenarios/$(1)/golden-test.scm" \
+		"resources/scenarios/$(1)/golden-test.json"
 	cat resources/scenarios/$(1)/golden-test.json
 	TESTCONTAINERS_COMMAND=keep \
-		RUST_LOG=info \
+		RUST_LOG=debug \
 		nix develop -c time -p cargo run -- -p ./resources/scenarios/$(1)/golden-test.json
 endef
 
 guile-test-wikimusic:
 	$(call pop-test-guile-test-example,"wikimusic")
+	pkill art
 
 # Development REPL
 guile-repl:
-	guix shell -m resources/guile/manifest.scm -- guile --fresh-auto-compile -c '((@ (ares server) run-nrepl-server))'
+	guix shell -m resources/bindings/guile-scheme/manifest.scm -- \
+		guile --fresh-auto-compile -c '((@ (ares server) run-nrepl-server))'
 
 # Target to format source code files according to the style guide
 # Find all .scm files and format them using 'guix style'
