@@ -1,6 +1,5 @@
 import poptest.models._
-import poptest.models.JsonImplicits._
-import io.circe.syntax._
+import poptest.Serializer._
 
 object GoldenTest extends App {
 
@@ -89,6 +88,5 @@ object GoldenTest extends App {
     popSqlite = None
   )
 
-  // Optional: Print the Scala object as JSON to verify snake_case encoding
-  println(popScenario.asJson.spaces2)
+  serializeToFile(args, popScenario)
 }

@@ -107,7 +107,10 @@ define pop-test-scala-test-example
 	$(call pop-test-log-info,"running scenario for: $(1)")
 	rm -rfv ./resources/scenarios/$(1)/golden-test.json
 	touch ./resources/scenarios/$(1)/golden-test.json
-	scala-cli -Ymacro-annotations ./resources/bindings/scala/Bindings.scala ./resources/scenarios/$(1)/GoldenTest.scala
+	scala-cli -Ymacro-annotations \
+		./resources/bindings/scala/Bindings.scala \
+		./resources/bindings/scala/Serializer.scala \
+		./resources/scenarios/$(1)/GoldenTest.scala -- ./resources/scenarios/$(1)/golden-test.json
 # cat resources/scenarios/$(1)/golden-test.json
 # TESTCONTAINERS_COMMAND=keep \
 # 	RUST_LOG=debug \

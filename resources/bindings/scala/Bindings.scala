@@ -30,7 +30,7 @@ import io.circe.generic.extras.semiauto._
 import io.circe.generic.JsonCodec
 
 object JsonImplicits {
-  implicit val config: Configuration = Configuration.default.withSnakeCaseMemberNames
+  implicit val config: Configuration = Configuration.default.withSnakeCaseMemberNames.withDiscriminator("type")
   implicit val popServiceHealthActionCodec: Codec[PopServiceHealthAction] = deriveConfiguredCodec[PopServiceHealthAction]
   implicit val popServicePostgresCodec: Codec[PopServicePostgres] = deriveConfiguredCodec[PopServicePostgres]
   implicit val popServiceKafkaCodec: Codec[PopServiceKafka] = deriveConfiguredCodec[PopServiceKafka]

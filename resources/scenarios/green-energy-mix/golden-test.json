@@ -1,0 +1,89 @@
+{
+  "pop_services" : [
+    {
+      "id" : "green-energy-mix",
+      "name" : null,
+      "dir" : "$HOME/Ontwikkeling/Werk/Vandebron",
+      "base_url" : "http://localhost:50000",
+      "shell_path" : null,
+      "start_cmd_args" : [
+        "sbt \"greenEnergyMix/run\""
+      ],
+      "env_vars" : {
+        "NATIONAAL_ENERGIE_DASHBOARD_TOKEN" : "002b9a99a4d98cdee8aabf3abb0778cb649126ffbffc1bcde516884797809ce9"
+      },
+      "health_check" : {
+        "path" : "/health",
+        "patience_seconds" : 120,
+        "type" : "Http"
+      },
+      "postgres" : null,
+      "kafka" : null,
+      "pop_server" : null,
+      "keycloak" : null
+    }
+  ],
+  "pop_actions" : [
+    {
+      "name" : "Check that the forecast endpoint returns a 200 with correct data, with load and solar",
+      "delay_seconds" : null,
+      "assert_code" : null,
+      "assert_url" : "/api/v1/forecast",
+      "service_id" : "green-energy-mix",
+      "method" : "GET",
+      "json_patterns" : [
+        {
+          "pattern" : "meta.forecastDate",
+          "condition" : "non-empty-str"
+        },
+        {
+          "pattern" : "data.[0].load",
+          "condition" : "> 0"
+        },
+        {
+          "pattern" : "data.[0].solar",
+          "condition" : ">= 0"
+        }
+      ],
+      "html_patterns" : null,
+      "with_keycloak_user_token" : null,
+      "message_file_path" : null,
+      "message" : null,
+      "extra_headers" : null,
+      "type" : "HttpAssertionAction"
+    },
+    {
+      "name" : "Check that the window endpoint returns a 200 with correct data",
+      "delay_seconds" : null,
+      "assert_code" : null,
+      "assert_url" : "/api/v1/window",
+      "service_id" : "green-energy-mix",
+      "method" : "GET",
+      "json_patterns" : [
+        {
+          "pattern" : "greenPercentage",
+          "condition" : ">= 0"
+        },
+        {
+          "pattern" : "windowStartUtc",
+          "condition" : "non-empty-str"
+        },
+        {
+          "pattern" : "windowStartAms",
+          "condition" : "non-empty-str"
+        }
+      ],
+      "html_patterns" : null,
+      "with_keycloak_user_token" : null,
+      "message_file_path" : null,
+      "message" : null,
+      "extra_headers" : null,
+      "type" : "HttpAssertionAction"
+    }
+  ],
+  "pop_postgres" : null,
+  "pop_kafka" : null,
+  "pop_server" : null,
+  "pop_keycloak" : null,
+  "pop_sqlite" : null
+}
