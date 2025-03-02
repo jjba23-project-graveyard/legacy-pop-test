@@ -18,18 +18,20 @@
 (use-modules (json))
 (use-modules (ice-9 string-fun))
 
-(define (alist-keys->strings obj)
+(define (->pop-test-scenario obj)
   (cond
    ((pair? obj) ; Check if it's a cons cell (alist pair or list)
     (let ((key (car obj))
           (value (cdr obj)))
       (if (and (symbol? key) (pair? obj))
-          (cons (string-replace-substring (symbol->string key) "-" "_") (alist-keys->strings value)) ; Convert key and recurse
-          (cons (alist-keys->strings key) (alist-keys->strings value))))) ; Recurse on both key and value
-   ((list? obj) ; Check if it's a list (handle nested lists)
-    (map alist-keys->strings obj))
-   ((symbol? obj) ; Convert bare symbols to strings
+          (cons (string-replace-substring (symbol->string key) "-" "_") (->pop-test-scenario value)) 
+          (cons (->pop-test-scenario key) (->pop-test-scenario value))))) 
+   ((list? obj)
+    (map ->pop-test-scenario obj))
+   ((symbol? obj)
     (string-replace-substring (symbol->string obj) "-" "_"))
+   ((vector? obj)
+    (list->vector (map ->pop-test-scenario (vector->list obj))))
    (else obj)))
 
 (define (main args)
@@ -46,6 +48,6 @@
           (newline)
           (call-with-output-file filename
             (lambda (port)
-              (scm->json (alist-keys->strings pop-test-scenario) port #:pretty #t)))))))
+              (scm->json (->pop-test-scenario pop-test-scenario) port #:pretty #t)))))))
 
 (main (command-line))

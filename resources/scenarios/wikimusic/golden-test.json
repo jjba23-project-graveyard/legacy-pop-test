@@ -3,24 +3,24 @@
     {
       "id": "wikimusic",
       "dir": "$HOME/Ontwikkeling/Persoonlijk/wikimusic",
-      "base-url": "http://localhost:50050",
-      "start-cmd-args": [
+      "base_url": "http://localhost:50050",
+      "start_cmd_args": [
         "guix shell -m manifest.scm -- art work"
       ],
-      "health-check": {
+      "health_check": {
         "path": "/",
-        "patience-seconds": 30
+        "patience_seconds": 30
       }
     }
   ],
   "pop_actions": [
     {
       "name": "Check that the welcome page works well",
-      "assert-url": "/",
+      "assert_url": "/",
       "method": "GET",
-      "assert-code": 200,
-      "service-id": "wikimusic",
-      "html-patterns": [
+      "assert_code": 200,
+      "service_id": "wikimusic",
+      "html_patterns": [
         "h2"
       ]
     }
