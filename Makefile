@@ -160,4 +160,4 @@ gt-wikimusic:
 e2e-enode-flow:
 	cd ~/Ontwikkeling/Werk/Vandebron && sbt "vehicleEventsHub/stage"
 	cd ~/Ontwikkeling/Werk/Vandebron && sbt "dynamicTariffCharging/stage"
-	$(call pop-test-gt-example,"e2e-enode-flow")
+	$(call pop-test,"e2e-enode-flow")
