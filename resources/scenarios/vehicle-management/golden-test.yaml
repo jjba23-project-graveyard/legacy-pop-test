@@ -20,6 +20,8 @@ pop_services:
   - id: 'vehicle-management'
     dir: '$HOME/Ontwikkeling/Werk/Vandebron'
     base_url: 'http://localhost:8306'
+    env_vars:
+      REMOVE_VENDOR_INTEGRATIONS_JOB_ENABLED: "true"
     start_cmd_args:
       - 'sbt "vehicleManagement/run"'
     health_check:
