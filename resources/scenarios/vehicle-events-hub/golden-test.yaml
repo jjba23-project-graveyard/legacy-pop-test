@@ -72,6 +72,8 @@ pop_actions:
           "vehicle": {
             "id": "fc83e067-77da-4d00-8cf2-d90ebfad9fea",
             "userId": "3f482623-701f-4402-9eb8-067f54b974f7",
+            "lastSeen": "2023-12-21T16:14:48.849030+01:00",
+            "capabilities": [],
             "chargeState": {
               "isPluggedIn": true,
               "range": 300,
